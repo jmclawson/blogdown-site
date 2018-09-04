@@ -1,0 +1,962 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+<head>
+<title>A Hugo website - Authorship and Milton’s De Doctrina Christiana</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="keywords" content="">
+<meta name="author" content="A Hugo website">
+<meta name="generator" content="Hugo 0.48" />
+
+  
+
+
+
+<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+
+
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/grids-responsive-min.css">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="/css/tuftesque.css">
+<style>
+body {
+  
+    background-color: #fffff8;
+  
+}
+</style>
+
+
+
+<script>
+
+</script>
+
+
+</head>
+
+<body>
+<div id="layout" class="pure-g">
+<article class="pure-u-1">
+<header class="brand">
+  <h1>
+    <a href="/">
+      <span id = "blog_logo">
+         <img src="/logo.png" alt="Blog Logo" style="height: 40px; width:40px">
+      </span>
+      
+    </a>
+  </h1>
+</header>
+
+<section>
+  <h1 class="content-title">
+  
+  <a href="/2017/08/03/authorship-and-miltons-de-doctrina-christiana/">Authorship and Milton’s De Doctrina Christiana</a>
+  
+  </h1>
+  
+  
+  
+  <span class="content-meta">
+    
+  
+  
+  
+  <i class="fa fa-user">&nbsp;</i><span class="author">
+    &nbsp;James Clawson (with Hugh Wilson)</span> <br>
+    
+  
+  
+  
+  <i class="fa fa-calendar"></i>
+    &nbsp;Aug 3, 2017
+  
+  
+  
+  &nbsp;<i class="fa fa-clock-o"></i>
+    &nbsp;8 min read
+  
+  
+  
+    </span>
+    
+    
+    </section>
+
+
+<section><div id="background-placement-and-distance" class="section level2">
+<h2>Background: Placement and Distance</h2>
+<p>It may seem confusing to start off discussing placement and distance, but much of the stylometric method relies on an abstract understanding of ideas of proximity. This introduction serves as a gentle introduction to these concepts. Please be patient before we get to the good stuff.</p>
+<div id="addressing-multidimensionality" class="section level3">
+<h3>Addressing Multidimensionality</h3>
+<p>For one year of grad school, this was my mailing address:</p>
+<blockquote>
+<p>69/6 Montpelier Park </br> Edinburgh, EH10 4ND </br> United Kingdom</p>
+</blockquote>
+<p>Addresses like these are easy to understand because they are made up of recognizable pockets of information. At the end, the country name “United Kingdom” signifies which of a list of potential countries the address belongs to, “Edinburgh” signifies which of a list of potential cities,<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> “Montpelier Park” signifies which of a list of potential streets, and so on. At the very top, the street number narrows things down further, and the apartment number “/6” goes further still, signifying the sixth apartment of number 69 on Montpelier Park. Ignoring the post code, an address like this contains five necessary components for any letter or package, but it is easy to imagine some addresses having still more.<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a></p>
+<p>A mailing address is an easy introduction to multidimensionality. Each part might theoretically be interchangeable with other parts, and with one shift an item of mail might arrive in a different apartment on the same street, in the same apartment number on a different street, or even potentially on the same street name in a different city or country. In this way, an address’s shifting parameters work mostly independently of each other, demonstrating how each measures something specific and unique. For this reason, each part of the address represents a dimension, even if some of these dimensions are categories (which city?) and others are measurements (how far down the street?).</p>
+</div>
+<div id="dimensionality-and-distance" class="section level3">
+<h3>Dimensionality and Distance</h3>
+<div style="float:right;">
+<p><img src="/post/distance_files/figure-html/pythagorean-1.png" width="240" /></p>
+</div>
+<p>More efficiently, the world is commonly divided up into two or three dimensions. The index of a street map or atlas, for instance, will rely on a series of letters and numbers to pinpoint the column and row where some point of interest might be found. The entire globe is similarly overlaid with a fine, invisible mesh of latitude and longitude, parceling the planet into ever smaller squares of electronic precision. Because of this system, it is trivial to determine the distance between any two points with known positioning—as in the distance from point A to point B in the image to the right—simply using the Pythagorean theorem.<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> In fact, this same equation works as well with two dimensions as it does with three or more.<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a> This measurement of distance by contrasting measurements of scale is a foundation in much of machine learning. And while the equation is attributed to Pythagoras, the resulting measurement is called the <em>Euclidean distance</em>.</p>
+<p><br clear="both"></p>
+<p>Given a list of cities in the UK, it is possible to find the coordinates of latitude and longitude that relate to their place in the world:</p>
+<table class="table table-condensed" style="width:auto;border-spacing:0.5em 0">
+<thead>
+<tr>
+<th style="text-align:left;">
+city
+</th>
+<th style="text-align:left;">
+region
+</th>
+<th style="text-align:right;">
+lon
+</th>
+<th style="text-align:right;">
+lat
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Aberystwyth
+</td>
+<td style="text-align:left;">
+Wales
+</td>
+<td style="text-align:right;">
+-4.0829200
+</td>
+<td style="text-align:right;">
+52.41530
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Belfast
+</td>
+<td style="text-align:left;">
+Northern Ireland
+</td>
+<td style="text-align:right;">
+-5.9301200
+</td>
+<td style="text-align:right;">
+54.59728
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bristol
+</td>
+<td style="text-align:left;">
+England
+</td>
+<td style="text-align:right;">
+-2.5879100
+</td>
+<td style="text-align:right;">
+51.45451
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cambridge
+</td>
+<td style="text-align:left;">
+England
+</td>
+<td style="text-align:right;">
+0.1218170
+</td>
+<td style="text-align:right;">
+52.20534
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cardiff
+</td>
+<td style="text-align:left;">
+Wales
+</td>
+<td style="text-align:right;">
+-3.1790900
+</td>
+<td style="text-align:right;">
+51.48158
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Dover
+</td>
+<td style="text-align:left;">
+England
+</td>
+<td style="text-align:right;">
+1.3134027
+</td>
+<td style="text-align:right;">
+51.12788
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Edinburgh
+</td>
+<td style="text-align:left;">
+Scotland
+</td>
+<td style="text-align:right;">
+-3.1882670
+</td>
+<td style="text-align:right;">
+55.95325
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Glasgow
+</td>
+<td style="text-align:left;">
+Scotland
+</td>
+<td style="text-align:right;">
+-4.2518060
+</td>
+<td style="text-align:right;">
+55.86424
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Inverness
+</td>
+<td style="text-align:left;">
+Scotland
+</td>
+<td style="text-align:right;">
+-4.2247210
+</td>
+<td style="text-align:right;">
+57.47777
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Land’s End
+</td>
+<td style="text-align:left;">
+England
+</td>
+<td style="text-align:right;">
+-5.7131746
+</td>
+<td style="text-align:right;">
+50.06570
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Liverpool
+</td>
+<td style="text-align:left;">
+England
+</td>
+<td style="text-align:right;">
+-2.9915726
+</td>
+<td style="text-align:right;">
+53.40837
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+London
+</td>
+<td style="text-align:left;">
+England
+</td>
+<td style="text-align:right;">
+-0.1277583
+</td>
+<td style="text-align:right;">
+51.50735
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Manchester
+</td>
+<td style="text-align:left;">
+England
+</td>
+<td style="text-align:right;">
+-2.2426305
+</td>
+<td style="text-align:right;">
+53.48076
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Oxford
+</td>
+<td style="text-align:left;">
+England
+</td>
+<td style="text-align:right;">
+-1.2577263
+</td>
+<td style="text-align:right;">
+51.75202
+</td>
+</tr>
+</tbody>
+</table>
+<p>Using these coordinates as points on a Cartesian system, it’s easy to project the cities onto a map: <img src="/post/distance_files/figure-html/uk_map-1.png" width="672" /></p>
+<p>And again assuming an imaginary unit of distance as “one degree”, the Pythagorean theorem makes it easy to calculate the Euclidean distance between each of these cities:<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a></p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">Aberystwyth</th>
+<th align="right">Belfast</th>
+<th align="right">Bristol</th>
+<th align="right">Cambridge</th>
+<th align="right">Cardiff</th>
+<th align="right">Dover</th>
+<th align="right">Edinburgh</th>
+<th align="right">Glasgow</th>
+<th align="right">Inverness</th>
+<th align="right">Land.s.End</th>
+<th align="right">Liverpool</th>
+<th align="right">London</th>
+<th align="right">Manchester</th>
+<th align="right">Oxford</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Aberystwyth</td>
+<td align="right">NA</td>
+<td align="right">4.437512</td>
+<td align="right">2.5132339</td>
+<td align="right">5.953850</td>
+<td align="right">1.8377938</td>
+<td align="right">7.845731</td>
+<td align="right">5.169965</td>
+<td align="right">4.883382</td>
+<td align="right">7.162222</td>
+<td align="right">4.443418</td>
+<td align="right">2.867329</td>
+<td align="right">5.738933</td>
+<td align="right">3.728132</td>
+<td align="right">4.146135</td>
+</tr>
+<tr class="even">
+<td>Belfast</td>
+<td align="right">4.437512</td>
+<td align="right">NA</td>
+<td align="right">6.4885577</td>
+<td align="right">9.229741</td>
+<td align="right">5.8786343</td>
+<td align="right">11.358294</td>
+<td align="right">4.325826</td>
+<td align="right">2.973853</td>
+<td align="right">4.734365</td>
+<td align="right">6.415976</td>
+<td align="right">4.482988</td>
+<td align="right">9.296788</td>
+<td align="right">5.448796</td>
+<td align="right">7.736514</td>
+</tr>
+<tr class="odd">
+<td>Bristol</td>
+<td align="right">2.513234</td>
+<td align="right">6.488558</td>
+<td align="right">NA</td>
+<td align="right">3.976523</td>
+<td align="right">0.8369379</td>
+<td align="right">5.536592</td>
+<td align="right">6.418589</td>
+<td align="right">6.665474</td>
+<td align="right">8.827959</td>
+<td align="right">4.836543</td>
+<td align="right">2.821529</td>
+<td align="right">3.479982</td>
+<td align="right">2.968564</td>
+<td align="right">1.927642</td>
+</tr>
+<tr class="even">
+<td>Cambridge</td>
+<td align="right">5.953850</td>
+<td align="right">9.229741</td>
+<td align="right">3.9765226</td>
+<td align="right">NA</td>
+<td align="right">4.7798267</td>
+<td align="right">2.271914</td>
+<td align="right">7.715671</td>
+<td align="right">8.642579</td>
+<td align="right">9.663427</td>
+<td align="right">8.789219</td>
+<td align="right">4.722733</td>
+<td align="right">1.483190</td>
+<td align="right">3.799292</td>
+<td align="right">2.536117</td>
+</tr>
+<tr class="odd">
+<td>Cardiff</td>
+<td align="right">1.837794</td>
+<td align="right">5.878634</td>
+<td align="right">0.8369379</td>
+<td align="right">4.779827</td>
+<td align="right">NA</td>
+<td align="right">6.373468</td>
+<td align="right">6.323997</td>
+<td align="right">6.389761</td>
+<td align="right">8.678614</td>
+<td align="right">4.151926</td>
+<td align="right">2.737766</td>
+<td align="right">4.315389</td>
+<td align="right">3.122753</td>
+<td align="right">2.744317</td>
+</tr>
+<tr class="even">
+<td>Dover</td>
+<td align="right">7.845731</td>
+<td align="right">11.358294</td>
+<td align="right">5.5365924</td>
+<td align="right">2.271914</td>
+<td align="right">6.3734684</td>
+<td align="right">NA</td>
+<td align="right">9.332655</td>
+<td align="right">1.334859</td>
+<td align="right">11.915697</td>
+<td align="right">1.499767</td>
+<td align="right">6.889622</td>
+<td align="right">2.175780</td>
+<td align="right">6.316266</td>
+<td align="right">3.741726</td>
+</tr>
+<tr class="odd">
+<td>Edinburgh</td>
+<td align="right">5.169965</td>
+<td align="right">4.325826</td>
+<td align="right">6.4185886</td>
+<td align="right">7.715671</td>
+<td align="right">6.3239968</td>
+<td align="right">9.332655</td>
+<td align="right">NA</td>
+<td align="right">1.593296</td>
+<td align="right">2.676660</td>
+<td align="right">9.596260</td>
+<td align="right">3.697376</td>
+<td align="right">7.633183</td>
+<td align="right">3.743644</td>
+<td align="right">6.538734</td>
+</tr>
+<tr class="even">
+<td>Glasgow</td>
+<td align="right">4.883382</td>
+<td align="right">2.973853</td>
+<td align="right">6.6654735</td>
+<td align="right">8.642579</td>
+<td align="right">6.3897615</td>
+<td align="right">1.334859</td>
+<td align="right">1.593296</td>
+<td align="right">NA</td>
+<td align="right">2.282198</td>
+<td align="right">8.456792</td>
+<td align="right">3.937126</td>
+<td align="right">8.484133</td>
+<td align="right">4.485742</td>
+<td align="right">7.193729</td>
+</tr>
+<tr class="odd">
+<td>Inverness</td>
+<td align="right">7.162222</td>
+<td align="right">4.734365</td>
+<td align="right">8.8279593</td>
+<td align="right">9.663427</td>
+<td align="right">8.6786137</td>
+<td align="right">11.915697</td>
+<td align="right">2.676660</td>
+<td align="right">2.282198</td>
+<td align="right">NA</td>
+<td align="right">1.691518</td>
+<td align="right">6.134319</td>
+<td align="right">1.242166</td>
+<td align="right">6.394844</td>
+<td align="right">9.127743</td>
+</tr>
+<tr class="even">
+<td>Land’s End</td>
+<td align="right">4.443418</td>
+<td align="right">6.415976</td>
+<td align="right">4.8365426</td>
+<td align="right">8.789219</td>
+<td align="right">4.1519262</td>
+<td align="right">1.499767</td>
+<td align="right">9.596260</td>
+<td align="right">8.456792</td>
+<td align="right">1.691518</td>
+<td align="right">NA</td>
+<td align="right">6.959922</td>
+<td align="right">8.157846</td>
+<td align="right">6.885828</td>
+<td align="right">6.737165</td>
+</tr>
+<tr class="odd">
+<td>Liverpool</td>
+<td align="right">2.867329</td>
+<td align="right">4.482988</td>
+<td align="right">2.8215288</td>
+<td align="right">4.722733</td>
+<td align="right">2.7377664</td>
+<td align="right">6.889622</td>
+<td align="right">3.697376</td>
+<td align="right">3.937126</td>
+<td align="right">6.134319</td>
+<td align="right">6.959922</td>
+<td align="right">NA</td>
+<td align="right">4.861134</td>
+<td align="right">1.641166</td>
+<td align="right">3.391819</td>
+</tr>
+<tr class="even">
+<td>London</td>
+<td align="right">5.738933</td>
+<td align="right">9.296788</td>
+<td align="right">3.4799823</td>
+<td align="right">1.483190</td>
+<td align="right">4.3153886</td>
+<td align="right">2.175780</td>
+<td align="right">7.633183</td>
+<td align="right">8.484133</td>
+<td align="right">1.242166</td>
+<td align="right">8.157846</td>
+<td align="right">4.861134</td>
+<td align="right">NA</td>
+<td align="right">4.972890</td>
+<td align="right">1.635487</td>
+</tr>
+<tr class="odd">
+<td>Manchester</td>
+<td align="right">3.728132</td>
+<td align="right">5.448796</td>
+<td align="right">2.9685638</td>
+<td align="right">3.799292</td>
+<td align="right">3.1227529</td>
+<td align="right">6.316266</td>
+<td align="right">3.743644</td>
+<td align="right">4.485742</td>
+<td align="right">6.394844</td>
+<td align="right">6.885828</td>
+<td align="right">1.641166</td>
+<td align="right">4.972890</td>
+<td align="right">NA</td>
+<td align="right">2.813744</td>
+</tr>
+<tr class="even">
+<td>Oxford</td>
+<td align="right">4.146135</td>
+<td align="right">7.736514</td>
+<td align="right">1.9276415</td>
+<td align="right">2.536117</td>
+<td align="right">2.7443167</td>
+<td align="right">3.741726</td>
+<td align="right">6.538734</td>
+<td align="right">7.193729</td>
+<td align="right">9.127743</td>
+<td align="right">6.737165</td>
+<td align="right">3.391819</td>
+<td align="right">1.635487</td>
+<td align="right">2.813744</td>
+<td align="right">NA</td>
+</tr>
+</tbody>
+</table>
+<p>From here, it is easy to list the cities in order of their proximity to Edinburgh:</p>
+<table class="table table-condensed" style="width:auto;border-spacing:0.5em 0">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Edinburgh
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Edinburgh
+</td>
+<td style="text-align:right;">
+0.000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Glasgow
+</td>
+<td style="text-align:right;">
+1.593296
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Inverness
+</td>
+<td style="text-align:right;">
+2.676660
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Liverpool
+</td>
+<td style="text-align:right;">
+3.697376
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Manchester
+</td>
+<td style="text-align:right;">
+3.743644
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Belfast
+</td>
+<td style="text-align:right;">
+4.325826
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Aberystwyth
+</td>
+<td style="text-align:right;">
+5.169965
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cardiff
+</td>
+<td style="text-align:right;">
+6.323997
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bristol
+</td>
+<td style="text-align:right;">
+6.418589
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Oxford
+</td>
+<td style="text-align:right;">
+6.538734
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+London
+</td>
+<td style="text-align:right;">
+7.633183
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cambridge
+</td>
+<td style="text-align:right;">
+7.715671
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Dover
+</td>
+<td style="text-align:right;">
+9.332655
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Land’s End
+</td>
+<td style="text-align:right;">
+9.596260
+</td>
+</tr>
+</tbody>
+</table>
+<p>This same application is used in one of the simplest methods of supervised machine called <em>K-Nearest Neighbors</em> (<em>knn</em>). This method relies on the assumption that there is a relationship between something being measured (for instance, a city’s GPS coordinates) and membership in a given category (which country the city belongs to). It works by checking the known categories of nearby data points and taking a vote to draw a conclusion on the unknown category of one specific point. Essentially, if birds of a feather flock together, <em>knn</em> considers a bird’s flock to guess its feather. This method is simple, but it can be very accurate if there is a good sample of known data points to vote and if the assumption of relationship between measurement and membership is true. Here, we can use the technique to determine Liverpool’s most likely region based on its nearest neighbors:</p>
+<table class="table table-condensed" style="width:auto;border-spacing:0.5em 0">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+region
+</th>
+<th style="text-align:right;">
+Liverpool
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Liverpool
+</td>
+<td style="text-align:left;">
+&lt;unknown&gt;
+</td>
+<td style="text-align:right;">
+0.000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Manchester
+</td>
+<td style="text-align:left;">
+England
+</td>
+<td style="text-align:right;">
+1.641166
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cardiff
+</td>
+<td style="text-align:left;">
+Wales
+</td>
+<td style="text-align:right;">
+2.737766
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bristol
+</td>
+<td style="text-align:left;">
+England
+</td>
+<td style="text-align:right;">
+2.821529
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Aberystwyth
+</td>
+<td style="text-align:left;">
+Wales
+</td>
+<td style="text-align:right;">
+2.867329
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Oxford
+</td>
+<td style="text-align:left;">
+England
+</td>
+<td style="text-align:right;">
+3.391819
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Edinburgh
+</td>
+<td style="text-align:left;">
+Scotland
+</td>
+<td style="text-align:right;">
+3.697376
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Glasgow
+</td>
+<td style="text-align:left;">
+Scotland
+</td>
+<td style="text-align:right;">
+3.937126
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Belfast
+</td>
+<td style="text-align:left;">
+Northern Ireland
+</td>
+<td style="text-align:right;">
+4.482988
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cambridge
+</td>
+<td style="text-align:left;">
+England
+</td>
+<td style="text-align:right;">
+4.722733
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+London
+</td>
+<td style="text-align:left;">
+England
+</td>
+<td style="text-align:right;">
+4.861134
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Inverness
+</td>
+<td style="text-align:left;">
+Scotland
+</td>
+<td style="text-align:right;">
+6.134319
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Dover
+</td>
+<td style="text-align:left;">
+England
+</td>
+<td style="text-align:right;">
+6.889622
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Land’s End
+</td>
+<td style="text-align:left;">
+England
+</td>
+<td style="text-align:right;">
+6.959922
+</td>
+</tr>
+</tbody>
+</table>
+<p>Commonly, determining the number of neighbors to consider is the biggest difficulty with <em>knn</em>. In the example here, the proximity of Manchester, England, suggests that Liverpool may also be in England; in this case, checking with one neighbor will yield a correct categorization of England, as no other region will get a vote. But checking two neighbors means asking for a vote from both Manchester and Aberystwyth, yielding a tie between England and Wales. A third neighbor means adding Cardiff, and the two votes from Wales overpower the single vote from England, so the model will inaccurately guess that Liverpool is in Wales. Liverpool’s fourth-nearest neighbor among this list of cities is Oxford, in England, once again resulting in a tie between England and Wales.</p>
+<p>The example with data for cities nearest Liverpool is useful because it exposes a couple truths underlying <em>knn</em>’s methodology. First, the method is only as good as its training data, and it is less trustworthy at points near a border between two categories or in positions where data points are sparse. Second, it is probably unwise to choose an even number of neighbors, as they are unable to resolve a tie.</p>
+<p>With K-Nearest Neighbors, it can be difficult to walk the line between useful and accurate. Checking with too many neighbors magnifies deficiencies in a minority population and skews results toward the average of the overall population. Imagine, for instance, checking for the nearest three neighbors of any city in Northern Ireland, or checking for the nearest twelve neighbors of any city: the first would place the city in Wales or Scotland, while the second would always result in England. Likewise, checking with too few neighbors can sacrifice accuracy: after all, the nearest neighbor to Land’s End, England, is Cardiff, Wales. The best anyone can do is to to have as many known data points as is reasonably possible and to take the vote of a reasonably small number of neighbors, tweaking numbers to fit a data set in order to get more correct results.</p>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>The post code changes the rules, as it rushes ahead with specificity out of turn.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>Instead of counting out the apartments in a stairwell to arrive at an ordinal number, for instance, some addresses indicate a floor and a side—e.g., “3FL,” indicating two more parts, “third floor” and “left.”<a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p>In the example above, assuming one degree of latitude or longitude represents one unit of distance, the Pythagorean theorem (where, in a right triangle, the length of the hypotenuse squared is equal to the sum of the squared lengths of the legs, or <span class="math inline">\(\mathrm{hypotenuse}^2=\sum\mathrm{legs}^2\)</span>, or <span class="math inline">\(d^2=\sum{{\Delta_\mathrm{legs}}^2}\)</span>) makes it easy to calculate that a point 3 degrees east and 4 degrees to the north will be 5 units away (<span class="math inline">\(d^2 = 3^2+4^2\)</span>; <span class="math inline">\(d = \sqrt{3^2+4^2}\)</span>; <span class="math inline">\(d=\sqrt{25}\)</span>; <span class="math inline">\(d=5\)</span>). In reality, the world is neither flat nor an exact sphere, so lines of latitude and longitude are less systematic than this model would suggest, and there is no such thing as a stable “unit” of distance between any two degrees of latitude or longitude.<a href="#fnref3">↩</a></p></li>
+<li id="fn4"><p>It is just as easy to add a third dimension, a fourth, or many others. There is room for all in Pythagoras’s equation, which scales easily to any number of dimensions: <span class="math inline">\(d = \sqrt{(\Delta_x)^2+(\Delta_y)^2+\ldots{}+(\Delta_n)^2}\)</span><a href="#fnref4">↩</a></p></li>
+<li id="fn5"><p>This chart makes clear the way measurements of latitude and longitude are a poor choice for the example of positioning and distance discussed here. There is no clear single unit of distance for the difference of a degree of latitude or longitude. Although the chart puts Belfast fifth in a list of Edinburgh’s nearby neighbors, it deserves placement before Liverpool. Because of the way these lines are drawn, a change in longitude carries more weight in our phony calculation of “units”&quot; of Euclidean distance than does a change in latitude.<a href="#fnref5">↩</a></p></li>
+</ol>
+</div>
+</section>
+<section>
+  
+
+  
+
+
+
+  
+
+
+      
+  <footer class="page-footer">
+		<hr>
+		<ul class="page-footer-menu">
+		
+		</ul>
+
+  
+
+	<div class="copyright">
+	<p>
+    
+      &copy;2018
+    .
+    All rights reserved.
+    
+  </p>
+</div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      }
+    });
+    </script>
+    <script type="text/javascript"
+      src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+</footer>
+
+</section>
+</article>
+</div>
+</body>
+</html>
