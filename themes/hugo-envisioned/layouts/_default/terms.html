@@ -1,0 +1,37 @@
+{{ partial "header.html" . }}
+
+<body>
+<div id="layout" class="pure-g">
+<article class="pure-u-1">
+{{ partial "brand.html" . }}
+{{ partial "content.header.html" . }}
+    {{ $data := .Data }}
+    <div class="pure-g">
+      <div class="pure-u-1 pure-u-sm-1-2">
+        <section>
+        <table>
+        <thead>
+          <tr>
+            <th>Term</th>
+            <th>Count</th>
+          </tr>
+        </thead>
+        </tbody>
+        {{ range $key, $value := .Data.Terms.Alphabetical}}
+          <tr>
+            <td><a href="{{ $value.Name| urlize }}">
+              {{ $value.Name}}
+            </a></td>
+            <td>{{  $value.Count }}</td>
+          </tr>
+        {{ end }}
+        </tbody>
+        </table>
+        </section>
+      </div>
+    </div>
+{{ partial "footer.html" . }}
+</article>
+</div>
+</body>
+</html>

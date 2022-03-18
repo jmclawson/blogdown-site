@@ -1,0 +1,32 @@
+<!-- Load MathJax, if necessary. -->
+{{ if or .Params.math .IsHome }}
+  {{ partial "math.html" . }}
+{{ end }}
+
+<!-- Syntax highlighting -->
+<!-- {{ partial "highlight.html" . }} -->
+
+<!-- Pure css -->
+<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/base-min.css">
+<!--[if lte IE 8]>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/grids-responsive-old-ie-min.css">
+<![endif]-->
+<!--[if gt IE 8]><!-->
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/grids-responsive-min.css">
+<!--<![endif]-->
+
+<!-- Fonts -->
+<!-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans"> -->
+<!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface"> -->
+<!-- <link href='//fonts.googleapis.com/css?family=Raleway:400,200,100,700,300,500,600,800' rel='stylesheet' type='text/css'> -->
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+<!-- Highlight JS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+
+<!-- Main CSS file based on Pure blog layout -->
+<link rel="stylesheet" href="{{ "https://jmclawson.net/blog/css/envisioned.css" | absURL }}">
+<link rel="stylesheet" href="{{ "https://jmclawson.net/blog/css/hugo-envisioned.css" | absURL }}">
+<link rel="stylesheet" href="{{ "https://jmclawson.net/blog/css/hugo-envisioned-override.css" | absURL }}">

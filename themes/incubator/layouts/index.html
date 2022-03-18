@@ -1,0 +1,69 @@
+<html>
+<head>
+<title>jmclawson / blog</title>
+
+<link rel="stylesheet" href="http://jmclawson.net/blog/css/tuftesque.css">
+<link rel="stylesheet" type="text/css" href="http://jmclawson.net/style.css">
+
+<style>
+	body{
+		background-image: url("/images/quartet-splatplot.png");
+		background-color:  white;
+		background-repeat: no-repeat;
+		background-position: center top;
+		background-size: 90% 10vw;
+	}
+
+	#blogpage{
+	    background-color: #111111;
+	}
+
+</style>
+
+<!-- <meta name="viewport" content="initial-scale=1.0"> -->
+
+<!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">   -->
+
+
+</head>
+<body class="blog">
+
+<div class="header">
+	<h1>James M. Clawson</h1>
+	<ul class="topmenu">
+		<li><a href="/" id="homepage">Home</a></li>
+		<li><a href="/teach" id="teachingpage">Teaching</a></li>
+		<li><a href="/research" id="researchpage">Research</a></li>
+		<li><a href="/projects" id="projectspage">Projects</a></li>
+		<!-- <li><a href="/mapping/neatline/" id="mappage">Mapping</a></li> -->
+		<li><a href="/blog/" id="blogpage">Blog</a></li>
+		<li><a href="/about" id="aboutpage">About</a></li>
+	</ul>
+</div>
+
+<style>
+  body {
+    padding-left: 0 !important;
+  }
+  p {
+    width: 100%;
+  }
+</style>
+<div id="homepage">
+
+{{ range .Site.Pages }}
+  {{if eq .Type "post" }}
+    {{if eq .Title "Posts"}}
+      <h2><a href="{{ .RelPermalink | relURL }}">See all posts</a></h2>
+    {{else}}
+      {{ partial "content.header.html" . }}
+      <p>{{ .Params.excerpt }}</p>
+      <p><a href="{{ .RelPermalink | relURL }}">Read On &rarr;</a></p>
+      <hr>
+    {{ end  }}
+  {{ end }}
+{{ end  }}
+{{ partial "footer.html" . }}
+</div>
+</body>
+</html>

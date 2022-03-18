@@ -1,0 +1,203 @@
+---
+title: "Untangling Principal Components"
+author: "James Clawson"
+date: "2019-04-20"
+output: 
+  tufte::tufte_html: default
+  blogdown::html_page: default
+excerpt: "I used to think Principal Components Analysis was something like magic. A recent explanation by Julia Silge made me see otherwise."
+draft: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      cache=TRUE)
+library(stylo)
+library(dplyr)
+library(knitr)
+```
+
+I often use Principal Components Analysis to look for relationships among things I’m studying. A single command would turn something complex into something simple, but it always seemed like something arcane among the dark arts of statistics that I would never need to try to understand. A [recent explanation](https://juliasilge.com/blog/stack-overflow-pca/) by Julia Silge made me reconsider my stance of strategic ignorance, so I decided to explore how I might use the parts of principal components analysis I didn’t even know existed to get more out of one of my stylometric projects.
+
+To get started on anything, I use stylo^[Eder, M., Rybicki, J. and Kestemont, M. (2016). “[Stylometry with R: a package for computational text analysis](https://journal.r-project.org/archive/2016/RJ-2016-007/index.html).” *R Journal* 8(1): 107-121.] to save the word counts into an object I’ll call `results`:
+
+```{r stylo, eval=FALSE, include=TRUE}
+library(stylo)
+results <- stylo()
+```
+
+```{r stylo-real, echo=FALSE, message=FALSE, fig.fullwidth = FALSE, fig.cap="In this graphic created by the stylo package, each color signifies an author, and each symbol symbolizes a text. Proximity of two works directly corresponds to stylometric similarity of style, but the similarity here is simplified to two dimensions."}
+results <- stylo(gui=FALSE, corpus.lang="Latin.corr", corpus.dir = "~/GitHub/milton/corpus2", analysis.type="PCV", text.id.on.graphs="points", display.on.screen=TRUE, custom.graph.title="My results")
+
+```
+Choosing “PCA” in the statistics tab in `stylo()` yields the visualization above, plotting each text against its values for the first and second principal components, PC1 on the horizontal and PC2 on the vertical. This is where I used to stop, but exactly what goes into each of these values merits further study. Below, I work through the process of understanding the data by breaking it down and building it back up.
+
+## Which features go into each component?
+
+In the `results` object I created using `stylo()`, the list of 100 most frequent words actually measured are saved as `results$features.actually.used`, while the table of measurements for *all* words and all texts is in `results$table.with.all.freqs`. I can use the first to subset the second into a smaller table to study closer using principle components analysis with the command `prcomp()`:
+
+```{r subset, message=FALSE}
+results.subset <- 
+  results$table.with.all.freqs[,results$features.actually.used]
+results.prcomp <- prcomp(results.subset)
+```
+
+From here, it is easy to discover the breakdown of features for each of the extracted components. Here, for instance, is a small version of the table, with just the first 10 rows and first five components:
+
+```{r results summary, echo=FALSE}
+kable(results.prcomp$rotation[1:10,1:5], format="html", table.attr = "class='table table-condensed' style='width:auto;border-spacing:0.5em 0'")
+```
+
+In the case of my data,`r tufte::margin_note("More generally, PCA figures out which groupings of features in a high-dimensional space account for the widest differentiation among those things being analyzed.")` principal components analysis finds clusters of words often appearing near each other in the documents I’m studying, measuring how strong each cluster is in each document. The process then optimizes these clusters so that there’s as broad a spectrum of strengths across all documents as possible, labeling the cluster with the broadest spectrum of measurements *PC1*, the cluster with the second-broadest spectrum *PC2*, and so forth. For the default, Cartesian visualization that comes from principal components analysis (see my first chart above), PC1 is graphed to the horizontal axis, and PC2 is graphed to the vertical axis. 
+
+Since it is possible to look at the tables of this data without the chart, it is possible to study it more closely. Silge’s explanation points out that ordering the first principal component by size will show which words are farthest to the left or right of the horizontal axis; words near the zero point in the middle represent the average features that aren’t strongly indicative, positively or negative, of this newly projected dimension, while words in the bottom or top of an ordered list are further left or right. 
+
+If, when compared to others in the set, a given text has relatively high values of the words high on the ordered list---and simultaneously low values of those words low on the list---, that text will appear on the right half of the PCA image. Here, for instance, are the words that factor most heavily into the horizontal axis of my PCA visualization, shifting texts in my set to the left (low words) or right (high words):
+
+```{r results words}
+# Make it a function to repeat on different 
+# components. This function gets the data 
+# in a usable format, but it lacks styling.
+component.words <- function(pc,n=12) {
+  df <- as.data.frame(results.prcomp$rotation)
+  results.sorted <- row.names(df[with(df, order(df[[pc]])),])
+  
+  return(list(head(results.sorted,n),
+              tail(results.sorted,n)))
+}
+
+# Make it a function to repeat on different components
+# This function calls the prior function, adding style
+results.words <- function(pc,n=12) {
+  cat("For", pc, 
+      "\nLow words: ", component.words(pc,n)[[1]], 
+      "\nHigh words: ", component.words(pc,n)[[2]], 
+      "\n\n")
+}
+
+# Now call the function for PC1
+results.words("PC1")
+
+```
+
+Interestingly, words from the third principal component in my results suggest that it might differentiate religious texts (below zero) from nonreligious ones (above zero):
+
+```{r results PC3}
+results.words("PC3")
+```
+
+## Which texts score highly on each component?
+
+Applying these considerations to the texts themselves makes it possible to study the dimensions projected on a textual basis, document by document, rather than on a basis of individual features:
+
+```{r results texts}
+# Make it a function to repeat on different components
+# This function gets the data in a usable format, but lacks style
+component.texts <- function(pc,n=10,full=TRUE) {
+  df <- as.data.frame(results.prcomp$x)
+  results.sorted <- row.names(df[with(df, order(df[[pc]])),])
+  
+  if(full==TRUE){
+    return(results.sorted)
+  } else {
+    return(list(head(results.sorted,n),
+                tail(results.sorted,n)))
+  }
+}
+
+# Make it a function to repeat on different components
+# This function calls the prior function, and it adds style
+results.texts <- function(pc,n=10,full=FALSE){
+  cat("Extreme texts for", pc, "(low to high)\n",
+      paste(component.texts(pc,n,full=FALSE)[[1]],collapse="\n "),
+      "\n ***\n",
+      paste(component.texts(pc,n,full=FALSE)[[2]],collapse="\n "),
+      "\n\n")
+  }
+
+# Make it a function to repeat on different components
+# This function combines results for two other functions
+checkit <- function(pc){
+  results.words(pc,8)
+  results.texts(pc,4)
+}
+
+```
+
+At this point, running `component.texts("PC19",full=TRUE)` would result in the full list of texts ordered by component 19, while `checkit("PC19")` would yield both a list of words and a list of some of the extreme texts.`r tufte::margin_note("I don’t show the output here, as my data is from collaborative research in progress and isn’t wholly mine to share.")`
+
+## What’s the interaction between components?
+
+Finally, if one were interested in ignoring the typical interaction between PC1 and PC2 to understand the interaction between, say, PC19 and PC20, while also understanding which features were strongest at play on each axis, that’s easily done:
+
+```{r plot-pc19-pc20}
+# Make it a function so it can easily be run on different components
+plotit <- function(x="PC1",y="PC2",labels=FALSE,legend=TRUE){
+  library(ggplot2)
+  
+  # Make a nice label for the horizontal axis
+  hlabel <- paste(x,"\n",
+                 sprintf('\u2190'), " ",
+                 paste(component.words(x,n=5)[[1]],collapse=", "),
+                 "...",
+                 paste(rep(" ",5),collapse=""),
+                 "|",
+                 paste(rep(" ",5),collapse=""),
+                 "...",
+                 paste(component.words(x,n=5)[[2]],collapse=", "),
+                 " ", sprintf('\u2192'),
+                 sep="")
+  
+  # make a nice label for the vertical axis
+  vlabel <- paste(y,"\n",
+                 sprintf('\u2190'), " ",
+                 paste(component.words(y,n=4)[[1]],collapse=", "),
+                 "...",
+                 paste(rep(" ",5),collapse=""),
+                 "|",
+                 paste(rep(" ",5),collapse=""),
+                 "...",
+                 paste(component.words(y,n=4)[[2]],collapse=", "),
+                 " ", sprintf('\u2192'),
+                 sep="")
+  
+  # subset the data
+  df <- as.data.frame(results.prcomp$x)
+  
+  # extract labels from files named for stylo
+  df$label <- sapply(strsplit(row.names(df),"_"),
+                     function(x) unlist(x)[1])
+  
+  # plot it!
+  theplot <- ggplot(data=df, mapping = aes(x=df[[x]], y=df[[y]], color=label)) + 
+    geom_point() +
+    xlab(hlabel) +
+    ylab(vlabel)
+  
+  # Use text labels instead of dots
+  if (labels==TRUE){
+    theplot <- theplot + 
+      geom_label(mapping=aes(label=label),hjust=.5,vjust=.5)
+    legend <- FALSE
+  }
+  
+  # Show or hide the legend
+  if (legend==FALSE){
+    theplot <- theplot +
+      theme(legend.position="none")
+  }
+  
+  print(theplot)
+}
+
+# Now call the function
+plotit("PC19","PC20",labels=FALSE,legend=FALSE)
+
+```
+
+And at this point, of course, it’s trivial to recreate that original visualization created by `stylo()`, only now including a little more context based on the words that are most indicative of each axis:
+```{r plot-pc1-pc2}
+plotit("PC1","PC2",labels=FALSE,legend=FALSE)
+```
+
+I can now use these functions to study my corpus using PCA more deliberately, which might hopefully shed some light on the ways the texts are differentiated.

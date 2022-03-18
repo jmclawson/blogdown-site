@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+<head>
+<title>jmclawson / blog - Word Vector Utilities</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="keywords" content="">
+<meta name="author" content="jmclawson / blog">
+<meta name="generator" content="Hugo 0.74.3" />
+
+  
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/base-min.css">
+
+
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/grids-responsive-min.css">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="https://jmclawson.net/blog/css/envisioned.css">
+<link rel="stylesheet" href="https://jmclawson.net/blog/css/hugo-envisioned.css">
+<link rel="stylesheet" href="https://jmclawson.net/blog/css/hugo-envisioned-override.css">
+
+  
+  <style>
+  	body.index{
+		padding-top: 6.5vw;
+		background-repeat: no-repeat;
+		background-position: center top;
+		background-size: 90% 10vw;
+  		background-image: url(/images/quartet-splatplot.png);
+		width: 65%;
+		min-width: 400px;
+		max-width: 800px;
+  	}
+	
+	.index #blog_logo {
+		display: none;
+	}
+	
+	@media all and (max-width: 550px) {
+	  body.index div.header {
+ 
+	  }
+	  body.index div.header a.deactive {
+	    text-decoration: none !important;
+	  }
+  }
+	
+	div.topmenu, ul.topmenu {
+	 
+	    background-color: white;
+	}
+	
+	.topmenu a {
+		text-decoration: underline;
+	}
+
+	a, h3 {
+	    color: #333399;
+	}
+
+	div.topmenu{
+	    margin: 0 0 20 0;
+	    padding: 0;
+	    overflow: hidden;
+		text-align: center;
+	}
+	ul.topmenu {
+	    list-style-type: none;
+	    padding: 0;
+	    overflow: hidden;
+		font-family:Futura,Helvetica Neue,Helvetica,Arial;
+		width: 100%;
+		font-size: calc(12px + 1vw);
+		line-height:140%;
+	
+	}
+
+	.topmenu li {
+	 
+	    display: inline;
+	    color: navy;
+	    text-align: center;
+	 
+		padding: 0;
+	}
+
+	.topmenu li a {
+	    padding: 1vw;
+	 
+	}
+
+	.topmenu li a:hover {
+	 
+	}
+
+	.topmenu li:hover {
+	 
+		border-top-style: solid;
+		border-top-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-width: 1px;
+	}
+	
+	body.index div.header h1, body.index h2, body.index h3, body.index h4{
+	font-family:Futura,Helvetica Neue,Helvetica,Arial;}
+	
+	div.header h1 {
+		text-align:center;
+		margin-top:0;
+		 
+		 
+		font-size:calc(12px + 5.5vw);
+		font-weight: normal;
+}
+	
+
+  	#blogpage, #blogpage:hover, #blogpage a, #blogpage a:link {
+   
+  		text-decoration: none;
+  		color: black;
+  		font-weight: bold;
+		pointer-events: none;
+  		text-decoration: none;
+  		border-top-style: none;
+  		border-bottom-style: none;
+		background-repeat: unset !important;
+  	}
+	
+	.topmenu a {
+		background: none !important;
+	}
+
+  </style>
+</head>
+
+
+<body>
+<div id="layout" class="pure-g">
+<article class="pure-u-1">
+<header class="brand, post-brand">
+  <h1>
+    <a href="/blog">
+      <span id = "blog_logo">
+         <img src="/blog/splat.png" alt="Blog Logo" style="height: auto; width:80px">
+      </span>
+      
+    </a>
+  </h1>
+</header>
+<section>
+    <div id="top-of-post">
+        <a href="/"><i class="fa fa-chevron-left" aria-hidden="true";></i></a>
+        <h1 class="content-title">
+        
+        Word Vector Utilities
+        
+        </h1>
+        
+        
+        
+    </div>
+  <span class="content-meta">
+
+    
+       <i class="fa fa-user">&nbsp;</i><span class="author">
+         &nbsp;James Clawson</span> <br>
+    
+
+
+    
+      <i class="fa fa-calendar"></i>
+      &nbsp;Aug 12, 2019
+    
+
+    
+      &nbsp;<i class="fa fa-clock-o"></i>
+      &nbsp;10 min read
+    
+
+     <br>
+	<script type="text/javascript">
+
+	
+	function toggle_R() {
+	  var x = document.getElementsByClassName('r');
+	  if (x.length == 0) return;
+	  function toggle_vis(o) {
+	    var d = o.style.display;
+	    o.style.display = (d == 'block' || d == '') ? 'none':'block';
+	  }
+
+	  for (i = 0; i < x.length; i++) {
+	    var y = x[i];
+	    if (y.tagName.toLowerCase() === 'pre') toggle_vis(y);
+	  }
+
+	    var elem = document.getElementById("myButton1");
+	    if (elem.value === "Hide Code") elem.value = "Show Code";
+	    else elem.value = "Hide Code";
+	}
+
+	document.write('<input onclick="toggle_R();" type="button" value="Hide Code" id="myButton1"></input>')
+
+	</script>
+  </span>
+
+
+</section>
+
+
+
+<section>
+
+
+<p style="border: 1px solid gray; padding: .75em; border-radius: 3px; background-color: #FFFFCF;">
+Substantial changes to these functions are explained here: <a href="https://jmclawson.net/blog/posts/updates-to-word-vector-utilities/">jmclawson.net/blog/posts/updates-to-word-vector-utilities/</a>
+</p>
+<p>This July, I was very fortunate to be a participant at the <a href="https://wwp.northeastern.edu/blog/word-vectors-thoughtful-humanist/">Word Vectors for the Thoughtful Humanist</a> workshop, organized by the Women Writers Project at Northeastern University and funded by the NEH. Sarah Connell and Julia Flanders, along with Laura Johnson, Ashley Clark, Laura Nelson, Syd Bauman, and others, guided us through introduction, discussion, and practical application of word vector embeddings. I left Boston with a new understanding of some tricky concepts, a new sense of how I might use these techniques in my work, and a new network of workshop participants and leaders to continue learning from and with. The whole experience far exceeded my expectations, and the travel funding they offered made my participation possible.<label for="tufte-sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"> In case it’s not obvious from the subdued tone here, I recommend it very highly! <a href="https://www.wwp.northeastern.edu/outreach/seminars/neh_wem.html">Visit their website</a> to see details about attending one of the remaining three workshops.</span></p>
+<p>While we began by using models that the workshop leaders built for us in the months leading up to the workshop, we also created our own models using Ben Schmidt’s <a href="https://github.com/bmschmidt/wordVectors">wordVectors package</a> and the RMarkdown files provided by the Women Writers Project, <a href="https://github.com/NEU-DSG/wwp-public-code-share/blob/master/WordVectors/introduction_word2vec.Rmd">“Word Vectors Intro”</a> and <a href="https://github.com/NEU-DSG/wwp-public-code-share/blob/master/WordVectors/template_word2vec.Rmd">“Word Vectors Template”</a>. Expanding on what I learned from the workshop, I’ve since standardized some of my workflow in the form of utility functions, which I’m oversharing in this post. These functions can be loaded with the following line in RStudio:<label for="tufte-sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-2" class="margin-toggle"><span class="sidenote"> The gist is available <a href="https://gist.github.com/jmclawson/21c6a40c78fd66d708bec45d5c0b52e2">here</a>. In order to load it remotely, the <code>devtools</code> package will need to be installed if it’s not yet on the system, but it’s also possible to paste the source into a local file.</span></p>
+<pre class="r"><code>devtools::source_gist(&quot;21c6a40c78fd66d708bec45d5c0b52e2&quot;)</code></pre>
+<div id="preparing-and-modeling-a-corpus" class="section level2">
+<h2>Preparing and Modeling a Corpus</h2>
+<p>The Women Writers Project’s template files walk through the process for preparing and processing a corpus to train a model, explaining some best practices along the way. While training multiple models for different subsections of my corpus, I kept losing track of where I was in the process, so I boiled these things down from about sixteen lines in the template to two functions.</p>
+<p>Before doing anything in R,<label for="tufte-sn-3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-3" class="margin-toggle"><span class="sidenote"> Well, it’s a good idea first to double check the working directory in R using <code>getwd()</code>.</span> it’s necessary to have the corpus materials organized in a way that the scripts know how to understand. Outside of R, organize files the following way:</p>
+<ol style="list-style-type: decimal">
+<li>Within the working directory, create a subdirectory called <code>data</code>.</li>
+<li>Within that <code>data</code> directory, create a subdirectory named <code>YourModelName</code>, giving it whatever name will be used for the model. Keep in mind, this name will persist into future steps, so name it something short, meaningful, and useful.</li>
+<li>Save the corpus files as plain text files within this <code>YourModelName</code> directory.</li>
+</ol>
+<div id="prep_model" class="section level3">
+<h3><code>prep_model()</code></h3>
+<p>Once text files are organized accordingly, go back into RStudio, load the gist using the above <code>source_gist()</code> command, and then prepare each corpus using the command <code>prep_model(model="YourModelName")</code>, using whatever model name chosen for the directory, above.<label for="tufte-sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-4" class="margin-toggle"><span class="sidenote"> For these examples, I’m using the sample corpus the Women Writers Project makes available <a href="https://github.com/NEU-DSG/wwp-public-code-share/tree/master/WordVectors/data/WomensNovels">here</a>, and I’m naming my model <code>WomensNovels</code>.</span></p>
+<pre class="r"><code>prep_model(&quot;WomensNovels&quot;)</code></pre>
+<p>This first command is nothing more than a wrapper simplifying six lines from the WWP template. In the <code>data</code> subdirectory, it will save two text files whose filenames begin with the name of the model: in my case, “WomensNovels.txt” contains all corpus texts within a single file, and “WomensNovels_cleaned.txt” replaces all uppercase letters with lowercase; if the optional <code>bundle_ngrams</code> parameter had been set to anything but the default, this second text file would also include ngram bundling.</p>
+</div>
+<div id="train_model" class="section level3">
+<h3><code>train_model()</code></h3>
+<p>After running that first command, this second command will carry things through the rest of the way:</p>
+<pre class="r"><code>train_model(&quot;WomensNovels&quot;)</code></pre>
+<p>The second command does a bit more than the first. In addition to simplifying about ten lines from the Women Writers Project’s template using reasonable default settings, this second command will create a new object named <code>WomensNovels</code> in the global environment and store these parameter settings for later recall.<label for="tufte-sn-5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-5" class="margin-toggle"><span class="sidenote"> Since training the model may take many hours, and since there’s no built-in way to go back in time to check what parameters were used, workshop leaders strongly urged us to take note of these parameters before beginning this step. Taking note of these parameters is still a good idea, but this wrapper function adds some backup.</span> Setting defaults are <code>vectors=100</code>, <code>window=6</code>, <code>iter=10</code>, <code>negative_samples=15</code>, <code>threads=3</code>; these can each be changed within the <code>train_model()</code> call, and they can later be recalled with the <code>attributes()</code> function:</p>
+<pre class="r"><code>attributes(WomensNovels)$window</code></pre>
+<pre><code>## window 
+##      6</code></pre>
+<pre class="r"><code>attributes(WomensNovels)$negative_samples</code></pre>
+<pre><code>## negative_samples 
+##               15</code></pre>
+<p>As part of the <code>wordVectors</code> package, a trained model will be saved in the <code>data</code> directory, for instance as “WomensNovels.bin”. And as part of these utility functions, the parameter settings will be saved alongside these “.bin” files as <code>metadata_YourModelName.Rdata</code>—in my case as “metadata_WomensNovels.Rdata”. After a model has been trained and saved to disk, it can be recalled into memory in a later R session using the <code>train_model()</code> function, which will also load any existing metadata:</p>
+<pre class="r"><code>train_model(&quot;WomensNovels&quot;)</code></pre>
+</div>
+</div>
+<div id="working-directly-with-data" class="section level2">
+<h2>Working Directly with Data</h2>
+<div id="make_siml_matrix" class="section level3">
+<h3><code>make_siml_matrix()</code></h3>
+<p>Once the models are trained, additional utility functions provide some ways to explore the results. Most useful among these is the <code>make_siml_matrix(wem, x, y)</code> function, which makes it easy to see how one group of words <em><code>x</code></em> relates to another group of words <em><code>y</code></em> within a single model <em><code>wem</code></em>.</p>
+<pre class="r"><code>make_siml_matrix(WomensNovels,
+                 x=c(&quot;sweet&quot;, &quot;bitter&quot;, &quot;fresh&quot;, &quot;hot&quot;), 
+                 y=c(&quot;bread&quot;, &quot;sea&quot;, &quot;attitude&quot;, &quot;air&quot;))</code></pre>
+<pre><code>##              sweet    bitter     fresh       hot
+## bread    0.3408684 0.2231573 0.4800544 0.4845648
+## sea      0.3286719 0.1064460 0.2720364 0.4040408
+## attitude 0.2924267 0.4117849 0.2358243 0.1779941
+## air      0.2132098 0.1775206 0.2999856 0.1284261</code></pre>
+<p>The <code>make_siml_matrix()</code> function returns a matrix of cosine similarity values for each comparison among the two groups of words. Here, it shows that <em>hot</em> and <em>bread</em> are the nearest words among these two groups in the <code>WomensNovels</code> corpus, since the highest value is in the <em>bread</em> row and the <em>hot</em> column. It’s still necessary to interpret these results, probably even making the judgment call that a similarity of <code>0.485</code> isn’t very high even if it is the highest in this set, but the function makes some of this process simpler.</p>
+<p>These cosine similarity values measure how likely any two words are to be used in the same context—either near each other or near the same words. Any two words with strongly dissimilar meanings may appear in similar scenarios, so it’s unsurprising if antonyms show high cosine similarity:</p>
+<pre class="r"><code>make_siml_matrix(WomensNovels,
+                 x=c(&quot;good&quot;, &quot;healthy&quot;, &quot;high&quot;, &quot;bright&quot;), 
+                 y=c(&quot;bad&quot;, &quot;ill&quot;, &quot;low&quot;, &quot;dark&quot;))</code></pre>
+<pre><code>##           good   healthy      high     bright
+## bad  0.4892814 0.3720099 0.2449388 0.22157602
+## ill  0.5740076 0.3516507 0.2686943 0.03634597
+## low  0.2212564 0.3649225 0.1946395 0.29597524
+## dark 0.1955804 0.4216446 0.3700006 0.54517738</code></pre>
+<p>Here, the relationships of <em>ill</em> / <em>good</em> and <em>bright</em> / <em>dark</em> show the highest cosine similarities, higher even than the relationship of <em>hot</em> / <em>bread</em>. I was expecting the paired antonyms to show the highest cosine similarity values, but that doesn’t seem to be the case in this limited corpus.</p>
+<p>Any matrix can be exported using the standard <code>write.csv()</code> command. This example also shows that it’s possible to use vectors with these functions.</p>
+<pre class="r"><code>v_man &lt;- c(&quot;man&quot;, &quot;husband&quot;, &quot;father&quot;, &quot;son&quot;) 
+v_woman&lt;- c(&quot;woman&quot;, &quot;wife&quot;, &quot;mother&quot;, &quot;daughter&quot;)
+
+male_female &lt;- make_siml_matrix(WomensNovels, x=v_man, y=v_woman)
+
+write.csv(male_female,file=&quot;man_woman.csv&quot;)</code></pre>
+</div>
+</div>
+<div id="visualizing-relationships" class="section level2">
+<h2>Visualizing Relationships</h2>
+<div id="cosine_heatmap" class="section level3">
+<h3><code>cosine_heatmap()</code></h3>
+<p>The utility functions also include a couple to explore the data visually. The first of these, <code>cosine_heatmap()</code>, makes it easy to visualize a heatmap of the above matrix:</p>
+<pre class="r"><code>cosine_heatmap(WomensNovels,
+                 x=c(&quot;sweet&quot;, &quot;bitter&quot;, &quot;fresh&quot;, &quot;hot&quot;), 
+                 y=c(&quot;bread&quot;, &quot;sea&quot;, &quot;attitude&quot;, &quot;air&quot;))</code></pre>
+<pre><code>## Warning: `guides(&lt;scale&gt; = FALSE)` is deprecated. Please use `guides(&lt;scale&gt; =
+## &quot;none&quot;)` instead.</code></pre>
+<p><img src="/blog/post/word-vector-utilities_files/figure-html/unnamed-chunk-10-1.png" width="672"  /> Adding color to the similarity matrix makes the data easier to read quickly. And by default, the name of the model (here, <code>WomensNovels</code>) is printed at the top, aiding comparisons of heatmaps from multiple models.</p>
+<p>Matching <code>x</code> and <code>y</code> values can be a good way to provide context in a comparison. Since a strong relationship shows up as a bold red, this redundant comparison results in a clear diagonal:</p>
+<pre class="r"><code>v_doubt &lt;- WomensNovels %&gt;% 
+  closest_to(~&quot;doubt&quot; + &quot;truth&quot;) %&gt;% 
+  .$word</code></pre>
+<pre><code>## Warning in if (class(object) == &quot;VectorSpaceModel&quot;) {: the condition has length
+## &gt; 1 and only the first element will be used</code></pre>
+<pre class="r"><code>cosine_heatmap(WomensNovels, v_doubt, v_doubt)</code></pre>
+<pre><code>## Warning: `guides(&lt;scale&gt; = FALSE)` is deprecated. Please use `guides(&lt;scale&gt; =
+## &quot;none&quot;)` instead.</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+As long as values are kept in the right order <em><code>wem</code></em>, <em><code>x</code></em>, <em><code>y</code></em>, it’s ok to skip naming the parameters to save space. In other words, <code>cosine_heatmap(wem=A,x=B,y=C)</code> is the same as <code>cosine_heatmap(A,B,C)</code>.
+</p>
+<img src="/blog/post/word-vector-utilities_files/figure-html/unnamed-chunk-11-1.png" alt="As long as values are kept in the right order *`wem`*, *`x`*, *`y`*, it's ok to skip naming the parameters to save space. In other words, `cosine_heatmap(wem=A,x=B,y=C)` is the same as `cosine_heatmap(A,B,C)`." width="672"  />
+</div>
+<p>When using <code>x</code> and <code>y</code> values that equal each other like this, it may be nice to simplify things, showing only half of the heatmap by turning off the <code>redundant</code> toggle:</p>
+<pre class="r"><code>cosine_heatmap(WomensNovels,
+               x=v_doubt, 
+               y=v_doubt, 
+               redundant = FALSE)</code></pre>
+<pre><code>## Warning: `guides(&lt;scale&gt; = FALSE)` is deprecated. Please use `guides(&lt;scale&gt; =
+## &quot;none&quot;)` instead.</code></pre>
+<p><img src="/blog/post/word-vector-utilities_files/figure-html/unnamed-chunk-12-1.png" width="672"  /></p>
+<p>As noted above, the command works with a vector of values, but it’s also possible to be trickier, combining the function with the <code>closest_to()</code> command from the <code>wordVectors</code> package:</p>
+<pre class="r"><code>cosine_heatmap(WomensNovels, 
+               x=closest_to(WomensNovels, &quot;man&quot;, 15)$word, 
+               y=closest_to(WomensNovels, &quot;woman&quot;, 15)$word)</code></pre>
+<pre><code>## Warning: `guides(&lt;scale&gt; = FALSE)` is deprecated. Please use `guides(&lt;scale&gt; =
+## &quot;none&quot;)` instead.</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+When using the <code>closest_to()</code> command here, don’t forget to add <code>$word</code> at the end, dropping the numeric values and returning only the words themselves.
+</p>
+<img src="/blog/post/word-vector-utilities_files/figure-html/unnamed-chunk-13-1.png" alt="When using the `closest_to()` command here, don't forget to add `$word` at the end, dropping the numeric values and returning only the words themselves." width="672"  />
+</div>
+<p>By default, these heatmaps round values to two digits right of the decimal point, but it’s possible to change this setting by setting the <code>round</code> parameter to another number like <code>round=3</code>. It’s also possible to hide values altogether when they’re not necessary for exploring a model or if a heatmap gets too tight:</p>
+<pre class="r"><code>cosine_heatmap(WomensNovels, 
+               x=closest_to(WomensNovels, &quot;man&quot;, 25)$word, 
+               y=closest_to(WomensNovels, &quot;woman&quot;, 25)$word, 
+               values=FALSE)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+When the <code>values</code> parameter is set to <code>FALSE</code>, the function displays a legend by default. In practice, a cosine similarity of -1 is probably unlikely, as (I think) the model relies heavily on negative sampling to get anything less than 0.
+</p>
+<img src="/blog/post/word-vector-utilities_files/figure-html/unnamed-chunk-14-1.png" alt="When the `values` parameter is set to `FALSE`, the function displays a legend by default. In practice, a cosine similarity of -1 is probably unlikely, as (I think) the model relies heavily on negative sampling to get anything less than 0." width="672"  />
+</div>
+</div>
+<div id="amplified_heatmap" class="section level3">
+<h3><code>amplified_heatmap()</code></h3>
+<p>The second function for visualizing results helps to amplify comparisons within each row and column. This function merely strengthens signals it finds within a subset of words; it doesn’t validate these signals, so it’s necessary to be careful about attributing too much importance to cosine similarity values that may actually be meager.</p>
+<pre class="r"><code>amplified_heatmap(WomensNovels, 
+                  x=closest_to(WomensNovels, &quot;man&quot;, 25)$word, 
+                  y=closest_to(WomensNovels, &quot;woman&quot;, 25)$word)</code></pre>
+<p><img src="/blog/post/word-vector-utilities_files/figure-html/unnamed-chunk-15-1.png" width="672"  /></p>
+<p>Many of the same parameters used with <code>cosine_heatmap()</code> work for <code>amplified_heatmap()</code>, too. But as this second function amplifies the highest and lowest values for each row and column, results become less useful for sets with any words appearing on both the <code>x</code> and <code>y</code> axes; for these, it’s probably a good idea to toggle the <code>diagonal</code> parameter to <code>FALSE</code>:</p>
+<pre class="r"><code>amplified_heatmap(WomensNovels, 
+                  x=c(v_man, v_woman), 
+                  y=c(v_man, v_woman), 
+                  diagonal = FALSE)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Setting <code>diagonal=FALSE</code> hides the obviously strong connections between a word and itself by making these cells gray and leaving space on the spectrum to amplify lower-ranked values. As always, a strong red signifies that two words are more similar to each other, while a strong blue indicates they’re much more dissimilar, relative to other words in each row and column.
+</p>
+<img src="/blog/post/word-vector-utilities_files/figure-html/unnamed-chunk-16-1.png" alt="Setting `diagonal=FALSE` hides the obviously strong connections between a word and itself by making these cells gray and leaving space on the spectrum to amplify lower-ranked values. As always, a strong red signifies that two words are more similar to each other, while a strong blue indicates they're much more dissimilar, relative to other words in each row and column." width="672"  />
+</div>
+</div>
+</div>
+<div id="iterative-exploration" class="section level2">
+<h2>Iterative Exploration</h2>
+<p>Ideally, the process of visualizing sets of words will lead to iterative development of a research question, as new relationships are suggested in unexpected heat patterns. What, for instance, can be made of the unusually hot cell at the bottom of the the first amplified heatmap above, where the <em>fat</em> row meets the <em>healthy</em> column? First checking it out with <code>cosine_heatmap()</code> is a good idea to verify that the numbers justify going further:</p>
+<pre class="r"><code>cosine_heatmap(WomensNovels, 
+               x=closest_to(WomensNovels, &quot;healthy&quot;, 10)$word, 
+               y=closest_to(WomensNovels, &quot;fat&quot;, 10)$word, 
+               round=3)</code></pre>
+<pre><code>## Warning: `guides(&lt;scale&gt; = FALSE)` is deprecated. Please use `guides(&lt;scale&gt; =
+## &quot;none&quot;)` instead.</code></pre>
+<p><img src="/blog/post/word-vector-utilities_files/figure-html/unnamed-chunk-17-1.png" width="672"  /></p>
+<p>These values look high enough to warrant exploration, so a second step might be to widen the scope and discover any other relationships revealed by an amplified heatmap:</p>
+<pre class="r"><code>amplified_heatmap(WomensNovels, 
+                  x=closest_to(WomensNovels, &quot;healthy&quot;, 30)$word, 
+                  y=closest_to(WomensNovels, &quot;fat&quot;, 30)$word, 
+                  legend = FALSE, 
+                  diagonal = FALSE)</code></pre>
+<pre><code>## Warning: `guides(&lt;scale&gt; = FALSE)` is deprecated. Please use `guides(&lt;scale&gt; =
+## &quot;none&quot;)` instead.</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Here, the legend on the right hand side is turned off by toggling the <code>legend=FALSE</code> parameter, making more space for more words.
+</p>
+<img src="/blog/post/word-vector-utilities_files/figure-html/unnamed-chunk-18-1.png" alt="Here, the legend on the right hand side is turned off by toggling the `legend=FALSE` parameter, making more space for more words." width="672"  />
+</div>
+<p>At this point, someone working with this corpus might continue exploring the relationship of <em>fat</em> to <em>healthy</em>, or they might be inspired by other relationships. For instance, is there something interesting in the relationships of <em>portrait</em> / <em>fashion</em> and <em>proportioned</em> / <em>painted</em>? In what ways do texts draw upon the language of art to establish expectations of beauty, and do they leave room in the conversation for <em>health</em>?</p>
+</div>
+<div id="section" class="section level2">
+<h2> </h2>
+</div>
+<div id="section-1" class="section level2">
+<h2>…</h2>
+<p>I’ve already been using these utility functions to build word embedding models of subsets of my corpus and to begin to explore and compare relationships among the words. I’m very excited by this ongoing work, and I’m having fun doing it, discovering the kinds of connections of ideas and implications that can be found in my corpora, but I wanted to document some methods in progress and to share them. I hope they prove useful to others.</p>
+</div>
+</section>
+<section>
+  
+  <footer class="page-footer">
+		<hr>
+		<ul class="page-footer-menu">
+		
+		</ul>
+
+  
+    <p>
+      Powered by <a href="https://gohugo.io">Hugo</a> and the
+      <a href="https://github.com/dandermotj/hugo-envisioned">Envisioned theme</a>.
+    </p>
+  
+
+	<div class="copyright">
+	<p>
+    
+      &copy; 2020
+    .
+    All rights reserved.
+    
+  </p>
+</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
+</section>
+</article>
+</div>
+</body>
+</html>

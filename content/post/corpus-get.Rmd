@@ -1,0 +1,320 @@
+---
+title: "Getting a Literary Corpus from Project Gutenberg"
+author: "James Clawson"
+date: "2019-03-28"
+output: 
+  tufte::tufte_html: default
+  blogdown::html_page: default
+excerpt: "Project Gutenberg is a great resource for sourcing out-of-copyright texts, but it can be tedious for collecting a corpus of any size. David Robinson's gutenbergr is an easy way to make it work."
+draft: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = "~/GitHub/blogdown-site/temp/corpus-files")
+knitr::opts_chunk$set(echo = TRUE, 
+                      cache=FALSE)
+library(knitr)
+```
+
+
+
+
+In a previous blog post, I outlined some thinking and methodology for [selecting a literary corpus from Wikipedia](http://jmclawson.net/blog/posts/selecting-a-literary-corpus-from-wikipedia/). But counting the numbers of titles per year leaves much to be desired about the texts themselves. Isn't the purpose of literary study to, you know, study literature?
+
+To study these texts *as texts*, getting a list of titles is only the first step. As Wikipedia is a useful resource for collecting crowd-sourced lists of titles, Project Gutenberg is without peer for providing texts for reading or analyzing. Although the typical user of Project Gutenberg will probably visit one source at a time, getting access to each text by accessing its URL, a good corpus for digital analysis might easily have hundreds of titles. Finding all of those URLs would be tough! Luckily, David Robinson's gutenbergr`r tufte::margin_note("David Robinson (2018). [gutenbergr: Download and Process Public Domain Works from Project Gutenberg](https://CRAN.R-project.org/package=gutenbergr). R package version 0.1.4.")` is an easy way to use R to process titles and download texts with additional metadata. In this post, I explain my workflow, including some of the decisions I made along the way. As before, I'm writing up the process here to remind myself of the rationale behind my choices, and I'm including code in case it's the kind of thing that someone may find useful.^[If you find the code off-putting, you can toggle it above using the button marked "Hide Code."]
+
+### Why Project Gutenberg?
+
+Gutenberg's size
+its reliability
+
+Copyright texts
+compare to HathiTrust
+
+It is useful
+Thanks to gutenbergr, it is easy to use with R
+
+## Building on Prior Work
+
+To get started, first load the necessary packages in R. For this project, I use *dplyr* to reshuffle information, *gutenbergr* to interface with Project Gutenberg, and *ggplot2* to visualize things.
+```{r libraries, message=FALSE, warning=FALSE, include=TRUE}
+# library(rvest) I DON'T NEED THIS, RIGHT?
+library(dplyr)
+library(ggplot2)
+library(gutenbergr)
+```
+
+The previous blog posting ended with a table of titles and years. We'll use this data to make inquiries of Project Gutenberg and download whichever titles are available. It's fine to import the CSV file or the RDS file, but the latter is easier. After loading data, I typically check out the first few rows to make sure it looks ok.
+
+```{r load prior data}
+corpus_combined <- readRDS("corpus_combined.rds")
+kable(corpus_combined[1:5,])
+```
+
+At this point, we're ready to download the available texts in a selected corpus.
+
+## Querying Project Gutenberg
+
+With a clean table of titles, the next step is to write a function to cross reference each title against the available titles in the Project Gutenberg database using the functions already built into `gutenbergr`. Unfortunately, not every title on Wikipedia is listed on Project Gutenberg, so the list will shrink. Additionally, some titles may return multiple novels using the same title. For these, the function defaults to the first available item, saving each title in the list of **sketchy_titles** for double checking later.
+```{r Function to cross reference with Gutenberg}
+sketchy_titles <- c()
+get_metadata <- function(df=corpus_combined,start=1,end=NA){
+  if(is.na(end)){end=nrow(df)}
+  works_df <<- data.frame(titles="",year="",group="",possibleauthor="",gutenberg_id="",guten_title="",author="",gutenberg_author_id="",language="",gutenberg_bookshelf="",rights="",has_text="",stringsAsFactors=FALSE)
+  for(work in start:end){
+    this_gutenberg_data <- gutenberg_works(title==df$title[work])
+    if(nrow(this_gutenberg_data)>1){
+      sketchy_titles <<- c(sketchy_titles,df$title[work])
+    }
+    this_row <- data.frame(df[work,],this_gutenberg_data[1,])
+    works_df[work,] <<- this_row
+  }
+  corpus_available <<- works_df[!is.na(works_df$guten_title),]
+  
+  # Omit any novels published after 1922, as copyright restrictions make it highly lokely that these works are inaccurate
+  corpus_available <<- corpus_available[corpus_available$year<1923,]
+}
+```
+
+Run the function and view this latest data frame to discover which works are represented in Gutenberg. As it's a large dataframe, I'm showing only the first five rows here:
+```{r Do the cross ref for American, message=FALSE}
+get_metadata()
+kable(corpus_available[1:5,])
+```
+
+The full table has `r nrow(corpus_available)` rows of data.
+
+## Checking for Errors
+
+In the case of my data, the number of rows in the table shrank considerably because not every work is available on Project Gutenberg. But as the table shortens, it also inevitably grew wider, adding more columns of metadata for each work. Before things get out of hand, it's a good place to check the data for accuracy in at least four ways:
+
+1. *Check that the `possibleauthor` column jibes with Gutenberg's metadata.* Some of the listings on Wikipedia had inconsistently formatted author names suggested as part of the titles; in the function used to parse titles, I pulled out these messy author names into a secondary column called `possibleauthor`. We can use the information in this column to compare against the `author` column from Projct Gutenberg's metadata
+2. *Check that the works were written during the author's (reasonably productive years of) life.* The metadata from Project Gutenberg and functions from `gutenbergr` make it easy to look up the years of authors in our table and compare them to the listed year of publication for each work. We can easily select and view a subset of the table showing rows falling outside an expected range.
+3. *Check titles that have multiple listings in Project Gutenberg.* By default, my **get_metadata()** function chooses the first listing when multiple novels are returned, but this choice won't always be the best one.
+4. *Check that works lacking an author are the same titles that are listed on Wikipedia.* This step will take more work, but we can use available tools to make the work slightly more efficient.
+
+With this plan in mind, I wrote some functions.
+
+### 1. Check the `possibleauthor` column
+
+The number of novels that have a `possibleauthor` entry and that are available on Project Gutenberg is fortunately manageable, so we can get a good sense of things here:
+
+```{r Checking data quickly}
+check_possibleauthor <- function(df){
+  possibledf <- df[!df$possibleauthor=="",]
+  subd <- possibledf[,c(1,6,2,4,7)] %>%
+    filter(sapply(1:nrow(.), function(i) 
+      !grepl(possibleauthor[i], author[i])))
+  nrow(subd)
+  kable(subd)
+}
+
+check_possibleauthor(df=corpus_available)
+```
+
+Some of these are obvious problems, and others can be verified by looking up individual works. 
+
+### 2. Check book year against author's years
+
+Pulling together data from two sources is relatively easy here:
+
+```{r Checking data thoroughly, warning=FALSE, fig.cap="Negative numbers in the age column signify works published before an author's birth."}
+get_authoryears <- function(df=corpus_available,start=1,end=NA){
+  if(is.na(end)){end=nrow(df)}
+  author_table <<- data.frame(gutenberg_author_id="",author="",alias="",birthdate="",deathdate="",wikipedia="",aliases="",stringsAsFactors=FALSE)
+  for(work in start:end){
+    author_table[work,] <<- gutenberg_authors[gutenberg_authors$gutenberg_author_id==df$gutenberg_author_id[work],]
+  }
+  full_table <<- data.frame(df[,c(2:6)],author_table[,-6])
+  full_table$year <<- as.numeric(full_table$year)
+  full_table$birthdate <<- as.numeric(full_table$birthdate)
+  full_table$deathdate <<- as.numeric(full_table$deathdate)
+  
+  names(full_table)[names(full_table) == "birthdate"] <<- "birth"
+  names(full_table)[names(full_table) == "deathdate"] <<- "death"
+}
+
+check_lifespan <- function(){
+  # check that the work was written within an author's lifespan
+  # first test if it was published after the author's death
+  status_after_d <- grep(FALSE,full_table$year<=(full_table$death+1))
+  
+  # then check if it was published before the author was 20 years old
+  status_before_b <- grep(FALSE,full_table$year>(full_table$birth+20))
+  
+  # combine these tests into one grouping
+  status <- c(status_after_d,status_before_b)
+  
+  # find the rows that satisfy either test
+  error_table <<- full_table[status,c(5,1,7,9,10)]
+  
+  #check the author's age when the work was published
+  error_table$age <<- error_table$year-error_table$birth
+  error_table$age[error_table$year>error_table$death] <<- "†"
+  
+  error_tab <<- error_table[,c(1,2,3,6)]
+  names(error_tab)[3] <<- "supposed author"
+}
+
+
+print_error <- function(id){
+  row <- grep(TRUE,row.names(error_table)==id)
+  title <- error_table$guten_title[row]
+  year <- error_table$year[row]
+  author <- error_table$author[row]
+  birth <- error_table$birth[row]
+  death <- error_table$death[row]
+  
+  error <- paste("*", title, "* (", year, ") isn't by ", author, " (", birth, "-", death, ")", sep="")
+  
+  return(error)
+}
+
+get_authoryears()
+check_lifespan()
+kable(error_tab)
+
+```
+
+Only a few works turn out to have been published before an author's life, significantly posthumously, or before what might be expected to be an author's productive years. Working through the corpus and checking the `error_table` individually shows the following problems in relying on titles alone to perform the Gutenberg cross-reference of the Wikipedia data set:
+
+1. `r print_error(1508)`
+2. `r print_error(1617)`
+3. `r print_error(7)`
+4. `r print_error(8)`
+5. `r print_error(270)`
+6. `r print_error(293)`
+7. `r print_error(1673)`
+
+### 3. Check titles that have multiple listings
+
+A few of these match the error test above, but others are new:
+
+```{r More error checking, message=TRUE, warning=FALSE}
+
+sketchy_index <- grep(paste0("^",
+                            paste(sketchy_titles,
+                                  collapse="$|^"),
+                            "$"),
+                      gutenberg_metadata$title)
+
+error_table_sketchy <- gutenberg_metadata[sketchy_index,1:4]
+
+get_authoryears_error <- 
+  function(start=1, end=nrow(error_table_sketchy)){
+    author_table_sketchy <<- 
+      data.frame(gutenberg_author_id="", 
+                 author="", 
+                 alias="", 
+                 birth="", 
+                 death="",
+                 wikipedia="",
+                 aliases="",
+                 stringsAsFactors=FALSE)
+    
+    for(work in start:end){
+      author_table_sketchy[work,] <<- gutenberg_authors[gutenberg_authors$gutenberg_author_id==error_table_sketchy$gutenberg_author_id[work],]
+    }
+  }
+get_authoryears_error()
+# kable(author_table_sketchy[1:5,])
+# kable(error_table_sketchy)
+# length(sketchy_titles)
+# sketchy_titles
+# length(sketchy_index)
+# kable(gutenberg_metadata[1:5,])
+
+full_table_sketchy <<- data.frame(error_table_sketchy,
+                                  author_table_sketchy[,-6])
+  
+sketchyears <- c()
+for(row in 1:nrow(full_table_sketchy)){
+  thisyear <- full_table$year[full_table$guten_title==full_table_sketchy$title[row]]
+  if(length(thisyear)==0){
+    thisyear <- NA
+    }
+    # message(thisyear)
+    sketchyears <<- c(sketchyears,thisyear)
+}
+
+full_table_sketchy$year <- sketchyears
+  
+full_table_sketchy$birth <- as.numeric(full_table_sketchy$birth)
+  
+full_table_sketchy$death <- as.numeric(full_table_sketchy$death)
+  
+full_table_sketchy <- full_table_sketchy[,c(1:4,7,8,11,9,10)]
+
+# kable(full_table_sketchy[1:5])
+
+# get_authoryears_error()
+
+sketchyages <- full_table_sketchy$year - full_table_sketchy$birth
+
+# Assume that 21 is a reasonable age to publish
+sketchybad <- (full_table_sketchy$year - full_table_sketchy$birth)<21
+
+# Check if publication year is within reasonable bounds
+full_table_sketchy$ok <- 
+  (full_table_sketchy$year - full_table_sketchy$birth) >
+  20 & ((full_table_sketchy$death + 2 ) > 
+          full_table_sketchy$year)
+
+full_table_sketchy <- full_table_sketchy[,c(10,1:9)]
+
+bad_table_sketchy <- full_table_sketchy[which(full_table_sketchy$ok==FALSE),]
+
+kable(bad_table_sketchy)
+```
+
+The table of nine texts, above, shows a few errors, which we can correct for before we begin downloading anything:
+
+
+```{r}
+#Function to replace erroneous details (gutenberg_id, author, gutenberg_author_id, birth, deathdate, alias, aliases) in full_table with corresponding data from full_table_sketchy
+
+correct_data <- function(badid, goodid){
+  # subset the data
+  ok_row <- full_table_sketchy[full_table_sketchy$gutenberg_id==goodid,]
+  new_row <- full_table[full_table$gutenberg_id==badid,]
+  
+  # redefine the correct values
+  columns <- c("author",
+               "gutenberg_id",
+               "gutenberg_author_id",
+               "birth",
+               "death",
+               "alias",
+               "aliases")
+  new_row[columns] <-  ok_row[columns]
+  
+  full_table[full_table$gutenberg_id==badid,] <<- new_row
+}
+
+delete_row <- function(badid){
+  full_table <<- full_table[!full_table$gutenberg_id==badid,]
+}
+
+```
+
+After doing some research on these titles for which `gutenbergr` returns duplicates, I used the above functions to fix these errors with the following steps, including deleting two rows for which `gutenbergr` seemed not to have the correct version available. Then I saved a milestone just to be safe:
+
+```{r Correct-and-save}
+correct_data("4794","10892")
+correct_data("3118","7303")
+correct_data("13723","35638")
+correct_data("12669","35338")
+correct_data("927","31869")
+correct_data("1818","9845")
+delete_row("24913")# this novel isn't available
+delete_row("21691")# this novel isn't available
+delete_row("50834")# this novel isn't available
+# Some novels are on both lists, so get rid of each second listing
+dupe_index <- duplicated(full_table$gutenberg_id)
+full_table <- full_table[!dupe_index,]
+
+saveRDS(full_table,file="full_table.rds")
+
+```
+
+

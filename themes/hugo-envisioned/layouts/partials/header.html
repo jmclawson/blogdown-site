@@ -1,0 +1,119 @@
+{{ partial "doctype.html" . }}
+<head>
+<title>{{ .Site.Title }} - {{ .Title  }}</title>
+  {{ partial "meta.html" . }}
+  {{ partial "opengraph.html" }}
+  {{ partial "header.includes.html" . }}
+  
+  <style>
+  	body.index{
+		padding-top: 6.5vw;
+		background-repeat: no-repeat;
+		background-position: center top;
+		background-size: 90% 10vw;
+  		background-image: url(/images/quartet-splatplot.png);
+		width: 65%;
+		min-width: 400px;
+		max-width: 800px;
+  	}
+	
+	.index #blog_logo {
+		display: none;
+	}
+	
+	@media all and (max-width: 550px) {
+	  body.index div.header {
+/*	    margin-left: -5% !important;*/
+	  }
+	  body.index div.header a.deactive {
+	    text-decoration: none !important;
+	  }
+  }
+	
+	div.topmenu, ul.topmenu {
+	/*    background-color: #333399;*/
+	    background-color: white;
+	}
+	
+	.topmenu a {
+		text-decoration: underline;
+	}
+
+	a, h3 {
+	    color: #333399;
+	}
+
+	div.topmenu{
+	    margin: 0 0 20 0;
+	    padding: 0;
+	    overflow: hidden;
+		text-align: center;
+	}
+	ul.topmenu {
+	    list-style-type: none;
+	    padding: 0;
+	    overflow: hidden;
+		font-family:Futura,Helvetica Neue,Helvetica,Arial;
+		width: 100%;
+		font-size: calc(12px + 1vw);
+		line-height:140%;
+	
+	}
+
+	.topmenu li {
+	/*    float: left;*/
+	    display: inline;
+	    color: navy;
+	    text-align: center;
+	/*    text-decoration: none;*/
+		padding: 0;
+	}
+
+	.topmenu li a {
+	    padding: 1vw;
+	/*    display: block;*/
+	}
+
+	.topmenu li a:hover {
+	/*    padding: 15px;*/
+	}
+
+	.topmenu li:hover {
+	/*    background-color: #cccccc;*/
+		border-top-style: solid;
+		border-top-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-width: 1px;
+	}
+	
+	body.index div.header h1, body.index h2, body.index h3, body.index h4{
+	font-family:Futura,Helvetica Neue,Helvetica,Arial;}
+	
+	div.header h1 {
+		text-align:center;
+		margin-top:0;
+		/*	margin-bottom:1em;*/
+		/*	font-size: 6.5vw;*/
+		font-size:calc(12px + 5.5vw);
+		font-weight: normal;
+}
+	
+
+  	#blogpage, #blogpage:hover, #blogpage a, #blogpage a:link {
+  /*	    background-color: #bcbcbc;*/
+  		text-decoration: none;
+  		color: black;
+  		font-weight: bold;
+		pointer-events: none;
+  		text-decoration: none;
+  		border-top-style: none;
+  		border-bottom-style: none;
+		background-repeat: unset !important;
+  	}
+	
+	.topmenu a {
+		background: none !important;
+	}
+
+  </style>
+</head>

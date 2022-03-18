@@ -1,0 +1,736 @@
+---
+title: "Getting a Literary Corpus from Project Gutenberg"
+author: "James Clawson"
+date: "2019-03-28"
+output: 
+  tufte::tufte_html: default
+  blogdown::html_page: default
+excerpt: "Project Gutenberg is a great resource for sourcing out-of-copyright texts, but it can be tedious for collecting a corpus of any size. David Robinson's gutenbergr is an easy way to make it work."
+draft: true
+---
+
+
+
+<p>In a previous blog post, I outlined some thinking and methodology for <a href="http://jmclawson.net/blog/posts/selecting-a-literary-corpus-from-wikipedia/">selecting a literary corpus from Wikipedia</a>. But counting the numbers of titles per year leaves much to be desired about the texts themselves. Isn’t the purpose of literary study to, you know, study literature?</p>
+<p>To study these texts <em>as texts</em>, getting a list of titles is only the first step. As Wikipedia is a useful resource for collecting crowd-sourced lists of titles, Project Gutenberg is without peer for providing texts for reading or analyzing. Although the typical user of Project Gutenberg will probably visit one source at a time, getting access to each text by accessing its URL, a good corpus for digital analysis might easily have hundreds of titles. Finding all of those URLs would be tough! Luckily, David Robinson’s gutenbergr<label for="tufte-mn-1" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-1" class="margin-toggle"><span class="marginnote">David Robinson (2018). <a href="https://CRAN.R-project.org/package=gutenbergr">gutenbergr: Download and Process Public Domain Works from Project Gutenberg</a>. R package version 0.1.4.</span> is an easy way to use R to process titles and download texts with additional metadata. In this post, I explain my workflow, including some of the decisions I made along the way. As before, I’m writing up the process here to remind myself of the rationale behind my choices, and I’m including code in case it’s the kind of thing that someone may find useful.<label for="tufte-sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"> If you find the code off-putting, you can toggle it above using the button marked “Hide Code.”</span></p>
+<div id="why-project-gutenberg" class="section level3">
+<h3>Why Project Gutenberg?</h3>
+<p>Gutenberg’s size its reliability</p>
+<p>Copyright texts compare to HathiTrust</p>
+<p>It is useful Thanks to gutenbergr, it is easy to use with R</p>
+</div>
+<div id="building-on-prior-work" class="section level2">
+<h2>Building on Prior Work</h2>
+<p>To get started, first load the necessary packages in R. For this project, I use <em>dplyr</em> to reshuffle information, <em>gutenbergr</em> to interface with Project Gutenberg, and <em>ggplot2</em> to visualize things.</p>
+<pre class="r"><code># library(rvest) I DON&#39;T NEED THIS, RIGHT?
+library(dplyr)
+library(ggplot2)
+library(gutenbergr)</code></pre>
+<p>The previous blog posting ended with a table of titles and years. We’ll use this data to make inquiries of Project Gutenberg and download whichever titles are available. It’s fine to import the CSV file or the RDS file, but the latter is easier. After loading data, I typically check out the first few rows to make sure it looks ok.</p>
+<pre class="r"><code>corpus_combined &lt;- readRDS(&quot;corpus_combined.rds&quot;)
+kable(corpus_combined[1:5,])</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">titles</th>
+<th align="right">year</th>
+<th align="left">group</th>
+<th align="left">possibleauthor</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Clara Howard</td>
+<td align="right">1801</td>
+<td align="left">American</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Equality; or, A History of Lithconia</td>
+<td align="right">1802</td>
+<td align="left">American</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Memoirs of Carwin the Biloquist</td>
+<td align="right">1803</td>
+<td align="left">American</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Kelroy</td>
+<td align="right">1812</td>
+<td align="left">American</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Precaution</td>
+<td align="right">1820</td>
+<td align="left">American</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<p>At this point, we’re ready to download the available texts in a selected corpus.</p>
+</div>
+<div id="querying-project-gutenberg" class="section level2">
+<h2>Querying Project Gutenberg</h2>
+<p>With a clean table of titles, the next step is to write a function to cross reference each title against the available titles in the Project Gutenberg database using the functions already built into <code>gutenbergr</code>. Unfortunately, not every title on Wikipedia is listed on Project Gutenberg, so the list will shrink. Additionally, some titles may return multiple novels using the same title. For these, the function defaults to the first available item, saving each title in the list of <strong>sketchy_titles</strong> for double checking later.</p>
+<pre class="r"><code>sketchy_titles &lt;- c()
+get_metadata &lt;- function(df=corpus_combined,start=1,end=NA){
+  if(is.na(end)){end=nrow(df)}
+  works_df &lt;&lt;- data.frame(titles=&quot;&quot;,year=&quot;&quot;,group=&quot;&quot;,possibleauthor=&quot;&quot;,gutenberg_id=&quot;&quot;,guten_title=&quot;&quot;,author=&quot;&quot;,gutenberg_author_id=&quot;&quot;,language=&quot;&quot;,gutenberg_bookshelf=&quot;&quot;,rights=&quot;&quot;,has_text=&quot;&quot;,stringsAsFactors=FALSE)
+  for(work in start:end){
+    this_gutenberg_data &lt;- gutenberg_works(title==df$title[work])
+    if(nrow(this_gutenberg_data)&gt;1){
+      sketchy_titles &lt;&lt;- c(sketchy_titles,df$title[work])
+    }
+    this_row &lt;- data.frame(df[work,],this_gutenberg_data[1,])
+    works_df[work,] &lt;&lt;- this_row
+  }
+  corpus_available &lt;&lt;- works_df[!is.na(works_df$guten_title),]
+  
+  # Omit any novels published after 1922, as copyright restrictions make it highly lokely that these works are inaccurate
+  corpus_available &lt;&lt;- corpus_available[corpus_available$year&lt;1923,]
+}</code></pre>
+<p>Run the function and view this latest data frame to discover which works are represented in Gutenberg. As it’s a large dataframe, I’m showing only the first five rows here:</p>
+<pre class="r"><code>get_metadata()</code></pre>
+<pre><code>## Warning: `filter_()` is deprecated as of dplyr 0.7.0.
+## Please use `filter()` instead.
+## See vignette(&#39;programming&#39;) for more help
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_warnings()` to see where this warning was generated.</code></pre>
+<pre><code>## Warning: `distinct_()` is deprecated as of dplyr 0.7.0.
+## Please use `distinct()` instead.
+## See vignette(&#39;programming&#39;) for more help
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_warnings()` to see where this warning was generated.</code></pre>
+<pre><code>## Warning: The `i` argument of ``[.tbl_df`()` must lie in [0, rows] if positive, as of tibble 3.0.0.
+## Use `NA_integer_` as row index to obtain a row full of `NA` values.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_warnings()` to see where this warning was generated.</code></pre>
+<pre class="r"><code>kable(corpus_available[1:5,])</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">titles</th>
+<th align="left">year</th>
+<th align="left">group</th>
+<th align="left">possibleauthor</th>
+<th align="left">gutenberg_id</th>
+<th align="left">guten_title</th>
+<th align="left">author</th>
+<th align="left">gutenberg_author_id</th>
+<th align="left">language</th>
+<th align="left">gutenberg_bookshelf</th>
+<th align="left">rights</th>
+<th align="left">has_text</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>7</td>
+<td align="left">The Spy</td>
+<td align="left">1821</td>
+<td align="left">1</td>
+<td align="left">Cooper</td>
+<td align="left">1818</td>
+<td align="left">The Spy</td>
+<td align="left">Davis, Richard Harding</td>
+<td align="left">181</td>
+<td align="left">en</td>
+<td align="left">NA</td>
+<td align="left">Public domain in the USA.</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td align="left">The Pioneers</td>
+<td align="left">1823</td>
+<td align="left">1</td>
+<td align="left"></td>
+<td align="left">21691</td>
+<td align="left">The Pioneers</td>
+<td align="left">Ballantyne, R. M. (Robert Michael)</td>
+<td align="left">333</td>
+<td align="left">en</td>
+<td align="left">Children’s Fiction</td>
+<td align="left">Public domain in the USA.</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td align="left">The Pilot: A Tale of the Sea</td>
+<td align="left">1824</td>
+<td align="left">1</td>
+<td align="left"></td>
+<td align="left">7974</td>
+<td align="left">The Pilot: A Tale of the Sea</td>
+<td align="left">Cooper, James Fenimore</td>
+<td align="left">483</td>
+<td align="left">en</td>
+<td align="left">Historical Fiction</td>
+<td align="left">Public domain in the USA.</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td>15</td>
+<td align="left">The Prairie</td>
+<td align="left">1827</td>
+<td align="left">1</td>
+<td align="left"></td>
+<td align="left">6450</td>
+<td align="left">The Prairie</td>
+<td align="left">Cooper, James Fenimore</td>
+<td align="left">483</td>
+<td align="left">en</td>
+<td align="left">NA</td>
+<td align="left">Public domain in the USA.</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td>17</td>
+<td align="left">Fanshawe</td>
+<td align="left">1828</td>
+<td align="left">1</td>
+<td align="left"></td>
+<td align="left">7085</td>
+<td align="left">Fanshawe</td>
+<td align="left">Hawthorne, Nathaniel</td>
+<td align="left">28</td>
+<td align="left">en</td>
+<td align="left">NA</td>
+<td align="left">Public domain in the USA.</td>
+<td align="left">TRUE</td>
+</tr>
+</tbody>
+</table>
+<p>The full table has 769 rows of data.</p>
+</div>
+<div id="checking-for-errors" class="section level2">
+<h2>Checking for Errors</h2>
+<p>In the case of my data, the number of rows in the table shrank considerably because not every work is available on Project Gutenberg. But as the table shortens, it also inevitably grew wider, adding more columns of metadata for each work. Before things get out of hand, it’s a good place to check the data for accuracy in at least four ways:</p>
+<ol style="list-style-type: decimal">
+<li><em>Check that the <code>possibleauthor</code> column jibes with Gutenberg’s metadata.</em> Some of the listings on Wikipedia had inconsistently formatted author names suggested as part of the titles; in the function used to parse titles, I pulled out these messy author names into a secondary column called <code>possibleauthor</code>. We can use the information in this column to compare against the <code>author</code> column from Projct Gutenberg’s metadata</li>
+<li><em>Check that the works were written during the author’s (reasonably productive years of) life.</em> The metadata from Project Gutenberg and functions from <code>gutenbergr</code> make it easy to look up the years of authors in our table and compare them to the listed year of publication for each work. We can easily select and view a subset of the table showing rows falling outside an expected range.</li>
+<li><em>Check titles that have multiple listings in Project Gutenberg.</em> By default, my <strong>get_metadata()</strong> function chooses the first listing when multiple novels are returned, but this choice won’t always be the best one.</li>
+<li><em>Check that works lacking an author are the same titles that are listed on Wikipedia.</em> This step will take more work, but we can use available tools to make the work slightly more efficient.</li>
+</ol>
+<p>With this plan in mind, I wrote some functions.</p>
+<div id="check-the-possibleauthor-column" class="section level3">
+<h3>1. Check the <code>possibleauthor</code> column</h3>
+<p>The number of novels that have a <code>possibleauthor</code> entry and that are available on Project Gutenberg is fortunately manageable, so we can get a good sense of things here:</p>
+<pre class="r"><code>check_possibleauthor &lt;- function(df){
+  possibledf &lt;- df[!df$possibleauthor==&quot;&quot;,]
+  subd &lt;- possibledf[,c(1,6,2,4,7)] %&gt;%
+    filter(sapply(1:nrow(.), function(i) 
+      !grepl(possibleauthor[i], author[i])))
+  nrow(subd)
+  kable(subd)
+}
+
+check_possibleauthor(df=corpus_available)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">titles</th>
+<th align="left">guten_title</th>
+<th align="left">year</th>
+<th align="left">possibleauthor</th>
+<th align="left">author</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">The Spy</td>
+<td align="left">The Spy</td>
+<td align="left">1821</td>
+<td align="left">Cooper</td>
+<td align="left">Davis, Richard Harding</td>
+</tr>
+<tr class="even">
+<td align="left">The Awakening</td>
+<td align="left">The Awakening</td>
+<td align="left">1899</td>
+<td align="left">Chopin</td>
+<td align="left">Sharkey, Jack</td>
+</tr>
+<tr class="odd">
+<td align="left">Dawn</td>
+<td align="left">Dawn</td>
+<td align="left">1884</td>
+<td align="left">Haggard</td>
+<td align="left">Adams, H. A., Mrs.</td>
+</tr>
+<tr class="even">
+<td align="left">The Wrecker</td>
+<td align="left">The Wrecker</td>
+<td align="left">1892</td>
+<td align="left">Stevenson</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">The Whirlpool</td>
+<td align="left">The Whirlpool</td>
+<td align="left">1897</td>
+<td align="left">George Gissing</td>
+<td align="left">Gissing, George</td>
+</tr>
+<tr class="even">
+<td align="left">The Martian</td>
+<td align="left">The Martian</td>
+<td align="left">1898</td>
+<td align="left">du Maurier</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">Aliens</td>
+<td align="left">Aliens</td>
+<td align="left">1902</td>
+<td align="left">Tappan Wright</td>
+<td align="left">McFee, William</td>
+</tr>
+<tr class="even">
+<td align="left">The Inheritors</td>
+<td align="left">The Inheritors</td>
+<td align="left">1901</td>
+<td align="left">Conrad and Ford</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">Greatheart</td>
+<td align="left">Greatheart</td>
+<td align="left">1912</td>
+<td align="left">romance</td>
+<td align="left">Dell, Ethel M. (Ethel May)</td>
+</tr>
+<tr class="even">
+<td align="left">The Lost World</td>
+<td align="left">The Lost World</td>
+<td align="left">1912</td>
+<td align="left">Conan Doyle</td>
+<td align="left">Doyle, Arthur Conan</td>
+</tr>
+<tr class="odd">
+<td align="left">The Rescue</td>
+<td align="left">The Rescue</td>
+<td align="left">1920</td>
+<td align="left">Conrad</td>
+<td align="left">Sedgwick, Anne Douglas</td>
+</tr>
+</tbody>
+</table>
+<p>Some of these are obvious problems, and others can be verified by looking up individual works.</p>
+</div>
+<div id="check-book-year-against-authors-years" class="section level3">
+<h3>2. Check book year against author’s years</h3>
+<p>Pulling together data from two sources is relatively easy here:</p>
+<pre class="r"><code>get_authoryears &lt;- function(df=corpus_available,start=1,end=NA){
+  if(is.na(end)){end=nrow(df)}
+  author_table &lt;&lt;- data.frame(gutenberg_author_id=&quot;&quot;,author=&quot;&quot;,alias=&quot;&quot;,birthdate=&quot;&quot;,deathdate=&quot;&quot;,wikipedia=&quot;&quot;,aliases=&quot;&quot;,stringsAsFactors=FALSE)
+  for(work in start:end){
+    author_table[work,] &lt;&lt;- gutenberg_authors[gutenberg_authors$gutenberg_author_id==df$gutenberg_author_id[work],]
+  }
+  full_table &lt;&lt;- data.frame(df[,c(2:6)],author_table[,-6])
+  full_table$year &lt;&lt;- as.numeric(full_table$year)
+  full_table$birthdate &lt;&lt;- as.numeric(full_table$birthdate)
+  full_table$deathdate &lt;&lt;- as.numeric(full_table$deathdate)
+  
+  names(full_table)[names(full_table) == &quot;birthdate&quot;] &lt;&lt;- &quot;birth&quot;
+  names(full_table)[names(full_table) == &quot;deathdate&quot;] &lt;&lt;- &quot;death&quot;
+}
+
+check_lifespan &lt;- function(){
+  # check that the work was written within an author&#39;s lifespan
+  # first test if it was published after the author&#39;s death
+  status_after_d &lt;- grep(FALSE,full_table$year&lt;=(full_table$death+1))
+  
+  # then check if it was published before the author was 20 years old
+  status_before_b &lt;- grep(FALSE,full_table$year&gt;(full_table$birth+20))
+  
+  # combine these tests into one grouping
+  status &lt;- c(status_after_d,status_before_b)
+  
+  # find the rows that satisfy either test
+  error_table &lt;&lt;- full_table[status,c(5,1,7,9,10)]
+  
+  #check the author&#39;s age when the work was published
+  error_table$age &lt;&lt;- error_table$year-error_table$birth
+  error_table$age[error_table$year&gt;error_table$death] &lt;&lt;- &quot;†&quot;
+  
+  error_tab &lt;&lt;- error_table[,c(1,2,3,6)]
+  names(error_tab)[3] &lt;&lt;- &quot;supposed author&quot;
+}
+
+
+print_error &lt;- function(id){
+  row &lt;- grep(TRUE,row.names(error_table)==id)
+  title &lt;- error_table$guten_title[row]
+  year &lt;- error_table$year[row]
+  author &lt;- error_table$author[row]
+  birth &lt;- error_table$birth[row]
+  death &lt;- error_table$death[row]
+  
+  error &lt;- paste(&quot;*&quot;, title, &quot;* (&quot;, year, &quot;) isn&#39;t by &quot;, author, &quot; (&quot;, birth, &quot;-&quot;, death, &quot;)&quot;, sep=&quot;&quot;)
+  
+  return(error)
+}
+
+get_authoryears()
+check_lifespan()
+kable(error_tab)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">guten_title</th>
+<th align="right">year</th>
+<th align="left">supposed author</th>
+<th align="left">age</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>474</td>
+<td align="left">The Professor</td>
+<td align="right">1857</td>
+<td align="left">Brontë, Charlotte</td>
+<td align="left">†</td>
+</tr>
+<tr class="even">
+<td>559</td>
+<td align="left">Lady Susan</td>
+<td align="right">1871</td>
+<td align="left">Austen, Jane</td>
+<td align="left">†</td>
+</tr>
+<tr class="odd">
+<td>1084</td>
+<td align="left">Vandover and the Brute</td>
+<td align="right">1914</td>
+<td align="left">Norris, Frank</td>
+<td align="left">†</td>
+</tr>
+<tr class="even">
+<td>1508</td>
+<td align="left">Will Warburton</td>
+<td align="right">1905</td>
+<td align="left">Gissing, George</td>
+<td align="left">†</td>
+</tr>
+<tr class="odd">
+<td>1617</td>
+<td align="left">Marriage</td>
+<td align="right">1912</td>
+<td align="left">Ferrier, Susan</td>
+<td align="left">†</td>
+</tr>
+<tr class="even">
+<td>7</td>
+<td align="left">The Spy</td>
+<td align="right">1821</td>
+<td align="left">Davis, Richard Harding</td>
+<td align="left">-43</td>
+</tr>
+<tr class="odd">
+<td>8</td>
+<td align="left">The Pioneers</td>
+<td align="right">1823</td>
+<td align="left">Ballantyne, R. M. (Robert Michael)</td>
+<td align="left">-2</td>
+</tr>
+<tr class="even">
+<td>270</td>
+<td align="left">The Awakening</td>
+<td align="right">1899</td>
+<td align="left">Sharkey, Jack</td>
+<td align="left">-32</td>
+</tr>
+<tr class="odd">
+<td>293</td>
+<td align="left">Leonora</td>
+<td align="right">1806</td>
+<td align="left">Bennett, Arnold</td>
+<td align="left">-61</td>
+</tr>
+<tr class="even">
+<td>1673</td>
+<td align="left">Victory</td>
+<td align="right">1915</td>
+<td align="left">Del Rey, Lester</td>
+<td align="left">0</td>
+</tr>
+<tr class="odd">
+<td>1690</td>
+<td align="left">The Loom of Youth</td>
+<td align="right">1917</td>
+<td align="left">Waugh, Alec</td>
+<td align="left">19</td>
+</tr>
+</tbody>
+</table>
+<p>Only a few works turn out to have been published before an author’s life, significantly posthumously, or before what might be expected to be an author’s productive years. Working through the corpus and checking the <code>error_table</code> individually shows the following problems in relying on titles alone to perform the Gutenberg cross-reference of the Wikipedia data set:</p>
+<ol style="list-style-type: decimal">
+<li><em>Will Warburton</em> (1905) isn’t by Gissing, George (1857-1903)</li>
+<li><em>Marriage</em> (1912) isn’t by Ferrier, Susan (1782-1854)</li>
+<li><em>The Spy</em> (1821) isn’t by Davis, Richard Harding (1864-1916)</li>
+<li><em>The Pioneers</em> (1823) isn’t by Ballantyne, R. M. (Robert Michael) (1825-1894)</li>
+<li><em>The Awakening</em> (1899) isn’t by Sharkey, Jack (1931-1992)</li>
+<li><em>Leonora</em> (1806) isn’t by Bennett, Arnold (1867-1931)</li>
+<li><em>Victory</em> (1915) isn’t by Del Rey, Lester (1915-1993)</li>
+</ol>
+</div>
+<div id="check-titles-that-have-multiple-listings" class="section level3">
+<h3>3. Check titles that have multiple listings</h3>
+<p>A few of these match the error test above, but others are new:</p>
+<pre class="r"><code>sketchy_index &lt;- grep(paste0(&quot;^&quot;,
+                            paste(sketchy_titles,
+                                  collapse=&quot;$|^&quot;),
+                            &quot;$&quot;),
+                      gutenberg_metadata$title)
+
+error_table_sketchy &lt;- gutenberg_metadata[sketchy_index,1:4]
+
+get_authoryears_error &lt;- 
+  function(start=1, end=nrow(error_table_sketchy)){
+    author_table_sketchy &lt;&lt;- 
+      data.frame(gutenberg_author_id=&quot;&quot;, 
+                 author=&quot;&quot;, 
+                 alias=&quot;&quot;, 
+                 birth=&quot;&quot;, 
+                 death=&quot;&quot;,
+                 wikipedia=&quot;&quot;,
+                 aliases=&quot;&quot;,
+                 stringsAsFactors=FALSE)
+    
+    for(work in start:end){
+      author_table_sketchy[work,] &lt;&lt;- gutenberg_authors[gutenberg_authors$gutenberg_author_id==error_table_sketchy$gutenberg_author_id[work],]
+    }
+  }
+get_authoryears_error()
+# kable(author_table_sketchy[1:5,])
+# kable(error_table_sketchy)
+# length(sketchy_titles)
+# sketchy_titles
+# length(sketchy_index)
+# kable(gutenberg_metadata[1:5,])
+
+full_table_sketchy &lt;&lt;- data.frame(error_table_sketchy,
+                                  author_table_sketchy[,-6])
+  
+sketchyears &lt;- c()
+for(row in 1:nrow(full_table_sketchy)){
+  thisyear &lt;- full_table$year[full_table$guten_title==full_table_sketchy$title[row]]
+  if(length(thisyear)==0){
+    thisyear &lt;- NA
+    }
+    # message(thisyear)
+    sketchyears &lt;&lt;- c(sketchyears,thisyear)
+}
+
+full_table_sketchy$year &lt;- sketchyears
+  
+full_table_sketchy$birth &lt;- as.numeric(full_table_sketchy$birth)
+  
+full_table_sketchy$death &lt;- as.numeric(full_table_sketchy$death)
+  
+full_table_sketchy &lt;- full_table_sketchy[,c(1:4,7,8,11,9,10)]
+
+# kable(full_table_sketchy[1:5])
+
+# get_authoryears_error()
+
+sketchyages &lt;- full_table_sketchy$year - full_table_sketchy$birth
+
+# Assume that 21 is a reasonable age to publish
+sketchybad &lt;- (full_table_sketchy$year - full_table_sketchy$birth)&lt;21
+
+# Check if publication year is within reasonable bounds
+full_table_sketchy$ok &lt;- 
+  (full_table_sketchy$year - full_table_sketchy$birth) &gt;
+  20 &amp; ((full_table_sketchy$death + 2 ) &gt; 
+          full_table_sketchy$year)
+
+full_table_sketchy &lt;- full_table_sketchy[,c(10,1:9)]
+
+bad_table_sketchy &lt;- full_table_sketchy[which(full_table_sketchy$ok==FALSE),]
+
+kable(bad_table_sketchy)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">ok</th>
+<th align="right">gutenberg_id</th>
+<th align="left">title</th>
+<th align="left">author</th>
+<th align="right">gutenberg_author_id</th>
+<th align="left">alias</th>
+<th align="right">birth</th>
+<th align="right">year</th>
+<th align="right">death</th>
+<th align="left">aliases</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>4</td>
+<td align="left">FALSE</td>
+<td align="right">1818</td>
+<td align="left">The Spy</td>
+<td align="left">Davis, Richard Harding</td>
+<td align="right">181</td>
+<td align="left">NA</td>
+<td align="right">1864</td>
+<td align="right">1821</td>
+<td align="right">1916</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td>11</td>
+<td align="left">FALSE</td>
+<td align="right">5874</td>
+<td align="left">Dawn</td>
+<td align="left">Porter, Eleanor H. (Eleanor Hodgman)</td>
+<td align="right">200</td>
+<td align="left">Porter, Eleanor Hodgman</td>
+<td align="right">1868</td>
+<td align="right">1884</td>
+<td align="right">1920</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td>18</td>
+<td align="left">FALSE</td>
+<td align="right">10992</td>
+<td align="left">Cleopatra</td>
+<td align="left">Abbott, Jacob</td>
+<td align="right">2136</td>
+<td align="left">NA</td>
+<td align="right">1803</td>
+<td align="right">1889</td>
+<td align="right">1879</td>
+<td align="left">Erodore/Marianne</td>
+</tr>
+<tr class="even">
+<td>19</td>
+<td align="left">FALSE</td>
+<td align="right">12669</td>
+<td align="left">Marriage</td>
+<td align="left">Ferrier, Susan</td>
+<td align="right">4487</td>
+<td align="left">Ferrier, Susan Edmonstone</td>
+<td align="right">1782</td>
+<td align="right">1912</td>
+<td align="right">1854</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td>20</td>
+<td align="left">FALSE</td>
+<td align="right">13723</td>
+<td align="left">Leonora</td>
+<td align="left">Bennett, Arnold</td>
+<td align="right">859</td>
+<td align="left">NA</td>
+<td align="right">1867</td>
+<td align="right">1806</td>
+<td align="right">1931</td>
+<td align="left">Bennett, E. Arnold/Bennett, Enoch Arnold</td>
+</tr>
+<tr class="even">
+<td>24</td>
+<td align="left">FALSE</td>
+<td align="right">21691</td>
+<td align="left">The Pioneers</td>
+<td align="left">Ballantyne, R. M. (Robert Michael)</td>
+<td align="right">333</td>
+<td align="left">Ballantyne, Robert Michael</td>
+<td align="right">1825</td>
+<td align="right">1823</td>
+<td align="right">1894</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td>35</td>
+<td align="left">FALSE</td>
+<td align="right">34661</td>
+<td align="left">The Pioneers</td>
+<td align="left">Prichard, Katharine Susannah</td>
+<td align="right">37160</td>
+<td align="left">NA</td>
+<td align="right">1884</td>
+<td align="right">1823</td>
+<td align="right">1969</td>
+<td align="left">Prichard, Katarina Susanna/Throssell, Hugo, Mrs./Throssell, Mrs. Hugo/Prichard, Katherine Susannah</td>
+</tr>
+<tr class="even">
+<td>38</td>
+<td align="left">FALSE</td>
+<td align="right">41004</td>
+<td align="left">An Eye for an Eye</td>
+<td align="left">Le Queux, William</td>
+<td align="right">3141</td>
+<td align="left">NA</td>
+<td align="right">1864</td>
+<td align="right">1879</td>
+<td align="right">1927</td>
+<td align="left">Queux, William Le/Queux, William Tufnell Le</td>
+</tr>
+<tr class="odd">
+<td>39</td>
+<td align="left">FALSE</td>
+<td align="right">41345</td>
+<td align="left">Windsor Castle</td>
+<td align="left">Thomas, Edward</td>
+<td align="right">6876</td>
+<td align="left">NA</td>
+<td align="right">1878</td>
+<td align="right">1842</td>
+<td align="right">1917</td>
+<td align="left">Eastaway, Edward/Thomas, Philip Edward</td>
+</tr>
+</tbody>
+</table>
+<p>The table of nine texts, above, shows a few errors, which we can correct for before we begin downloading anything:</p>
+<pre class="r"><code>#Function to replace erroneous details (gutenberg_id, author, gutenberg_author_id, birth, deathdate, alias, aliases) in full_table with corresponding data from full_table_sketchy
+
+correct_data &lt;- function(badid, goodid){
+  # subset the data
+  ok_row &lt;- full_table_sketchy[full_table_sketchy$gutenberg_id==goodid,]
+  new_row &lt;- full_table[full_table$gutenberg_id==badid,]
+  
+  # redefine the correct values
+  columns &lt;- c(&quot;author&quot;,
+               &quot;gutenberg_id&quot;,
+               &quot;gutenberg_author_id&quot;,
+               &quot;birth&quot;,
+               &quot;death&quot;,
+               &quot;alias&quot;,
+               &quot;aliases&quot;)
+  new_row[columns] &lt;-  ok_row[columns]
+  
+  full_table[full_table$gutenberg_id==badid,] &lt;&lt;- new_row
+}
+
+delete_row &lt;- function(badid){
+  full_table &lt;&lt;- full_table[!full_table$gutenberg_id==badid,]
+}</code></pre>
+<p>After doing some research on these titles for which <code>gutenbergr</code> returns duplicates, I used the above functions to fix these errors with the following steps, including deleting two rows for which <code>gutenbergr</code> seemed not to have the correct version available. Then I saved a milestone just to be safe:</p>
+<pre class="r"><code>correct_data(&quot;4794&quot;,&quot;10892&quot;)
+correct_data(&quot;3118&quot;,&quot;7303&quot;)
+correct_data(&quot;13723&quot;,&quot;35638&quot;)
+correct_data(&quot;12669&quot;,&quot;35338&quot;)
+correct_data(&quot;927&quot;,&quot;31869&quot;)
+correct_data(&quot;1818&quot;,&quot;9845&quot;)
+delete_row(&quot;24913&quot;)# this novel isn&#39;t available
+delete_row(&quot;21691&quot;)# this novel isn&#39;t available
+delete_row(&quot;50834&quot;)# this novel isn&#39;t available
+# Some novels are on both lists, so get rid of each second listing
+dupe_index &lt;- duplicated(full_table$gutenberg_id)
+full_table &lt;- full_table[!dupe_index,]
+
+saveRDS(full_table,file=&quot;full_table.rds&quot;)</code></pre>
+</div>
+</div>

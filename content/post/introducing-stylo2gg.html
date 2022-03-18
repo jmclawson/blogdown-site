@@ -1,0 +1,337 @@
+---
+title: "Introducing Stylo2gg"
+author: "James Clawson"
+date: "2020-09-01"
+output: 
+  tufte::tufte_html: default
+  blogdown::html_page: default
+excerpt: "The stylo2gg package makes it easy to present stylo data using ggplot2, offering up additional useful options for annotation and understanding."
+---
+
+
+
+<p>For the past few years, I’ve been using the R package <a href="https://cran.r-project.org/web/packages/stylo/index.html">stylo</a><label for="tufte-sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"> Maciej Eder, Jan Rybicki, and Mike Kestemont, “Stylometry with R: A Package for Computational Text Analysis,” <em>R Journal</em>, vol. 8, no. 1 (2016): 107-121.</span> to study authorship in early modern texts and style in twentieth-century texts.<label for="tufte-sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-2" class="margin-toggle"><span class="sidenote"> I learned about stylometry and the stylo package from one of its authors, <a href="http://maciejeder.org">Maciej Eder</a>, by taking a class he taught at <a href="https://dhsi.org">DHSI</a> in 2017. It was a very well organized class, and I learned a <em>lot</em> in one week!</span> The package is incredibly useful for gathering word frequencies from a collection of texts and visualizing them a number of ways, and the single <code>stylo()</code> function handles everything from assaying texts to storing frequencies and visualizing the resulting data.</p>
+<p>Stylo makes it very easy to make very good visualizations from these frequency tables, but sometimes my process is not typical: combining two frequency tables into one analysis is easy using R, but it is not obvious then to visualize with stylo; dropping one text from an existing table is easy with dplyr, but then I’m impatient about seeing my results; grouping texts by some measure other than the scheme of their filenames is tempting and occasionally necessary.</p>
+<p>And I don’t understand plotting in base R graphics.</p>
+<p>I began using <a href="https://cran.r-project.org/web/packages/ggplot2/index.html">ggplot2</a><label for="tufte-sn-3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-3" class="margin-toggle"><span class="sidenote"> Hadley Wickham, <em>ggplot2: Elegant Graphics for Data Analysis</em>, Springer-Verlag, New York, 2016.</span> to plot analyses that needed intermediate steps. And since I used ggplot2 for these analyses, I also began regularly converting even my simpler explorations to ggplot2 so that my figures would look consistent. After too many manual iterations of this process—extracting a table, normalizing it, completing any intermediate analyses, reordering everything in an appropriate format, and then piping it into a visualization—it eventually <a href="https://twitter.com/jmclawson/status/1190701763306967044">dawned on me</a> how much time I was wasting by not doing everything with a function.</p>
+<p>So I wrote <a href="https://github.com/jmclawson/stylo2gg/">stylo2gg</a>.<label for="tufte-sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-4" class="margin-toggle"><span class="sidenote"> What started as just a function in a Gist is now a package that can be installed from GitHub using <a href="https://cran.r-project.org/web/packages/remotes/index.html">remotes</a> with the following command: <code>install_github("jmclawson/stylo2gg")</code></span> Using stylo it’s already easy to store frequencies of a feature set in a given corpus once, and using stylo2gg it’s easy to prepare multiple visualizations from that single measurement. Moreover, moving visualizations from base R graphics to ggplot2 opens up a range of advanced customizations and add-ons. Uses and examples of stylo2gg are included below.</p>
+<div id="showing-principal-components-analysis" class="section level2">
+<h2>Showing principal components analysis</h2>
+<p>Stylo has incredibly useful visualizations built in. The <code>stylo()</code> function itself offers options of visualizing stylometric data using techniques like principal components analysis and hierarchical clustering. As an example, here’s the code and output from rendering the eighty-five <em>Federalist Papers</em>, most of which were known to be written by Alexander Hamilton, John Jay, and James Madison (all shown categorically here by their last names), and some of which once had disputed or joint authorship (shown here by the “NA” category):</p>
+<pre class="r"><code>library(stylo)
+
+federalist_mfw &lt;- 
+  stylo(gui=FALSE,
+        corpus.dir = &quot;~/GitHub/stylo2gg/federalist/&quot;,
+        analysis.type=&quot;PCR&quot;,
+        pca.visual.flavour = &quot;symbols&quot;,
+        analyzed.features=&quot;w&quot;,
+        ngram.size=1,
+        display.on.screen=TRUE,
+        sampling=&quot;no.sampling&quot;,
+        culling.max=75,
+        culling.min=75,
+        mfw.min=900,
+        mfw.max=900)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+This visualization places each part by its frequencies of 120 of the most frequent words—chosen from among words appearing in at least three-fourths of all papers The chart shows that the texts whose authorship had once been in question, shown here in green crosses, have frequency distributions most similar to those by James Madison, shown here with red Xs.
+</p>
+<img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-1-1.png" alt="This visualization places each part by its frequencies of 120 of the most frequent words—chosen from among words appearing in at least three-fourths of all papers The chart shows that the texts whose authorship had once been in question, shown here in green crosses, have frequency distributions most similar to those by James Madison, shown here with red Xs." width="672"  />
+</div>
+<p>Unsurprisingly, the disputed and jointly-authored papers seem closest in style to those by James Madison—“unsurprisingly” because these findings match those of Frederick Mosteller and David Wallace in their 1963 study of <em>The Federalist Papers</em>.<label for="tufte-sn-5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-5" class="margin-toggle"><span class="sidenote"> “<a href="https://www.jstor.org/stable/2283270">Inference in an Authorship Problem</a>,” <em>Journal of the American Statistical Association</em>, vol. 58, no. 302 (1963): 275-309.</span> But while the analysis here uses some of the same measures they famously used, the ease and usefulness of tools like stylo means that preparing this quick visualization demanded far less time and sweat.</p>
+<p>In saving this output to a named object <code>federalist_mfw</code>, stylo makes it possible to access the frequency tables to study them in other ways. By taking advantage of this object, stylo2gg makes it very easy to try out different visualizations. Without any changed parameters, the <code>stylo2gg()</code> function will import defaults from the call used to run <code>stylo()</code>:</p>
+<pre class="r"><code>library(stylo2gg)
+federalist_mfw %&gt;% stylo2gg()</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Using selected <code>ggplot2</code> defaults for shapes and colors, the visualization created by <code>stylo2gg</code> nevertheless shows the same patterns of style, presenting a figure drawn from the same principal components. Here, the disputed papers are marked by purple diamonds, and they seem closest in style to the parts known to be by Madison, marked by blue Xs.
+</p>
+<img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-2-1.png" alt="Using selected `ggplot2` defaults for shapes and colors, the visualization created by `stylo2gg` nevertheless shows the same patterns of style, presenting a figure drawn from the same principal components. Here, the disputed papers are marked by purple diamonds, and they seem closest in style to the parts known to be by Madison, marked by blue Xs." width="672"  />
+</div>
+<p>In the simplest conversion of a stylo object, stylo2gg tries as closely as is reasonable to recreate the analytic and aesthetic decisions that went into the creation of that object, creating a chart comparing first and second principal components with axes marked by each’s distributed percentage of variation; the caption shows the feature count, feature type, culling percentage, and matrix type; and the legend is shown at the top of the graph. Stylo2gg even honors the choice from the original <code>stylo()</code> call to show principal components derived from a correlation matrix, though this isn’t the only option available.</p>
+<div id="labeling-points" class="section level3">
+<h3>Labeling points</h3>
+<p>From here, it’s easy to change options to clarify an analysis without having to call <code>stylo()</code> again. Files prepared for stylo typically follow a specific naming convention: in the case of this corpus, Federalist No. 10 is prepared in a text file called <code>Madison_10.txt</code>, indicating metadata offset by underscores, with the author name coming first and the title or textual marker coming next. Stylo already uses the first part of this metadata to apply color to different authors or class groupings of texts. Stylo2gg follows suit, but it can also choose among these aspects to apply a label. For this chart, it might make sense to replace symbols with the number of each paper it represents:</p>
+<pre class="r"><code>federalist_mfw %&gt;% 
+  stylo2gg(shapes = FALSE, 
+           labeling = 2)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+The option <code>shapes=FALSE</code> turns off the symbols that would otherwise also appear; simultaneously, the option <code>labeling=2</code> selects the second metadata element from corpus filenames—in this case the number of the specific paper—as a label for the visualization. When a chosen label consists of nothing but numbers, as it does here, the legend key changes to a number sign; if a label includes any other characters, it becomes the letter “a”, ggplot2’s default key for showing color of text.
+</p>
+<img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-3-1.png" alt="The option `shapes=FALSE` turns off the symbols that would otherwise also appear; simultaneously, the option `labeling=2` selects the second metadata element from corpus filenames---in this case the number of the specific paper---as a label for the visualization. When a chosen label consists of nothing but numbers, as it does here, the legend key changes to a number sign; if a label includes any other characters, it becomes the letter &quot;a&quot;, ggplot2's default key for showing color of text." width="672"  />
+</div>
+<p>Displaying these labels makes it possible further to study Mosteller and Wallace’s findings on the papers jointly authored by Madison and Hamilton: in this principal components analysis of 120 most frequent words, papers 18, 19, and 20 seem closer in style to Madison than to Hamilton, and Mosteller and Wallace’s work using different techniques seems to show the same finding for two of these three papers, with mixed results for number 20.</p>
+<p>If we preferred instead to label the author names, we could set <code>labeling=1</code>. If we wanted to show everything, replicating stylo’s option <code>pca.visual.flavour="labels"</code>, we can set <code>labeling=0</code>:</p>
+<pre class="r"><code>federalist_mfw %&gt;% 
+  stylo2gg(shapes = FALSE, 
+           labeling = 0)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+The option <code>labeling=0</code> shows entire file names for items in the corpus, excepting the extension. This option also turns off the legend by default, since that information is indicated.
+</p>
+<img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-4-1.png" alt="The option `labeling=0` shows entire file names for items in the corpus, excepting the extension. This option also turns off the legend by default, since that information is indicated." width="672"  />
+</div>
+</div>
+<div id="highlighting-groups" class="section level3">
+<h3>Highlighting groups</h3>
+<p>In addition to recreating some of the visualizations offered by stylo, stylo2gg takes advantage of ggplot2’s extensibility to offer additional options. If, for instance, we want to emphasize the overlap of style among the disputed papers and those by Madison, it’s easy to show a highlight of the 3rd and 4th categories of texts (corresponding to their orders on the legend):</p>
+<pre class="r"><code>federalist_mfw %&gt;% 
+  stylo2gg(shapes = FALSE, 
+           labeling = 2,
+           highlight = c(3,4))</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+The <code>highlight</code> option accepts numbers corresponding to categories shown on the legend. Highlights on principal components charts can include 1 or more categories, but highlights for hierarchical clusters can only accept one category. To draw these loops around points on a scatterplot, stylogg relies on the <a href='https://cran.r-project.org/web/packages/ggalt/index.html'>ggalt</a> package.
+</p>
+<img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-5-1.png" alt="The `highlight` option accepts numbers corresponding to categories shown on the legend. Highlights on principal components charts can include 1 or more categories, but highlights for hierarchical clusters can only accept one category. To draw these loops around points on a scatterplot, stylogg relies on the &lt;a href='https://cran.r-project.org/web/packages/ggalt/index.html'&gt;ggalt&lt;/a&gt; package." width="672"  />
+</div>
+</div>
+<div id="overlay-loadings" class="section level3">
+<h3>Overlay loadings</h3>
+<p>With these texts charted, we might want to communicate something about the underlying word frequencies that inform their placement. The <code>top.loadings</code> option allows us to show a number of words—ordered from the most frequent to the least frequent—overlaid with scaled vectors as alternative axes on the principal components chart:</p>
+<pre class="r"><code>federalist_mfw %&gt;% 
+  stylo2gg(shapes = FALSE, 
+           labeling = 2,
+           highlight = 4,
+           top.loadings = 10)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Set <code>top.loadings</code> to a number <code>n</code> to overlay loadings for the most frequent words, from 1 to <code>n</code>. This chart shows loadings and scaled vectors for the 10 most frequent words.
+</p>
+<img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-6-1.png" alt="Set `top.loadings` to a number `n` to overlay loadings for the most frequent words, from 1 to `n`. This chart shows loadings and scaled vectors for the 10 most frequent words." width="672"  />
+</div>
+<p>Alternatively, show loadings by nearest principal components, by the middle point of a given category, by a specific word, or all of the above:</p>
+<pre class="r"><code>federalist_mfw %&gt;% 
+  stylo2gg(shapes = FALSE, 
+           labeling = 2,
+           select.loadings = list(c(-4,-6),
+                                  &quot;Madison&quot;,
+                                  call(&quot;word&quot;, 
+                                       c(&quot;the&quot;, &quot;a&quot;, &quot;an&quot;))))</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+In a list form, the <code>select.loadings</code> option accepts coordinates, category names, and words. Here, <code>c(-4,-6)</code> indicates that the code should find the loading nearest to -4 on the first principal component and -6 on the second principal component; <code>"Madison"</code> indicates that the function should find coordinates at the middle of papers by Madison and then find the loading nearest those coordinates; and three articles “the,” “a,” and “an” indicate, using <code>call("word")</code>, that these specific loadings should be shown.
+</p>
+<img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-7-1.png" alt="In a list form, the `select.loadings` option accepts coordinates, category names, and words. Here, `c(-4,-6)` indicates that the code should find the loading nearest to -4 on the first principal component and -6 on the second principal component; `&quot;Madison&quot;` indicates that the function should find coordinates at the middle of papers by Madison and then find the loading nearest those coordinates; and three articles &quot;the,&quot; &quot;a,&quot; and &quot;an&quot; indicate, using `call(&quot;word&quot;)`, that these specific loadings should be shown." width="672"  />
+</div>
+</div>
+<div id="narrowing-things-down" class="section level3">
+<h3>Narrowing things down</h3>
+<p>One beauty of using a saved frequency list is that it makes it possible to select a subset from the data to inform an analysis. By counting all words that appear in 75% of the texts for this analysis, stylo prepares a frequency table of 120 words, but we can even select a subset of these using the <code>features</code> option (for selecting a specific vector of words) or the <code>num.features</code> option (for automatically selecting a given number of the most frequent words).</p>
+<p>I might, for instance, hypothesize that words shorter than 4 characters are sufficient to differentiate style in these English texts.<label for="tufte-sn-6" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-6" class="margin-toggle"><span class="sidenote"> Mosteller and Wallace write of being surprised that “high-frequency function words did the best job” (304), and their findings of this tendency in English texts have been confirmed many times over since then.</span> Using the <code>features</code> option, I might test this hypothesis by choosing a smaller subset from the full list of 120 most frequent words:</p>
+<pre class="r"><code>short_words &lt;- 
+  federalist_mfw$features.actually.used[federalist_mfw$features.actually.used %&gt;% nchar() &lt; 4]
+
+federalist_mfw %&gt;% 
+  stylo2gg(shapes = TRUE, 
+           features = short_words,
+           top.loadings = 10)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Selecting a subset of features will also cause the caption to update from “120 MFW” to “42 W,” reflecting the changed number of features and the type: they are no longer most frequent words (MFW) but are now just words (W).
+</p>
+<img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-8-1.png" alt="Selecting a subset of features will also cause the caption to update from &quot;120 MFW&quot; to &quot;42 W,&quot; reflecting the changed number of features and the type: they are no longer most frequent words (MFW) but are now just words (W)." width="672"  />
+</div>
+<p>Results here suggest that my hypothesis would have been mostly correct, as it’s possible still to see patterns in clusters. But it’s mostly harder to differentiate the styles of Hamilton and Madison when looking only at these shorter words. Interestingly, Jay’s style remains distinct in this consideration. Interesting, too, the overlay of the top ten loadings shows that papers with positive values in the second principal component in this chart—above a center line—are strongest in first-person plural features like “us” and “our” and “we.” And perhaps most interesting, just quickly looking at the top ten loadings suggests that Hamilton’s papers may have been less likely to use past-tense constructions like “was” and “had,” preferring infinitive forms marked by “to” and “be.”</p>
+<p>If instead of manually selecting features I wanted to choose a subset by number, the <code>num.features</code> option makes it possible.<label for="tufte-sn-7" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-7" class="margin-toggle"><span class="sidenote"> Currently, stylo2gg should be limited to a subset of the features originally chosen by stylo, but, since stylo also saves a much larger table of frequencies, this might change.</span></p>
+<pre class="r"><code>federalist_mfw %&gt;% 
+  stylo2gg(shapes = FALSE, 
+           labeling = federalist_mfw$table.with.all.freqs %&gt;% 
+             rownames() %&gt;% strsplit(&quot;_&quot;) %&gt;% 
+             sapply(`[`, 1) %&gt;% substr(1,1) %&gt;% 
+             paste0(&quot;.&quot;,
+                    federalist_mfw$table.with.all.freqs %&gt;% 
+                      rownames() %&gt;% strsplit(&quot;_&quot;) %&gt;% 
+                      sapply(`[`, 2)),
+           legend = FALSE,
+           highlight = 2,
+           num.features = 50)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Setting <code>num.features</code> to 50 will limit a chart to the 50 most frequent words. The caption updates to reflect this choice.
+</p>
+<img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-9-1.png" alt="Setting `num.features` to 50 will limit a chart to the 50 most frequent words. The caption updates to reflect this choice." width="672"  />
+</div>
+<p>This last visualization also shows that, in addition to a number corresponding to the metadata from a filename, the <code>labeling</code> option can also accept a vector of the same length as the number of texts. Here, I’ve elected to show the first letter of each author category, a dot, and the text’s corresponding number; additionally, I’ve turned off the legend by setting its option to <code>FALSE</code>.</p>
+</div>
+<div id="emphasizing-with-contrast" class="section level3">
+<h3>Emphasizing with contrast</h3>
+<p>By default, stylo2gg uses symbols that ought to be distinguishable when printing in gray scale. But to optimize for a situation lacking color, or to employ contrast to emphasize a particular group, use the <code>black=</code> option, along with the number of a given category.</p>
+<pre class="r"><code>federalist_mfw %&gt;% 
+  stylo2gg(black = 4)</code></pre>
+<p><img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-10-1.png" width="672"  /></p>
+</div>
+<div id="other-options-for-principal-components-analysis" class="section level3">
+<h3>Other options for principal components analysis</h3>
+<p>In addition to the options shown above, principal components analysis can be directed with a covariance matrix (<code>viz = "PCV</code>) or correlation matrix (<code>viz = "PCV</code>), and a given chart can be flipped horizontally (with <code>invert.x=TRUE</code>) or vertically (<code>invert.y=TRUE</code>). Additionally, the caption below the chart can be removed using <code>caption=FALSE</code>. Alternatively, setting <code>viz="pca"</code> will choose a minimal set of changes from which one might choose to build up selected additions: turning on captions (<code>caption=TRUE</code>), moving the legend or calling on other ggplot2 commands, adding a title (using <code>title="Title Goes Here"</code>), or other matters.</p>
+<pre class="r"><code>federalist_mfw %&gt;% 
+  stylo2gg(viz = &quot;pca&quot;) + 
+  theme(legend.position = &quot;bottom&quot;) + 
+  scale_size_manual(values = c(8.5,9,7,10)) +
+  scale_shape_manual(values = 15:18) +
+  scale_alpha_manual(values = rep(.5,4)) + 
+  labs(title = &quot;Larger, solid points make the data easier to see.&quot;,
+       subtitle = &quot;Setting alpha values is a good idea when solid points overlap.&quot;) +
+  theme(plot.title.position = &quot;plot&quot;)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Setting <code>viz=pca</code> rather than the stylo-flavored <code>viz="PCR"</code> or <code>viz="PCV"</code> prepares a minimal visualization of a principal components analysis derived from a correlation matrix. This might be a good setting to use if further customizing the figure by adding refinements provided by ggplot2 functions.
+</p>
+<img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-11-1.png" alt="Setting `viz=pca` rather than the stylo-flavored `viz=&quot;PCR&quot;` or `viz=&quot;PCV&quot;` prepares a minimal visualization of a principal components analysis derived from a correlation matrix. This might be a good setting to use if further customizing the figure by adding refinements provided by ggplot2 functions." width="672"  />
+</div>
+</div>
+</div>
+<div id="showing-hierarchical-clustering" class="section level2">
+<h2>Showing hierarchical clustering</h2>
+<p>In addition to visualizing by reducing dimensions via principal components analysis, stylo can alternatively show texts’ relationships based on their distance to each other. The resulting dendrogram shows texts in a cluster analysis, with branches splitting off from one another at points that correspond to distance: in the orientation shown below, when two texts or groups of texts seem to have greater stylistic similarity, their branches will join nearer to the right side of the chart—nearer to a distance of zero. As the texts show greater dissimilarity, their branches will connect closer to the left side of the chart.</p>
+<pre class="r"><code>stylo(gui=FALSE,
+      corpus.dir = &quot;~/GitHub/stylo2gg/federalist/&quot;,
+      custom.graph.title=&quot;Federalist Papers&quot;,
+      analysis.type=&quot;CA&quot;,
+      analyzed.features=&quot;w&quot;,
+      ngram.size=1,
+      display.on.screen=TRUE,
+      sampling=&quot;no.sampling&quot;,
+      culling.max=75,
+      culling.min=75,
+      mfw.min=900,
+      mfw.max=900)</code></pre>
+<p><img src="/blog/post/introducing-stylo2gg_files/figure-html/stylo_hc-1.png" width="672"  /></p>
+<p>Using the same <code>federalist_mfw</code> object saved earlier, stylo2gg will create a similar cluster analysis using the option <code>viz="CA"</code>:</p>
+<pre class="r"><code>federalist_mfw %&gt;% stylo2gg(viz = &quot;CA&quot;)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+To prepare dendrograms for display, stylo2gg uses <a href='https://cran.r-project.org/web/packages/dendextend/index.html'>dendextend</a>.
+</p>
+<img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-12-1.png" alt="To prepare dendrograms for display, stylo2gg uses &lt;a href='https://cran.r-project.org/web/packages/dendextend/index.html'&gt;dendextend&lt;/a&gt;." width="672"  />
+</div>
+<p>The addition of symbols to the chart allows for interpretability when printing, though these can be turned off with <code>shapes=FALSE</code>, as they can when showing PCA. In fact, many of the same options that apply to a visualization of principal components will also apply to cluster analysis:</p>
+<pre class="r"><code>federalist_mfw %&gt;% 
+  stylo2gg(viz = &quot;CA&quot;,
+           labeling = 2,
+           highlight = 4,
+           black = 3) + 
+  theme(legend.position = &quot;bottom&quot;) + 
+  scale_shape_manual(values = 15:18)</code></pre>
+<p><img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-13-1.png" width="672"  /></p>
+<div id="options-for-distance-and-linkage" class="section level3">
+<h3>Options for distance and linkage</h3>
+<p>Stylo2gg will adopt stylo’s settings for measuring distances and finding groups if they are available. If they’re not available, it will default to finding distance using the Burrows delta (<code>distance.measure="delta"</code>) and grouping texts using the Ward1 method (<code>linkage="ward.D"</code>); many options native to stylo and to R can be set for these.</p>
+</div>
+<div id="minimal-display" class="section level3">
+<h3>Minimal display</h3>
+<p>When setting <code>viz="CA"</code> or importing directly from a stylo analysis with the option set <code>analysis.type="CA"</code>, stylo2gg will try to approximate the aesthetics shown by stylo, displaying an axis of distance and an explanatory caption. These options may not be desired since relative distances are already meaningful without the axis. To show a minimal dendrogram, choose the option <code>viz="hc"</code> (for hierarchical clustering)</p>
+<pre class="r"><code>federalist_mfw %&gt;% 
+  stylo2gg(viz = &quot;hc&quot;,
+           shapes = FALSE,
+           linkage = &quot;ward.D2&quot;,
+           distance = &quot;euclidean&quot;) +
+    expand_limits(y = 0)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+This minimal dendrogram shows clusters using the Ward2 method based on Euclidean distances. If labels get clipped at the edge, consider expanding the limits using the added function shown here.
+</p>
+<img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-14-1.png" alt="This minimal dendrogram shows clusters using the Ward2 method based on Euclidean distances. If labels get clipped at the edge, consider expanding the limits using the added function shown here." width="672"  />
+</div>
+</div>
+<div id="hilighting-results-with-boxes" class="section level3">
+<h3>Hilighting results with boxes</h3>
+<p>As shown above, setting the <code>highlight</code> option to a category’s number will draw a box around the branches containing this category. Unlike with principal components visualization, only one category can be highlighted at a time on a dendrogram; nevertheless, there are a few more options available to tweak this highlighting.</p>
+<p>By default, stylo2gg will draw a single box, even if texts belonging to a category are distributed unevenly.</p>
+<pre class="r"><code>federalist_mfw %&gt;% 
+  stylo2gg(viz = &quot;hc&quot;,
+           shapes = FALSE,
+           highlight=1,
+           highlight.nudge = 0.4,
+           linkage = &quot;ward.D2&quot;,
+           distance = &quot;euclidean&quot;) +
+    expand_limits(y = 0)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Drawing a highlight box when texts are distributed widely isn’t very useful. The <code>highlight.nudge</code> option here moves the box’s edge to avoid clipping labels.
+</p>
+<img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-15-1.png" alt="Drawing a highlight box when texts are distributed widely isn't very useful. The `highlight.nudge` option here moves the box's edge to avoid clipping labels." width="672"  />
+</div>
+<p>Setting <code>highlight.single=FALSE</code> will instead draw multiple boxes while consolidating any contiguous branches:</p>
+<pre class="r"><code>federalist_mfw %&gt;% 
+  stylo2gg(viz = &quot;hc&quot;,
+           shapes = FALSE,
+           highlight=1,
+           highlight.nudge = 0.4,
+           highlight.single = FALSE,
+           linkage = &quot;ward.D2&quot;,
+           distance = &quot;euclidean&quot;) +
+    expand_limits(y = 0)</code></pre>
+<p><img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-16-1.png" width="672"  /></p>
+<p>As an alternative to categorical highlighting on a dendrogram, stylo2gg can draw boxes indicated by each text’s index number from the bottom, with the lowest text being number 1, the second-lowest text number 2, etc:</p>
+<pre class="r"><code>federalist_mfw %&gt;% 
+  stylo2gg(viz = &quot;hc&quot;,
+           shapes = FALSE,
+           highlight.box = c(6:19, 23:24, 29:63, 84:85),
+           highlight.nudge = 0.4,
+           linkage = &quot;ward.D2&quot;,
+           distance = &quot;euclidean&quot;,
+           show.zero = FALSE)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Manually indicate groupings to highlight using the <code>highlight.box</code> option. To aid in the counting, set <code>count.labels=TRUE</code>.
+</p>
+<img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-17-1.png" alt="Manually indicate groupings to highlight using the `highlight.box` option. To aid in the counting, set `count.labels=TRUE`." width="672"  />
+</div>
+</div>
+<div id="vertical-dendrograms" class="section level3">
+<h3>Vertical dendrograms</h3>
+<p>Finally, set <code>horiz=FALSE</code> to display the cluster analysis vertically instead of horizontally:</p>
+<pre class="r"><code>federalist_mfw %&gt;% 
+  stylo2gg(viz = &quot;CA&quot;, horiz = FALSE) +
+  theme(legend.position = &quot;top&quot;)</code></pre>
+<p><img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-18-1.png" width="672"  /></p>
+</div>
+</div>
+<div id="taking-advantage-of-ggplot2" class="section level2">
+<h2>Taking advantage of ggplot2</h2>
+<p>In addition to the options accommodated by stylo2gg, visualizations benefit from the conversion to the ggplot2 system over base graphics. Options like theming, transparency, and symbol shape and size behave as they do with any other ggplot2 plot, giving one access to many useful functions for communicating findings.</p>
+<pre class="r"><code>federalist_mfw %&gt;% 
+  stylo2gg() + 
+  xlim(-4.5,1) + 
+  ylim(-0.5,NA) + 
+  theme_minimal()</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Changing <code>ylim()</code> and <code>xlim()</code> allows you to zoom in on a particular region.
+</p>
+<img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-19-1.png" alt="Changing `ylim()` and `xlim()` allows you to zoom in on a particular region." width="672"  />
+</div>
+<p>Additionally, ggplot2 makes it easy to add layers, imagining new ways of communicating an idea—for example, by using density overlays to indicate how Hamilton’s typical style is distinct from the style of the disputed papers:</p>
+<pre class="r"><code>stylo2gg(federalist_mfw, &quot;pca&quot;, legend = FALSE) + 
+  scale_alpha_manual(values=rep(0, 4)) +
+  geom_density_2d(aes(color = class),
+                  show.legend = FALSE) + 
+  theme_minimal()</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+The plot created by <code>stylo2gg()</code> passes along the variable <code>class</code> used for the categorical grouping.
+</p>
+<img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-20-1.png" alt="The plot created by `stylo2gg()` passes along the variable `class` used for the categorical grouping." width="672"  />
+</div>
+<p>Most usefully, the conversion to ggplot2 allows visualizations to benefit from a universe of package add-ons like “<a href="https://github.com/thomasp85/ggforce">ggforce</a>,” which opens up many more options and customizations than could ever be considered in a single package devoted to stylometry:</p>
+<pre class="r"><code>library(ggforce)
+
+stylo2gg(federalist_mfw, &quot;pca&quot;)  +
+  geom_mark_hull(aes(fill=class, 
+                     color=class)) + 
+  geom_mark_hull(aes(group=class, 
+                     label=class, 
+                     filter=class %in% c(&quot;Madison&quot;,&quot;NA&quot;)),
+                 con.cap = 0,
+                 show.legend = FALSE)</code></pre>
+<p><img src="/blog/post/introducing-stylo2gg_files/figure-html/unnamed-chunk-21-1.png" width="672"  /></p>
+<p>Many other extensions to ggplot2 are available.<label for="tufte-sn-8" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-8" class="margin-toggle"><span class="sidenote"> A collection can be found <a href="https://exts.ggplot2.tidyverse.org/gallery/">here</a>.</span> Although they’re not all appropriate for stylometry, and although they won’t all be compatible with stylo2gg’s data structure, it’s promising to see that some like ggforce work instantly.</p>
+</div>
+<div id="section" class="section level2">
+<h2>…</h2>
+<p>Making stylo2gg did not only simplify some of the steps I needed to undertake my analyses—though it did that, too. It also provided the opportunity to get “under the hood” of the stylo package and to see how it works. As a project, making stylo2gg offered a chance to tinker as a mechanic, breaking apart and then building back up some of these stylometric methods I’d learned to use but not to appreciate: figuring out how to plot loadings on a PCA chart introduced me to eigenvalues and made me think of the data space from a different perspective; studying clustering methods led me to understand how they’re conceptualized beyond simply being called as options in a function, which in turn helped me better understand the differences they make when studying style. And preparing the code as a package in order to keep my general methodology pure, distinct from any specific use, forced me to improve as a coder.</p>
+<p>This project has been one of the most satisfying I’ve done in awhile, and I’ve been able to use it in a lot of my work over the past few years. I plan to continue using it, and hope it might be useful to others.</p>
+</div>

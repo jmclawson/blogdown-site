@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+<head>
+<title>jmclawson / blog - Untangling Principal Components</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="keywords" content="">
+<meta name="author" content="jmclawson / blog">
+<meta name="generator" content="Hugo 0.48" />
+
+  
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/base-min.css">
+
+
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/grids-responsive-min.css">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="http://jmclawson.net/blog/css/envisioned.css">
+<link rel="stylesheet" href="http://jmclawson.net/blog/css/hugo-envisioned.css">
+<link rel="stylesheet" href="http://jmclawson.net/blog/css/hugo-envisioned-override.css">
+
+</head>
+
+
+<body>
+<div id="layout" class="pure-g">
+<article class="pure-u-1">
+<header class="brand, post-brand">
+  <h1>
+    <a href="/blog">
+      <span id = "blog_logo">
+         <img src="/blog/splat.png" alt="Blog Logo" style="height: auto; width:80px">
+      </span>
+      
+    </a>
+  </h1>
+</header>
+<section>
+    <div id="top-of-post">
+        <a href="/"><i class="fa fa-chevron-left" aria-hidden="true";></i></a>
+        <h1 class="content-title">
+        
+        Untangling Principal Components
+        
+        </h1>
+        
+        
+        
+    </div>
+  <span class="content-meta">
+
+    
+       <i class="fa fa-user">&nbsp;</i><span class="author">
+         &nbsp;James Clawson</span> <br>
+    
+
+
+    
+      <i class="fa fa-calendar"></i>
+      &nbsp;Feb 1, 2019
+    
+
+    
+      &nbsp;<i class="fa fa-clock-o"></i>
+      &nbsp;7 min read
+    
+
+     <br>
+	<script type="text/javascript">
+
+	
+	function toggle_R() {
+	  var x = document.getElementsByClassName('r');
+	  if (x.length == 0) return;
+	  function toggle_vis(o) {
+	    var d = o.style.display;
+	    o.style.display = (d == 'block' || d == '') ? 'none':'block';
+	  }
+
+	  for (i = 0; i < x.length; i++) {
+	    var y = x[i];
+	    if (y.tagName.toLowerCase() === 'pre') toggle_vis(y);
+	  }
+
+	    var elem = document.getElementById("myButton1");
+	    if (elem.value === "Hide Code") elem.value = "Show Code";
+	    else elem.value = "Hide Code";
+	}
+
+	document.write('<input onclick="toggle_R();" type="button" value="Hide Code" id="myButton1"></input>')
+
+	</script>
+  </span>
+
+
+</section>
+
+
+
+<section><p>I often use Principal Components Analysis to look for relationships among things I’m studying. A single command would turn something complex into something simple, but it always seemed like something arcane among the dark arts of statistics that I would never need to try to understand. A <a href="https://juliasilge.com/blog/stack-overflow-pca/">recent explanation</a> by Julia Silge made me reconsider my stance of strategic ignorance, so I decided to explore how I might use the parts of principal components analysis I didn’t even know existed to get more out of one of my stylometric projects.</p>
+<p>To get started on anything, I use stylo<label for="tufte-sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"> Eder, M., Rybicki, J. and Kestemont, M. (2016). “<a href="https://journal.r-project.org/archive/2016/RJ-2016-007/index.html">Stylometry with R: a package for computational text analysis</a>.” <em>R Journal</em> 8(1): 107-121.</span> to save the word counts into an object I’ll call <code>results</code>:</p>
+<pre class="r"><code>library(stylo)
+results &lt;- stylo()</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+In this graphic created by the stylo package, each color signifies an author, and each symbol symbolizes a text. Proximity of two works directly corresponds to stylometric similarity of style, but the similarity here is simplified to two dimensions.
+</p>
+<img src="/blog/post/untangling_files/figure-html/stylo-real-1.png" alt="In this graphic created by the stylo package, each color signifies an author, and each symbol symbolizes a text. Proximity of two works directly corresponds to stylometric similarity of style, but the similarity here is simplified to two dimensions." width="672"  />
+</div>
+<p>Choosing “PCA” in the statistics tab in <code>stylo()</code> yields the visualization above, plotting each text against its values for the first and second principal components, PC1 on the horizontal and PC2 on the vertical. This is where I used to stop, but exactly what goes into each of these values merits further study. Below, I work through the process of understanding the data by breaking it down and building it back up.</p>
+<div id="which-features-go-into-each-component" class="section level2">
+<h2>Which features go into each component?</h2>
+<p>In the <code>results</code> object I created using <code>stylo()</code>, the list of 100 most frequent words actually measured are saved as <code>results$features.actually.used</code>, while the table of measurements for <em>all</em> words and all texts is in <code>results$table.with.all.freqs</code>. I can use the first to subset the second into a smaller table to study closer using principle components analysis with the command <code>prcomp()</code>:</p>
+<pre class="r"><code>results.subset &lt;- 
+  results$table.with.all.freqs[,results$features.actually.used]
+results.prcomp &lt;- prcomp(results.subset)</code></pre>
+<p>From here, it is easy to discover the breakdown of features for each of the extracted components. Here, for instance, is a small version of the table, with just the first 10 rows and first five components:</p>
+<table class="table table-condensed" style="width:auto;border-spacing:0.5em 0">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+PC1
+</th>
+<th style="text-align:right;">
+PC2
+</th>
+<th style="text-align:right;">
+PC3
+</th>
+<th style="text-align:right;">
+PC4
+</th>
+<th style="text-align:right;">
+PC5
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+et
+</td>
+<td style="text-align:right;">
+0.8682090
+</td>
+<td style="text-align:right;">
+0.3338737
+</td>
+<td style="text-align:right;">
+0.1313156
+</td>
+<td style="text-align:right;">
+-0.0469188
+</td>
+<td style="text-align:right;">
+-0.1075749
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+in
+</td>
+<td style="text-align:right;">
+-0.1184873
+</td>
+<td style="text-align:right;">
+-0.0555770
+</td>
+<td style="text-align:right;">
+-0.2155236
+</td>
+<td style="text-align:right;">
+-0.0961720
+</td>
+<td style="text-align:right;">
+-0.2800630
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+est
+</td>
+<td style="text-align:right;">
+-0.3121664
+</td>
+<td style="text-align:right;">
+0.7554269
+</td>
+<td style="text-align:right;">
+-0.0143093
+</td>
+<td style="text-align:right;">
+-0.1229380
+</td>
+<td style="text-align:right;">
+0.0959514
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+non
+</td>
+<td style="text-align:right;">
+-0.0441791
+</td>
+<td style="text-align:right;">
+0.2532214
+</td>
+<td style="text-align:right;">
+0.2165926
+</td>
+<td style="text-align:right;">
+0.3140298
+</td>
+<td style="text-align:right;">
+-0.3030539
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ut
+</td>
+<td style="text-align:right;">
+-0.0642116
+</td>
+<td style="text-align:right;">
+0.0843537
+</td>
+<td style="text-align:right;">
+0.1527380
+</td>
+<td style="text-align:right;">
+-0.1279598
+</td>
+<td style="text-align:right;">
+-0.2027873
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ad
+</td>
+<td style="text-align:right;">
+-0.0026583
+</td>
+<td style="text-align:right;">
+-0.0523479
+</td>
+<td style="text-align:right;">
+-0.0390218
+</td>
+<td style="text-align:right;">
+-0.1272561
+</td>
+<td style="text-align:right;">
+-0.1271762
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+qui
+</td>
+<td style="text-align:right;">
+0.0626136
+</td>
+<td style="text-align:right;">
+-0.0024452
+</td>
+<td style="text-align:right;">
+-0.0710446
+</td>
+<td style="text-align:right;">
+0.1641040
+</td>
+<td style="text-align:right;">
+-0.0997237
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+quod
+</td>
+<td style="text-align:right;">
+-0.0454967
+</td>
+<td style="text-align:right;">
+0.0250191
+</td>
+<td style="text-align:right;">
+0.1526757
+</td>
+<td style="text-align:right;">
+0.1719014
+</td>
+<td style="text-align:right;">
+-0.0600998
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+sed
+</td>
+<td style="text-align:right;">
+-0.0024576
+</td>
+<td style="text-align:right;">
+0.0335676
+</td>
+<td style="text-align:right;">
+-0.0423513
+</td>
+<td style="text-align:right;">
+0.0899022
+</td>
+<td style="text-align:right;">
+-0.1727440
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+de
+</td>
+<td style="text-align:right;">
+-0.0866566
+</td>
+<td style="text-align:right;">
+-0.0928113
+</td>
+<td style="text-align:right;">
+-0.2175700
+</td>
+<td style="text-align:right;">
+-0.1457826
+</td>
+<td style="text-align:right;">
+-0.3567579
+</td>
+</tr>
+</tbody>
+</table>
+<p>In the case of my data,<label for="tufte-mn-1" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-1" class="margin-toggle"><span class="marginnote">More generally, PCA figures out which groupings of features in a high-dimensional space account for the widest differentiation among those things being analyzed.</span> principal components analysis finds clusters of words often appearing near each other in the documents I’m studying, measuring how strong each cluster is in each document. The process then optimizes these clusters so that there’s as broad a spectrum of strengths across all documents as possible, labeling the cluster with the broadest spectrum of measurements <em>PC1</em>, the cluster with the second-broadest spectrum <em>PC2</em>, and so forth. For the default, Cartesian visualization that comes from principal components analysis (see my first chart above), PC1 is graphed to the horizontal axis, and PC2 is graphed to the vertical axis.</p>
+<p>Since it is possible to look at the tables of this data without the chart, it is possible to study it more closely. Silge’s explanation points out that ordering the first principal component by size will show which words are farthest to the left or right of the horizontal axis; words near the zero point in the middle represent the average features that aren’t strongly indicative, positively or negative, of this newly projected dimension, while words in the bottom or top of an ordered list are further left or right.</p>
+<p>If, when compared to others in the set, a given text has relatively high values of the words high on the ordered list—and simultaneously low values of those words low on the list—, that text will appear on the right half of the PCA image. Here, for instance, are the words that factor most heavily into the horizontal axis of my PCA visualization, shifting texts in my set to the left (low words) or right (high words):</p>
+<pre class="r"><code># Make it a function to repeat on different 
+# components. This function gets the data 
+# in a usable format, but it lacks styling.
+component.words &lt;- function(pc,n=12) {
+  df &lt;- as.data.frame(results.prcomp$rotation)
+  results.sorted &lt;- row.names(df[with(df, order(df[[pc]])),])
+  
+  return(list(head(results.sorted,n),
+              tail(results.sorted,n)))
+}
+
+# Make it a function to repeat on different components
+# This function calls the prior function, adding style
+results.words &lt;- function(pc,n=12) {
+  cat(&quot;For&quot;, pc, 
+      &quot;\nLow words: &quot;, component.words(pc,n)[[1]], 
+      &quot;\nHigh words: &quot;, component.words(pc,n)[[2]], 
+      &quot;\n\n&quot;)
+}
+
+# Now call the function for PC1
+results.words(&quot;PC1&quot;)</code></pre>
+<pre><code>## For PC1 
+## Low words:  est in de quae i ut hoc sunt enim id quam esse 
+## High words:  christi christum etc deum omnibus quem à qui mihi dei ac et</code></pre>
+<p>Interestingly, words from the third principal component in my results suggest that it might differentiate religious texts (below zero) from nonreligious ones (above zero):</p>
+<pre class="r"><code>results.words(&quot;PC3&quot;)</code></pre>
+<pre><code>## For PC3 
+## Low words:  dei de in à ac christi deo u deum deus i christum 
+## High words:  quid quam tam tibi et quod ut si tu me non te</code></pre>
+</div>
+<div id="which-texts-score-highly-on-each-component" class="section level2">
+<h2>Which texts score highly on each component?</h2>
+<p>Applying these considerations to the texts themselves makes it possible to study the dimensions projected on a textual basis, document by document, rather than on a basis of individual features:</p>
+<pre class="r"><code># Make it a function to repeat on different components
+# This function gets the data in a usable format, but lacks style
+component.texts &lt;- function(pc,n=10,full=TRUE) {
+  df &lt;- as.data.frame(results.prcomp$x)
+  results.sorted &lt;- row.names(df[with(df, order(df[[pc]])),])
+  
+  if(full==TRUE){
+    return(results.sorted)
+  } else {
+    return(list(head(results.sorted,n),
+                tail(results.sorted,n)))
+  }
+}
+
+# Make it a function to repeat on different components
+# This function calls the prior function, and it adds style
+results.texts &lt;- function(pc,n=10,full=FALSE){
+  cat(&quot;Extreme texts for&quot;, pc, &quot;(low to high)\n&quot;,
+      paste(component.texts(pc,n,full=FALSE)[[1]],collapse=&quot;\n &quot;),
+      &quot;\n ***\n&quot;,
+      paste(component.texts(pc,n,full=FALSE)[[2]],collapse=&quot;\n &quot;),
+      &quot;\n\n&quot;)
+  }
+
+# Make it a function to repeat on different components
+# This function combines results for two other functions
+checkit &lt;- function(pc){
+  results.words(pc,8)
+  results.texts(pc,4)
+}</code></pre>
+<p>At this point, running <code>component.texts(&quot;PC19&quot;,full=TRUE)</code> would result in the full list of texts ordered by component 19, while <code>checkit(&quot;PC19&quot;)</code> would yield both a list of words and a list of some of the extreme texts.<label for="tufte-mn-2" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-2" class="margin-toggle"><span class="marginnote">I don’t show the output here, as my data is from collaborative research in progress and isn’t wholly mine to share.</span></p>
+</div>
+<div id="whats-the-interaction-between-components" class="section level2">
+<h2>What’s the interaction between components?</h2>
+<p>Finally, if one were interested in ignoring the typical interaction between PC1 and PC2 to understand the interaction between, say, PC19 and PC20, while also understanding which features were strongest at play on each axis, that’s easily done:</p>
+<pre class="r"><code># Make it a function so it can easily be run on different components
+plotit &lt;- function(x=&quot;PC1&quot;,y=&quot;PC2&quot;,labels=FALSE,legend=TRUE){
+  library(ggplot2)
+  
+  # Make a nice label for the horizontal axis
+  hlabel &lt;- paste(x,&quot;\n&quot;,
+                 sprintf(&#39;\u2190&#39;), &quot; &quot;,
+                 paste(component.words(x,n=5)[[1]],collapse=&quot;, &quot;),
+                 &quot;...&quot;,
+                 paste(rep(&quot; &quot;,5),collapse=&quot;&quot;),
+                 &quot;|&quot;,
+                 paste(rep(&quot; &quot;,5),collapse=&quot;&quot;),
+                 &quot;...&quot;,
+                 paste(component.words(x,n=5)[[2]],collapse=&quot;, &quot;),
+                 &quot; &quot;, sprintf(&#39;\u2192&#39;),
+                 sep=&quot;&quot;)
+  
+  # make a nice label for the vertical axis
+  vlabel &lt;- paste(y,&quot;\n&quot;,
+                 sprintf(&#39;\u2190&#39;), &quot; &quot;,
+                 paste(component.words(y,n=4)[[1]],collapse=&quot;, &quot;),
+                 &quot;...&quot;,
+                 paste(rep(&quot; &quot;,5),collapse=&quot;&quot;),
+                 &quot;|&quot;,
+                 paste(rep(&quot; &quot;,5),collapse=&quot;&quot;),
+                 &quot;...&quot;,
+                 paste(component.words(y,n=4)[[2]],collapse=&quot;, &quot;),
+                 &quot; &quot;, sprintf(&#39;\u2192&#39;),
+                 sep=&quot;&quot;)
+  
+  # subset the data
+  df &lt;- as.data.frame(results.prcomp$x)
+  
+  # extract labels from files named for stylo
+  df$label &lt;- sapply(strsplit(row.names(df),&quot;_&quot;),
+                     function(x) unlist(x)[1])
+  
+  # plot it!
+  theplot &lt;- ggplot(data=df, mapping = aes(x=df[[x]], y=df[[y]], color=label)) + 
+    geom_point() +
+    xlab(hlabel) +
+    ylab(vlabel)
+  
+  # Use text labels instead of dots
+  if (labels==TRUE){
+    theplot &lt;- theplot + 
+      geom_label(mapping=aes(label=label),hjust=.5,vjust=.5)
+    legend &lt;- FALSE
+  }
+  
+  # Show or hide the legend
+  if (legend==FALSE){
+    theplot &lt;- theplot +
+      theme(legend.position=&quot;none&quot;)
+  }
+  
+  print(theplot)
+}
+
+# Now call the function
+plotit(&quot;PC19&quot;,&quot;PC20&quot;,labels=FALSE,legend=FALSE)</code></pre>
+<p><img src="/blog/post/untangling_files/figure-html/plot-pc19-pc20-1.png" width="672"  /></p>
+<p>And at this point, of course, it’s trivial to recreate that original visualization created by <code>stylo()</code>, only now including a little more context based on the words that are most indicative of each axis:</p>
+<pre class="r"><code>plotit(&quot;PC1&quot;,&quot;PC2&quot;,labels=FALSE,legend=FALSE)</code></pre>
+<p><img src="/blog/post/untangling_files/figure-html/plot-pc1-pc2-1.png" width="672"  /></p>
+<p>I can now use these functions to study my corpus using PCA more deliberately, which might hopefully shed some light on the ways the texts are differentiated.</p>
+</div>
+</section>
+<section>
+  
+  
+    <div class="comments">
+      <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "jmclawson" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </div>
+  
+
+  <footer class="page-footer">
+		<hr>
+		<ul class="page-footer-menu">
+		
+		</ul>
+
+  
+    <p>
+      Powered by <a href="https://gohugo.io">Hugo</a> and the
+      <a href="https://github.com/dandermotj/hugo-envisioned">Envisioned theme</a>.
+    </p>
+  
+
+	<div class="copyright">
+	<p>
+    
+      &copy; 2019
+    .
+    All rights reserved.
+    
+  </p>
+</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
+</section>
+</article>
+</div>
+</body>
+</html>

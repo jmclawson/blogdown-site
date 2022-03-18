@@ -1,3 +1,52 @@
-baseURL = "http://example.org/"
+baseurl = "/blog/"
 languageCode = "en-us"
-title = "My New Hugo Site"
+title = "jmclawson / blog"
+theme = "hugo-envisioned"
+googleAnalytics = ""
+disqusShortname = "jmclawson"
+ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$", ".DStore"]
+ignoreCache = "FALSE"
+
+[permalinks]
+    post = "/posts/:slug/"
+
+[[menu.main]]
+    name = "About"
+    url = "/about/"
+[[menu.main]]
+    name = "GitHub"
+    url = "https://github.com/jmclawson"
+[[menu.main]]
+    name = "Twitter"
+    url = "https://twitter.com/jmclawson"
+
+[params]
+    description = "A website built through Hugo and blogdown."
+    comments = true
+    copyrightHolder = ""
+    showPoweredBy = true
+    hidereadtime = true
+
+    # options for highlight.js (version, additional languages, and theme)
+    highlightjsVersion = "9.11.0"
+    highlightjsCDN = "//cdn.bootcss.com"
+    highlightjsLang = ["r", "yaml"]
+    highlightjsTheme = "github"
+
+    MathJaxCDN = "//cdn.bootcss.com"
+    MathJaxVersion = "2.7.1"
+    
+    backgroundcolor = "white"
+    
+    showtitle = "TRUE"
+
+    [params.logo]
+    url = "splat.png"
+    width = 76
+    height = 40
+    alt = "Logo"
+    
+    [params.banner]
+    height = 0
+    width = 0
+

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+<head>
+<title>jmclawson / blog - Selecting a Better Corpus</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="keywords" content="">
+<meta name="author" content="jmclawson / blog">
+<meta name="generator" content="Hugo 0.74.3" />
+
+  
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/base-min.css">
+
+
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/grids-responsive-min.css">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="https://jmclawson.net/blog/css/envisioned.css">
+<link rel="stylesheet" href="https://jmclawson.net/blog/css/hugo-envisioned.css">
+<link rel="stylesheet" href="https://jmclawson.net/blog/css/hugo-envisioned-override.css">
+
+  
+  <style>
+  	body.index{
+		padding-top: 6.5vw;
+		background-repeat: no-repeat;
+		background-position: center top;
+		background-size: 90% 10vw;
+  		background-image: url(/images/quartet-splatplot.png);
+		width: 65%;
+		min-width: 400px;
+		max-width: 800px;
+  	}
+	
+	.index #blog_logo {
+		display: none;
+	}
+	
+	@media all and (max-width: 550px) {
+	  body.index div.header {
+ 
+	  }
+	  body.index div.header a.deactive {
+	    text-decoration: none !important;
+	  }
+  }
+	
+	div.topmenu, ul.topmenu {
+	 
+	    background-color: white;
+	}
+	
+	.topmenu a {
+		text-decoration: underline;
+	}
+
+	a, h3 {
+	    color: #333399;
+	}
+
+	div.topmenu{
+	    margin: 0 0 20 0;
+	    padding: 0;
+	    overflow: hidden;
+		text-align: center;
+	}
+	ul.topmenu {
+	    list-style-type: none;
+	    padding: 0;
+	    overflow: hidden;
+		font-family:Futura,Helvetica Neue,Helvetica,Arial;
+		width: 100%;
+		font-size: calc(12px + 1vw);
+		line-height:140%;
+	
+	}
+
+	.topmenu li {
+	 
+	    display: inline;
+	    color: navy;
+	    text-align: center;
+	 
+		padding: 0;
+	}
+
+	.topmenu li a {
+	    padding: 1vw;
+	 
+	}
+
+	.topmenu li a:hover {
+	 
+	}
+
+	.topmenu li:hover {
+	 
+		border-top-style: solid;
+		border-top-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-width: 1px;
+	}
+	
+	body.index div.header h1, body.index h2, body.index h3, body.index h4{
+	font-family:Futura,Helvetica Neue,Helvetica,Arial;}
+	
+	div.header h1 {
+		text-align:center;
+		margin-top:0;
+		 
+		 
+		font-size:calc(12px + 5.5vw);
+		font-weight: normal;
+}
+	
+
+  	#blogpage, #blogpage:hover, #blogpage a, #blogpage a:link {
+   
+  		text-decoration: none;
+  		color: black;
+  		font-weight: bold;
+		pointer-events: none;
+  		text-decoration: none;
+  		border-top-style: none;
+  		border-bottom-style: none;
+		background-repeat: unset !important;
+  	}
+	
+	.topmenu a {
+		background: none !important;
+	}
+
+  </style>
+</head>
+
+
+<body>
+<div id="layout" class="pure-g">
+<article class="pure-u-1">
+<header class="brand, post-brand">
+  <h1>
+    <a href="/blog">
+      <span id = "blog_logo">
+         <img src="/blog/splat.png" alt="Blog Logo" style="height: auto; width:80px">
+      </span>
+      
+    </a>
+  </h1>
+</header>
+<section>
+    <div id="top-of-post">
+        <a href="/"><i class="fa fa-chevron-left" aria-hidden="true";></i></a>
+        <h1 class="content-title">
+        
+        Selecting a Better Corpus
+        
+        </h1>
+        
+        
+        
+    </div>
+  <span class="content-meta">
+
+    
+       <i class="fa fa-user">&nbsp;</i><span class="author">
+         &nbsp;James Clawson</span> <br>
+    
+
+
+    
+      <i class="fa fa-calendar"></i>
+      &nbsp;May 30, 2019
+    
+
+    
+      &nbsp;<i class="fa fa-clock-o"></i>
+      &nbsp;9 min read
+    
+
+     <br>
+	<script type="text/javascript">
+
+	
+	function toggle_R() {
+	  var x = document.getElementsByClassName('r');
+	  if (x.length == 0) return;
+	  function toggle_vis(o) {
+	    var d = o.style.display;
+	    o.style.display = (d == 'block' || d == '') ? 'none':'block';
+	  }
+
+	  for (i = 0; i < x.length; i++) {
+	    var y = x[i];
+	    if (y.tagName.toLowerCase() === 'pre') toggle_vis(y);
+	  }
+
+	    var elem = document.getElementById("myButton1");
+	    if (elem.value === "Hide Code") elem.value = "Show Code";
+	    else elem.value = "Hide Code";
+	}
+
+	document.write('<input onclick="toggle_R();" type="button" value="Hide Code" id="myButton1"></input>')
+
+	</script>
+  </span>
+
+
+</section>
+
+
+
+<section>
+
+
+<p>Not long after posting the previous blog post, <a href="https://jmclawson.net/blog/posts/selecting-a-literary-corpus-from-wikipedia/">“Selecting a Literary Corpus from Wikipedia”</a>, I realized there was better way to go about everything. Rather than hard coding the specific Wikipedia pages from which to draw titles, it’s easier to define general years and categories, and then extract from these results. So, in the spirit of the previous blog post, and with the desire to get something out before the end of May, this is a quick addendum and improvement to the methods and process of last time. As always, if you’re allergic to code, feel free to hide it using the button above; alternatively, feel free to <a href="#visualizing-the-results">skip ahead to the pretty pictures and results</a> at the end.</p>
+<p>While the previous blog post resulted in a table of 1,907 titles, this new method yields 13,334.<label for="tufte-sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"> This data is available for exploration here: <a href="https://jmclawson.net/projects/wiki-corpus.html">jmclawson.net/projects/wiki-corpus.html</a></span> In this case, bigger really is better, especially when it comes to understanding an overall picture.</p>
+<div id="getting-started" class="section level2">
+<h2>Getting started</h2>
+<p>As before, start by loading necessary packages.</p>
+<pre class="r"><code>library(rvest)
+library(dplyr)
+library(ggplot2)</code></pre>
+<p>I decided to abstract these functions into a <a href="https://gist.github.com/jmclawson/79d95f5d10f4e5abd577fc5cf6e8e6ea">gist available on Github</a>, so the next step is to load it:</p>
+<pre class="r"><code>devtools::source_gist(&quot;https://gist.github.com/jmclawson/79d95f5d10f4e5abd577fc5cf6e8e6ea&quot;)</code></pre>
+<p>With these functions loaded, start by limiting the centuries and national categories to be considered, and then gather the category pages.</p>
+<pre class="r"><code>centuries &lt;- 16:20
+nations &lt;- c(&quot;American&quot;, 
+             &quot;Australian&quot;, 
+             &quot;British&quot;, 
+             &quot;Canadian&quot;, 
+             &quot;English&quot;, 
+             &quot;Indian&quot;, 
+             &quot;Irish&quot;, 
+             &quot;New Zealand&quot;)
+
+get_cat_pages()</code></pre>
+<p>Next, step through the subcategories to collect the URLs to each.</p>
+<pre class="r"><code>get_subcat_urls()</code></pre>
+</div>
+<div id="collecting-the-data" class="section level2">
+<h2>Collecting the data</h2>
+<p>Once the structures are ready, it’s time to check to see if each page exists locally and download it if it doesn’t. As before, this process is mostly to save Wikipedia from what might become a heavy traffic load if we come back to these pages multiple times to glean the data.</p>
+<p>This process is contained by the <code>get_subcat_pages()</code> function. It’ll take some time, as it’s designed to wait a randomized length of time to avoid hitting the Wikipedia servers too hard.</p>
+<pre class="r"><code>get_subcat_pages()</code></pre>
+<p>With pages stored locally, it’s time to collect and organize the data they contain.</p>
+<pre class="r"><code>parse_subcat_pages()</code></pre>
+<p>Once the collecting processes are finished, it’s wise to take a look at the results of things collected. First up is the top part of the table of all novels.</p>
+<pre class="r"><code>head(corpus_wikipedia)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">titles</th>
+<th align="right">year</th>
+<th align="left">nation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Clara Howard</td>
+<td align="right">1801</td>
+<td align="left">American</td>
+</tr>
+<tr class="even">
+<td align="left">Equality; or, A History of Lithconia</td>
+<td align="right">1802</td>
+<td align="left">American</td>
+</tr>
+<tr class="odd">
+<td align="left">Memoirs of Carwin the Biloquist</td>
+<td align="right">1803</td>
+<td align="left">American</td>
+</tr>
+<tr class="even">
+<td align="left">Kelroy</td>
+<td align="right">1812</td>
+<td align="left">American</td>
+</tr>
+<tr class="odd">
+<td align="left">Precaution (novel)</td>
+<td align="right">1820</td>
+<td align="left">American</td>
+</tr>
+<tr class="even">
+<td align="left">Owen Chase</td>
+<td align="right">1821</td>
+<td align="left">American</td>
+</tr>
+</tbody>
+</table>
+<p>Everything looks good there, so there’s no need to modify anything. There were 13,334 titles collected from Wikipedia’s national categories. That’s a lot!</p>
+<p>Next, double check the first few rows of novels per nation per year.</p>
+<pre class="r"><code>head(nation_byyear)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">nation</th>
+<th align="right">year</th>
+<th align="right">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">American</td>
+<td align="right">1801</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">American</td>
+<td align="right">1802</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">American</td>
+<td align="right">1803</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">American</td>
+<td align="right">1812</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">American</td>
+<td align="right">1820</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">American</td>
+<td align="right">1821</td>
+<td align="right">2</td>
+</tr>
+</tbody>
+</table>
+<p>The full version of this table shows 618 entries summarizing the number of titles represented by each nation for each year. Again, everything looks good and clean.</p>
+</div>
+<div id="visualizing-the-results" class="section level2">
+<h2>Visualizing the results</h2>
+<p>After collecting the full list of data, it’s rewarding to see a quantified visualization of the titles collected. In this case, Wikipedia yielded 13,334 titles from these national categories in the range of years in question.</p>
+<pre class="r"><code>plot_all &lt;- ggplot(corpus_wikipedia, aes(x=year)) + 
+  geom_bar(aes(fill=nation)) + 
+  scale_x_continuous(breaks = c(0:12*20+1760)) + 
+  xlab(NULL) +
+  ylab(&quot;number of novels&quot;) + 
+  ggtitle(&quot;Novels from Anglophonic nations listed on Wikipedia per year&quot;) +
+  theme_bw()
+
+plot_all</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+As expected, these five corpora mostly show robust growth. During the two world wars, especially, the trend of growth shifts noticeably.
+</p>
+<img src="/blog/post/corpus-huge_files/figure-html/visualizing-1.png" alt="As expected, these five corpora mostly show robust growth. During the two world wars, especially, the trend of growth shifts noticeably." width="672"  />
+</div>
+<p>Because the magnitudes of numbers grow wildly out of proportion among the different nations, it’s helpful to drill down into the novels that are not categorized as American or British:</p>
+<pre class="r"><code>ggplot(corpus_wikipedia[!corpus_wikipedia$nation %in% c(&quot;American&quot;,&quot;British&quot;),]) + 
+  geom_bar(mapping=aes(x=year, fill=nation)) + 
+  scale_x_continuous(breaks = c(0:12*20+1760)) + 
+  xlab(NULL) +
+  ylab(&quot;number of novels&quot;) + 
+  ggtitle(&quot;Non-American, Non-British subset of Wikipedia novels&quot;) +
+  theme_bw()</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Australian, Canadian, and Indian novels are a smaller percentage of the overall corpus, but they show clear participation in global trends.
+</p>
+<img src="/blog/post/corpus-huge_files/figure-html/visualizing-nonUS-nonUK-1.png" alt="Australian, Canadian, and Indian novels are a smaller percentage of the overall corpus, but they show clear participation in global trends." width="672"  />
+</div>
+<p>Looking at this chart, we notice immediately that some nations are missing. At the beginning of the process, we told our functions that we were interested in the following categories:</p>
+<pre class="r"><code>nations</code></pre>
+<pre><code>## [1] &quot;American&quot;    &quot;Australian&quot;  &quot;British&quot;     &quot;Canadian&quot;    &quot;English&quot;    
+## [6] &quot;Indian&quot;      &quot;Irish&quot;       &quot;New Zealand&quot;</code></pre>
+<p>Our final data is lacking in novels in the Wikipedia categories of English, Irish and New Zealand. These omissions come down to inconsistencies in Wikipedia’s category pages, with the category page for <a href="https://en.wikipedia.org/wiki/Category:New_Zealand_novels">New Zealand novels</a>, for instance, lacking years.</p>
+<p>We also need to be aware of discrepancies in the novels themselves. While the national categories were chosen to include Anglophonic nations, not all of the novels in the data set will be written in English, as the list of titles of Indian novels suggests.<label for="tufte-sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-2" class="margin-toggle"><span class="sidenote"> Figuring out which among these are written in English will take time for research beyond the scope of this blog posting.</span></p>
+<pre class="r"><code>head(corpus_wikipedia[corpus_wikipedia$nation==&quot;Indian&quot;,])</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">titles</th>
+<th align="right">year</th>
+<th align="left">nation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>13163</td>
+<td align="left">The English Teacher</td>
+<td align="right">1945</td>
+<td align="left">Indian</td>
+</tr>
+<tr class="even">
+<td>13164</td>
+<td align="left">All About H. Hatterr</td>
+<td align="right">1948</td>
+<td align="left">Indian</td>
+</tr>
+<tr class="odd">
+<td>13165</td>
+<td align="left">Randidangazhi</td>
+<td align="right">1948</td>
+<td align="left">Indian</td>
+</tr>
+<tr class="even">
+<td>13166</td>
+<td align="left">Sivagamiyin Sapatham</td>
+<td align="right">1948</td>
+<td align="left">Indian</td>
+</tr>
+<tr class="odd">
+<td>13167</td>
+<td align="left">Vaishali ki Nagarvadhu</td>
+<td align="right">1948</td>
+<td align="left">Indian</td>
+</tr>
+<tr class="even">
+<td>13168</td>
+<td align="left">Gunahon Ka Devta (novel)</td>
+<td align="right">1949</td>
+<td align="left">Indian</td>
+</tr>
+</tbody>
+</table>
+<p>Finally, this global corpus allows for a global understanding of some of the trends suggested in the previous corpus, limited to British and American texts.</p>
+<div id="world-war-1" class="section level3">
+<h3>World War 1</h3>
+<p>The smaller set of titles allowed for a consideration only of novels categorized as British and American. A global context should better visualize the impact of World War 1.</p>
+<pre class="r"><code>ww1 &lt;- ggplot(corpus_wikipedia[corpus_wikipedia$year %in% 1905:1925,],
+       aes(x=year)) + 
+  geom_rect(aes(xmin=1914,xmax=1918.4,ymin=-Inf,ymax=Inf),alpha=0.03,fill=&quot;pink&quot;) +
+  geom_bar() + 
+  scale_x_continuous(breaks = c(0:9*2+1906)) + 
+  xlab(NULL) +
+  ylab(&quot;number of novels&quot;) + 
+  ggtitle(&quot;Wikipedia&#39;s listing of novels during WW1&quot;) + 
+  theme_bw()
+
+ww1 + 
+  geom_smooth(data=corpus_byyear[corpus_byyear$year %in% 1905:1925,],
+              mapping=aes(y=count,x=year),
+              color=&quot;red&quot;) +
+  geom_label(aes(x=1916.2, y=5),
+             label=&quot;World War I\n7/1914 - 11/1918&quot;,
+             color=&quot;red&quot;)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Trendlines continue as before, even with a corpus selected more broadly.
+</p>
+<img src="/blog/post/corpus-huge_files/figure-html/ww1-1.png" alt="Trendlines continue as before, even with a corpus selected more broadly." width="672"  />
+</div>
+<p>The chart looks very similar to the previous chart including only American and British novels. Breaking it down into constituent parts makes it easy to see why:</p>
+<pre class="r"><code>ww1 + 
+  geom_bar(aes(fill=nation)) + 
+  facet_wrap( ~ nation, ncol=2) +
+  scale_x_continuous(breaks = c(0:6*3+1906)) + 
+  theme_bw() + 
+  theme(legend.position = &quot;none&quot;) +
+  ggtitle(&quot;Only American and British texts contribute to WW1&#39;s downward trend&quot;)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Not every national literature has enough data in Wikipedia’s listings to offer much to an understanding.
+</p>
+<img src="/blog/post/corpus-huge_files/figure-html/ww1-b-1.png" alt="Not every national literature has enough data in Wikipedia's listings to offer much to an understanding." width="672"  />
+</div>
+<p>It turns out that only American and British texts really contribute to the downward trendline of Wikipedia’s novels listed during World War 1.</p>
+</div>
+<div id="world-war-2" class="section level3">
+<h3>World War 2</h3>
+<p>Unlike the previous set of titles, this bigger list includes works published through the second world war, too. The data show a similar decline in the listing of wartime novels:</p>
+<pre class="r"><code>ww2 &lt;- ggplot(corpus_wikipedia[corpus_wikipedia$year %in% 1931:1951,],
+       aes(x=year)) + 
+  geom_rect(aes(xmin=1939,xmax=1945,ymin=-Inf,ymax=Inf),alpha=0.03,fill=&quot;pink&quot;) +
+  geom_bar() + 
+  scale_x_continuous(breaks = c(0:11*2+1931)) + 
+  xlab(NULL) +
+  ylab(&quot;number of novels&quot;) + 
+  ggtitle(&quot;Wikipedia&#39;s listing of novels during WW2&quot;) + 
+  theme_bw()
+
+ww2 + 
+  geom_smooth(data=corpus_byyear[corpus_byyear$year %in% 1931:1951,],
+              mapping=aes(y=count,x=year),
+              color=&quot;red&quot;) +
+  geom_label(aes(x=1942, y=10),
+             label=&quot;World War 2\n9/1939 - 9/1945&quot;,
+             color=&quot;red&quot;)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+World War 2 seems to have a similar effect on the data. It is unclear whether this shift in data is caused by declining publication rates, by low enduring significance of works published during the war years, or by competing interests of Wikipedia editors.
+</p>
+<img src="/blog/post/corpus-huge_files/figure-html/ww2-1.png" alt="World War 2 seems to have a similar effect on the data. It is unclear whether this shift in data is caused by declining publication rates, by low enduring significance of works published during the war years, or by competing interests of Wikipedia editors." width="672"  />
+</div>
+<p>Breaking it down by national output is only slightly more revealing than the data of World War 1:</p>
+<pre class="r"><code>ww2 + 
+  geom_bar(aes(fill=nation)) + 
+  facet_wrap( ~ nation, ncol=2) +
+  scale_x_continuous(breaks = c(0:6*4+1931)) + 
+  theme_bw() + 
+  theme(legend.position = &quot;none&quot;) +
+  ggtitle(&quot;Four of the five groups contribute to WW2&#39;s downward trend&quot;)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+National data shows slightly more effect during World War 2 than it did during World War 1.
+</p>
+<img src="/blog/post/corpus-huge_files/figure-html/ww2-b-1.png" alt="National data shows slightly more effect during World War 2 than it did during World War 1." width="672"  />
+</div>
+<p>Unlike the case in the first world war, the second shows Australian and Canadian texts contributing to the global decline in the numbers of titles listed, albeit in a very minor way when put into the context of American and British works. For understandable reasons, Indian novels aren’t categorized on Wikipedia until 1945.</p>
+</div>
+<div id="international-patterns" class="section level3">
+<h3>International patterns</h3>
+<p>Having considered the world at war, it may be beneficial to zoom out once again in hopes of making sense of the growth charts for all national literatures. For this comparison, it makes sense to use dissimilar scales among the charts, so that each facet is consistent only within itself; in this way, the trends of national growth—rather than the absolute numbers—can be compared</p>
+<pre class="r"><code>plot_all + 
+  facet_wrap( ~ nation, ncol=2, scales=&quot;free&quot;) +
+  ggtitle(&quot;National growth charts (inconsistent scales)&quot;) +
+  theme_bw() +
+  theme(legend.position = &quot;none&quot;,
+        axis.text.x = element_text(angle = 90,
+                                         hjust = 1,
+                                         vjust=0.5)) +
+  ylab(NULL)</code></pre>
+<p><img src="/blog/post/corpus-huge_files/figure-html/international-patterns-1.png" width="672"  /></p>
+<p>Of these, the trend for Canadian novels looks most similar to those of American and British novels, growing mostly consistently over time. On the contrary, Indian novels seem poorly represented on Wikipedia, so it probably doesn’t make sense to make sense out of this chart. Meanwhile, Australian novels show an interesting trend of positive growth until around 1960, with a change in direction until a nadir around 1980. I’m not sure what was happening in Australia at this time, but it would probably warrant further attention.</p>
+</div>
+<div id="titular-words" class="section level3">
+<h3>Titular words</h3>
+<p>At the moment, the data frame includes the titles, nation, and publication years from these 13,334 novels. Without the texts themselves, further options for exploration are limited, but it might be fun to peek at trends in the novel titles. After pulling together all the 42,305(!) words from the titles, it’s easy to filter out stop words and find the most common among those that remain:</p>
+<p><img src="/blog/post/corpus-huge_files/figure-html/word-cloud-1.png" width="672"  /></p>
+<p>This cloud of the top 60 words popular in 13,334 titles seems to reveal a lot. Surprisingly, “Oz” and “Conan” make appearances. Otherwise, novelists from this period show a preference for extremes of black and white, of light and dark. Many explore mysteries and themes of death and murder, life and war. And many devote themselves to questions of time, family, the world and humanity. (Or, as is more likely the case, does “man” here reflect a literary fixation on the masculine?)</p>
+<p>Finally, comparing the counts of words per title with the publication year shows a greater trend:</p>
+<p><img src="/blog/post/corpus-huge_files/figure-html/title-lengths-1.png" width="672"  /></p>
+<p>Even without a rigorous analysis, the chart shows that, after a slow rise from 1800 until around 1900, the number of words in titles has been on a slight decline since about 1950, especially among British and American texts, and that it’s always been low for Indian novels. At least some of this decline may likely be attributed to the falling out of favor of the double-barrelled <em>Title: or, Subtitle</em> format.</p>
+<p><strong>Update:</strong> My hunch about subtitles seems incorrect. On one hand, subtitled novels indeed have longer titles. On that same hand, there really is a decline of the prevalence of subtitles, at least within this limited corpus. But juxtaposing title lengths of subtitled and unsubtitled works emphasizes that the trend toward shorter titles is generally followed by novels in both groups:</p>
+<div class="figure">
+<p class="caption marginnote shownote">
+Although novels increasingly eschew subtitles, the role of subtitles is marginal to the overall trend of shortening title lengths.
+</p>
+<img src="/blog/post/corpus-huge_files/figure-html/unnamed-chunk-1-1.png" alt="Although novels increasingly eschew subtitles, the role of subtitles is marginal to the overall trend of shortening title lengths." width="672"  />
+</div>
+<p>A larger data set is necessary for testing this kind of a hunch—or even for having it, regardless of how wrong it turns out to be.</p>
+</div>
+</div>
+<div id="section" class="section level2">
+<h2> </h2>
+</div>
+<div id="conclusions" class="section level2">
+<h2>Conclusions</h2>
+<p>Wikipedia still isn’t perfect, but it’s a great way to collect a good-sized list of titles. And the methods in this blog post do so more robustly than those in the previous post.</p>
+<p>As always, save everything to external files at the end to have a milestone to start back from another time..<label for="tufte-mn-1" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-1" class="margin-toggle"><span class="marginnote">My files are available for download here: <a href="http://jmclawson.net/blog/post/corpus-huge_files/corpus_wikipedia.rds">corpus_wikipedia.rds</a>, <a href="http://jmclawson.net/blog/post/corpus-huge_files/corpus_wikipedia.csv">corpus_wikipedia.csv</a></span></p>
+<pre class="r"><code>saveRDS(corpus_wikipedia,file=&quot;corpus_wikipedia.rds&quot;)
+write.csv(corpus_wikipedia,file=&quot;corpus_wikipedia.csv&quot;, row.names=FALSE)</code></pre>
+<p>Sometime soon, I hope to write up my method for actually <em>getting</em> (some of) these texts, so it’ll be good to be able to start directly from a list of titles.</p>
+</div>
+</section>
+<section>
+  
+  <footer class="page-footer">
+		<hr>
+		<ul class="page-footer-menu">
+		
+		</ul>
+
+  
+    <p>
+      Powered by <a href="https://gohugo.io">Hugo</a> and the
+      <a href="https://github.com/dandermotj/hugo-envisioned">Envisioned theme</a>.
+    </p>
+  
+
+	<div class="copyright">
+	<p>
+    
+      &copy; 2020
+    .
+    All rights reserved.
+    
+  </p>
+</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
+</section>
+</article>
+</div>
+</body>
+</html>

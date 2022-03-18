@@ -1,0 +1,528 @@
+---
+title: "Word Vector Utilities"
+author: "James Clawson"
+date: "2019-08-12"
+output: 
+  tufte::tufte_html: default
+  blogdown::html_page: default
+excerpt: "The wordVectors package from Ben Schmidt and templates from the Women Writers Project have been very useful as I begin doing work with word vector embeddings. To simplify some things and to help with exploring results, I wrote some utility functions, which this post explains how to use."
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "~/GitHub/blogdown-site/temp/w2v-utilities")
+# knitr::opts_chunk$set(cache = FALSE)
+library(knitr)
+```
+
+```{r old-gist, message=FALSE, warning=FALSE, include=FALSE}
+library(tidyverse)
+library(tidytext)
+library(dplyr)
+library(reshape2)
+library(wordVectors)
+library(ggplot2)
+
+#######################
+## Modeling a Corpus
+
+# This process for preparing and modeling the corpus is adapted from Women Writers Project's template_word2vec.Rmd
+# These adaptations should allow for for preservation of modeling settings to aid in reproducibility
+# After training the model, recall its setting parameters by exploring the object's attributes.
+# Example 1: attributes(w2vModel)$window
+# Example 2: attributes(w2vModel)$negative_samples
+# Example 3: attributes(w2vModel)$vectors
+
+readTextFiles <- function(file, path2file) {
+  message(file)
+  rawText = paste(scan(file, sep="\n", what="raw", strip.white = TRUE))
+  output = tibble(filename=gsub(path2file, "", file), text=rawText) %>% 
+    group_by(filename) %>% 
+    summarise(text = paste(rawText, collapse = " "))
+  return(output)
+}
+
+# If the name of the folder with your corpus differs from your model name, be sure to set source.dir
+prep_model <- function(model="w2vModel",
+                       lowercase=TRUE,
+                       bundle_ngrams=1,
+                       source.dir=NULL){
+  modelInput <- paste0("data/",model,".txt")
+  modelCleaned <- paste0("data/",model,"_cleaned.txt")
+  if (is.null(source.dir)) {source.dir=paste0("data/",model)}
+  
+  if (!file.exists(modelInput)){
+    fileList <- list.files(source.dir,full.names = TRUE) 
+    
+    combinedTexts <- tibble(filename=fileList) %>% 
+      group_by(filename) %>% 
+      do(readTextFiles(.$filename, source.dir))
+    
+    combinedTexts$text %>% write_lines(modelInput)
+  } else {message("'", getwd(), "/", 
+              modelInput, 
+              "' already exists.")}
+  
+  if (!file.exists(modelCleaned)){
+    prep_word2vec(origin=modelInput,
+                  destination=modelCleaned,
+                  lowercase=lowercase,
+                  bundle_ngrams=bundle_ngrams)
+  } else {message("'", getwd(), "/", 
+              modelCleaned, 
+              "' already exists.")}
+}
+
+# For later recall, this function saves a metadata_model.Rdata file beside the model.bin in your data folder
+train_model <- function(model="w2vModel",
+                        vectors=100, 
+                        window=6, 
+                        iter=10, 
+                        negative_samples=15,
+                        threads=3){
+  if(!exists(".Random.seed")) set.seed(NULL)
+  modelSeed <- .Random.seed
+  modelBin <- paste0("data/", model, ".bin")
+  modelInput <- paste0("data/", model, ".txt")
+  modelCleaned <- paste0("data/", model, "_cleaned.txt")
+  if (!file.exists(modelBin)) {
+    the_model <- train_word2vec(
+      modelCleaned,
+      output_file=modelBin,
+      vectors=vectors,
+      threads=threads,
+      window=window, iter=iter, negative_samples=negative_samples
+    )
+    # This metadata gets lost after first run, so store it
+    attributes(the_model)$vectors <- vectors
+    attributes(the_model)$window <- window
+    attributes(the_model)$iter <- iter
+    attributes(the_model)$negative_samples <- negative_samples
+    attributes(the_model)$seed <- modelSeed
+    model_metadata <- c("vectors"=vectors, 
+                        "window"=window, 
+                        "iter"=iter,
+                        "negative_samples"=negative_samples,
+                        "seed"=modelSeed)
+    save(model_metadata,file=paste0("data/metadata_",
+                                    model,
+                                    ".Rdata"))
+    # Save this model in a global object
+    assign(model, the_model, envir = .GlobalEnv)
+  } else {
+    the_model <- read.vectors(modelBin)
+    meta_filename <- paste0("data/metadata_", model, ".Rdata")
+    if (file.exists(meta_filename)){
+      load(file=meta_filename)
+      
+      attributes(the_model)$vectors <- model_metadata["vectors"]
+      attributes(the_model)$window <- model_metadata["window"]
+      attributes(the_model)$iter <- model_metadata["iter"]
+      attributes(the_model)$negative_samples <- model_metadata["negative_samples"]
+      attributes(the_model)$seed <- model_metadata["seed"]
+    }
+    assign(model, the_model, envir = .GlobalEnv)
+  }
+}
+
+#######################
+## Managing Results
+
+# The get_siml() function returns distances between one word 'x' and a vector of words 'y' for model 'wem'
+# Example: get_siml(w2vModel, "salty", c("food", "ocean", "attitude", "air"))
+
+get_siml <- function(wem, x, y){
+  sapply(y, function(z) {
+    cosineSimilarity(wem[[x]],
+                     wem[[z]]) %>%
+    round(9)
+  })
+}
+
+# The make_siml_matrix() function returns a matrix of distances between two vectors of words 'x' and 'y' in model 'wem'
+# Example: make_siml_matrix(w2vModel, c("salty", "sweet", "fresh"), c("food", "ocean", "attitude", "air"))
+
+make_siml_matrix <- function(wem, x, y){
+  dis_col <- read.table(text="",
+                        colClasses="double",
+                        col.names = y)
+  for (each in x){
+    dis_col[each,] <- wem %>% 
+      get_siml(each, y) %>% 
+      data.frame() %>% 
+      t()
+  }
+  as.matrix(dis_col) %>% t()
+}
+
+# The scale_matrix() function scales values in a matrix, amplifying the signal in each row and column
+# Example 1: scale_matrix(my_matrix)
+# Example 2: make_siml_matrix(w2vModel, my_adj, my_nouns) %>% scale_matrix()
+
+scale_matrix <- function(x, diagonal=TRUE){
+  if (!diagonal){x[x==1] <- NA}
+  # scale each column 0 to 1
+  scale_cols <- x %>% 
+    apply(1, function(x) {
+      sapply(x, function(y) {
+        suppressWarnings((y-min(x, na.rm=TRUE))/(max(x, na.rm=TRUE)-min(x, na.rm=TRUE)))
+      })
+    }) %>% 
+    as.matrix()
+
+  # scale each row 0 to 1
+  scale_rows <- x %>% 
+    apply(2, function(x) {
+      sapply(x, function(y) {
+        suppressWarnings(y-min(x, na.rm=TRUE))/(max(x, na.rm=TRUE)-min(x, na.rm=TRUE))
+      })
+    }) %>% 
+    as.matrix() %>% 
+    t()
+  
+  # add these matrices together
+  scale_join <- scale_cols + scale_rows
+  return(t(scale_join))
+}
+
+#######################
+## Mapping Proximities
+
+# For cosine_heatmap(), set x and y to words you'd like to compare, distance-wise, along x and y axes.
+# For instance, x=c("salty","sweet","fresh"), y=c("food","ocean","air") or x=my_flavors, etc.
+# Try setting 'labeled' to "title" or "simple"; toggle 'values' to TRUE or FALSE
+
+# Example 1: cosine_heatmap(w2vModel, my_adj, my_nouns)
+# Example 2: cosine_heatmap(w2vModel, my_words, my_words)
+
+cosine_heatmap <- function(wem, x, y, 
+                           labeled="simple",
+                           round=2,
+                           legend=TRUE,
+                           values=TRUE,
+                           redundant=TRUE){
+  if (!identical(x, y)){
+    if (!redundant){
+      redundant <- TRUE
+      cat("Values for 'x' and 'y' don't match. Setting 'redundant' to TRUE.")
+    }
+  }
+  
+  the_matrix <- make_siml_matrix(wem, x, y)
+  
+  if (!redundant){
+    the_matrix[upper.tri(the_matrix)] <- NA
+    the_matrix <- the_matrix %>% melt(na.rm = TRUE)
+  } else {
+    the_matrix <- the_matrix %>% melt() 
+  }
+  
+  the_plot <- the_matrix %>% 
+    ggplot(aes(x=Var2, y=reorder(Var1, desc(Var1)), fill=value)) + 
+    geom_tile(color="white") + 
+    scale_fill_gradient2(low = "blue", 
+                         high = "red", 
+                         mid = "white", 
+                         midpoint = 0, 
+                         limit = c(-1,1),
+                         name="Similarity") + 
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, 
+                                     vjust = 1, 
+                                     size = 12, 
+                                     hjust = 1),
+          panel.grid.major = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank(),
+          axis.ticks = element_blank())
+  if(values){
+    the_plot <- the_plot + 
+      geom_text(aes(label=round(value,round)), color="black")
+    
+    legend <- FALSE
+  }
+  if(labeled=="title"){
+    the_plot <- the_plot +
+      labs(title=paste0("Comparing '",
+                        deparse(substitute(y)),
+                        "' by '",
+                        deparse(substitute(x)),
+                        "' in ",
+                        deparse(substitute(wem))),
+           x=element_blank(),
+           y=element_blank())
+  } else if (labeled=="simple") {
+    the_plot <- the_plot + 
+      labs(title=deparse(substitute(wem)),
+           x=element_blank(),
+           y=element_blank())
+  } else {
+    the_plot <- the_plot + 
+      labs(title=deparse(substitute(wem)),
+           x=deparse(substitute(x)),
+           y=deparse(substitute(y)))
+  }
+  if (!legend) {
+    the_plot <- the_plot + 
+      guides(fill=FALSE)
+  }
+  the_plot
+}
+
+# The amplified_heatmap() function merely amplifies signals it finds; it doesn't validate these signals.
+# Try setting 'labeled' to "title" or "simple".
+
+# Example 1: amplified_heatmap(w2vModel, my_adj, my_nouns)
+# Example 2: amplified_heatmap(w2vModel, my_words, my_words)
+
+amplified_heatmap <- function(wem, x, y,
+                              labeled="simple",
+                              legend=TRUE,
+                              diagonal=TRUE,
+                              redundant=TRUE){
+  if (!identical(x, y)){
+    if (!redundant){
+      redundant <- TRUE
+      cat("Values for 'x' and 'y' don't match. Setting 'redundant' to TRUE.")
+    }
+    }
+  if (!redundant){diagonal <- TRUE}
+  the_matrix <- make_siml_matrix(wem, x, y) %>% 
+    scale_matrix(diagonal)
+  
+  if (!redundant){
+    the_matrix[upper.tri(the_matrix)] <- NA
+    the_matrix <- the_matrix %>% melt(na.rm = TRUE)
+  } else {
+    the_matrix <- the_matrix %>% melt() 
+  }
+  
+  the_plot <- the_matrix %>% 
+    ggplot(aes(x=Var2, y=reorder(Var1, desc(Var1)), fill=value)) + 
+    geom_tile(color="white") + 
+    scale_fill_gradient2(low = "blue", 
+                         high = "red", 
+                         mid = "white", 
+                         midpoint = 1, 
+                         limit = c(0, 2),
+                         name=element_blank(),
+                         breaks=c(0, 2),
+                         labels=c("far", "near")) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, 
+                                     vjust = 1, 
+                                     size = 12, 
+                                     hjust = 1),
+          panel.grid.major = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank(),
+          axis.ticks = element_blank()) +
+    if(labeled=="title"){
+      labs(title=paste0("Comparing '",
+                        deparse(substitute(y)),
+                        "' by '",
+                        deparse(substitute(x)),
+                        "' in ",
+                        deparse(substitute(wem))),
+           x=element_blank(),
+           y=element_blank())
+    } else if (labeled=="simple") {
+      labs(title=deparse(substitute(wem)),
+           x=element_blank(),
+           y=element_blank())
+    } else {
+      labs(title=deparse(substitute(wem)),
+           x=deparse(substitute(x)),
+           y=deparse(substitute(y)))
+    }
+  if (!legend){
+    the_plot <- the_plot + 
+      guides(fill=FALSE)
+  }
+  the_plot
+}
+
+```
+
+<p style="border: 1px solid gray; padding: .75em; border-radius: 3px; background-color: #FFFFCF;">
+Substantial changes to these functions are explained here: [jmclawson.net/blog/posts/updates-to-word-vector-utilities/](https://jmclawson.net/blog/posts/updates-to-word-vector-utilities/)
+</p>
+
+This July, I was very fortunate to be a participant at the [Word Vectors for the Thoughtful Humanist](https://wwp.northeastern.edu/blog/word-vectors-thoughtful-humanist/) workshop, organized by the Women Writers Project at Northeastern University and funded by the NEH. Sarah Connell and Julia Flanders, along with Laura Johnson, Ashley Clark, Laura Nelson, Syd Bauman, and others, guided us through introduction, discussion, and practical application of word vector embeddings. I left Boston with a new understanding of some tricky concepts, a new sense of how I might use these techniques in my work, and a new network of workshop participants and leaders to continue learning from and with. The whole experience far exceeded my expectations, and the travel funding they offered made my participation possible.^[In case it's not obvious from the subdued tone here, I recommend it very highly! [Visit their website](https://www.wwp.northeastern.edu/outreach/seminars/neh_wem.html) to see details about attending one of the remaining three workshops.]
+
+While we began by using models that the workshop leaders built for us in the months leading up to the workshop, we also created our own models using Ben Schmidt's [wordVectors package](https://github.com/bmschmidt/wordVectors) and the RMarkdown files provided by the Women Writers Project, ["Word Vectors Intro"](https://github.com/NEU-DSG/wwp-public-code-share/blob/master/WordVectors/introduction_word2vec.Rmd) and ["Word Vectors Template"](https://github.com/NEU-DSG/wwp-public-code-share/blob/master/WordVectors/template_word2vec.Rmd). Expanding on what I learned from the workshop, I've since standardized some of my workflow in the form of utility functions, which I'm oversharing in this post. These functions can be loaded with the following line in RStudio:^[The gist is available [here](https://gist.github.com/jmclawson/21c6a40c78fd66d708bec45d5c0b52e2). In order to load it remotely, the `devtools` package will need to be installed if it's not yet on the system, but it's also possible to paste the source into a local file.]
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, cache=FALSE, include=TRUE, echo=TRUE}
+devtools::source_gist("21c6a40c78fd66d708bec45d5c0b52e2")
+```
+
+## Preparing and Modeling a Corpus
+The Women Writers Project's template files walk through the process for preparing and processing a corpus to train a model, explaining some best practices along the way. While training multiple models for different subsections of my corpus, I kept losing track of where I was in the process, so I boiled these things down from about sixteen lines in the template to two functions.
+
+Before doing anything in R,^[Well, it's a good idea first to double check the working directory in R using `getwd()`.] it's necessary to have the corpus materials organized in a way that the scripts know how to understand. Outside of R, organize files the following way:
+
+1. Within the working directory, create a subdirectory called `data`.
+2. Within that `data`  directory, create a subdirectory named `YourModelName`, giving it whatever name will be used for the model. Keep in mind, this name will persist into future steps, so name it something short, meaningful, and useful.
+3. Save the corpus files as plain text files within this `YourModelName` directory. 
+
+### `prep_model()`
+Once text files are organized accordingly, go back into RStudio, load the gist using the above `source_gist()` command, and then prepare each corpus using the command `prep_model(model="YourModelName")`, using whatever model name chosen for the directory, above.^[For these examples, I'm using the sample corpus the Women Writers Project makes available [here](https://github.com/NEU-DSG/wwp-public-code-share/tree/master/WordVectors/data/WomensNovels), and I'm naming my model `WomensNovels`.]
+
+```{r include=FALSE, cache=TRUE}
+setwd("~/GitHub/blogdown-site/temp/w2v-utilities/")
+prep_model(model="WomensNovels")
+train_model(model="WomensNovels")
+```
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+prep_model("WomensNovels")
+```
+
+This first command is nothing more than a wrapper simplifying six lines from the WWP template. In the `data` subdirectory, it will save two text files whose filenames begin with the name of the model: in my case, "WomensNovels.txt" contains all corpus texts within a single file, and "WomensNovels_cleaned.txt" replaces all uppercase letters with lowercase; if the optional `bundle_ngrams` parameter had been set to anything but the default, this second text file would also include ngram bundling.
+
+### `train_model()`
+
+After running that first command, this second command will carry things through the rest of the way:
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+train_model("WomensNovels")
+```
+
+The second command does a bit more than the first. In addition to simplifying about ten lines from the Women Writers Project's template using reasonable default settings, this second command will create a new object named `WomensNovels` in the global environment and store these parameter settings for later recall.^[Since training the model may take many hours, and since there's no built-in way to go back in time to check what parameters were used, workshop leaders strongly urged us to take note of these parameters before beginning this step. Taking note of these parameters is still a good idea, but this wrapper function adds some backup.] Setting defaults are `vectors=100`, `window=6`, `iter=10`, `negative_samples=15`, `threads=3`; these can each be changed within the `train_model()` call, and they can later be recalled with the `attributes()` function:
+```{r}
+attributes(WomensNovels)$window
+attributes(WomensNovels)$negative_samples
+```
+
+As part of the `wordVectors` package, a trained model will be saved in the `data` directory, for instance as "WomensNovels.bin". And as part of these utility functions, the parameter settings will be saved alongside these ".bin" files as `metadata_YourModelName.Rdata`---in my case as "metadata_WomensNovels.Rdata". After a model has been trained and saved to disk, it can be recalled into memory in a later R session using the `train_model()` function, which will also load any existing metadata:
+```{r eval=FALSE, include=TRUE}
+train_model("WomensNovels")
+```
+
+
+## Working Directly with Data
+
+### `make_siml_matrix()`
+
+Once the models are trained, additional utility functions provide some ways to explore the results. Most useful among these is the `make_siml_matrix(wem, x, y)` function, which makes it easy to see how one group of words *`x`* relates to another group of words *`y`* within a single model *`wem`*.
+
+```{r}
+make_siml_matrix(WomensNovels,
+                 x=c("sweet", "bitter", "fresh", "hot"), 
+                 y=c("bread", "sea", "attitude", "air"))
+```
+
+The `make_siml_matrix()` function returns a matrix of cosine similarity values for each comparison among the two groups of words. Here, it shows that *hot* and *bread* are the nearest words among these two groups in the `WomensNovels` corpus, since the highest value is in the *bread* row and the *hot* column. It's still necessary to interpret these results, probably even making the judgment call that a similarity of `0.485` isn't very high even if it is the highest in this set, but the function makes some of this process simpler.
+
+These cosine similarity values measure how likely any two words are to be used in the same context---either near each other or near the same words. Any two words with strongly dissimilar meanings may appear in similar scenarios, so it's unsurprising if antonyms show high cosine similarity:
+```{r}
+make_siml_matrix(WomensNovels,
+                 x=c("good", "healthy", "high", "bright"), 
+                 y=c("bad", "ill", "low", "dark"))
+```
+Here, the relationships of *ill* / *good* and *bright* / *dark* show the highest cosine similarities, higher even than the relationship of *hot* / *bread*. I was expecting the paired antonyms to show the highest cosine similarity values, but that doesn't seem to be the case in this limited corpus.
+
+Any matrix can be exported using the standard `write.csv()` command. This example also shows that it's possible to use vectors with these functions.
+
+```{r}
+v_man <- c("man", "husband", "father", "son") 
+v_woman<- c("woman", "wife", "mother", "daughter")
+
+male_female <- make_siml_matrix(WomensNovels, x=v_man, y=v_woman)
+
+write.csv(male_female,file="man_woman.csv")
+```
+
+
+## Visualizing Relationships
+
+### `cosine_heatmap()`
+The utility functions also include a couple to explore the data visually. The first of these, `cosine_heatmap()`, makes it easy to visualize a heatmap of the above matrix:
+
+```{r}
+cosine_heatmap(WomensNovels,
+                 x=c("sweet", "bitter", "fresh", "hot"), 
+                 y=c("bread", "sea", "attitude", "air"))
+```
+Adding color to the similarity matrix makes the data easier to read quickly. And by default, the name of the model (here, `WomensNovels`) is printed at the top, aiding comparisons of heatmaps from multiple models.
+
+Matching `x` and `y` values can be a good way to provide context in a comparison. Since a strong relationship shows up as a bold red, this redundant comparison results in a clear diagonal: 
+
+```{r, fig.cap="As long as values are kept in the right order *`wem`*, *`x`*, *`y`*, it's ok to skip naming the parameters to save space. In other words, `cosine_heatmap(wem=A,x=B,y=C)` is the same as `cosine_heatmap(A,B,C)`."}
+v_doubt <- WomensNovels %>% 
+  closest_to(~"doubt" + "truth") %>% 
+  .$word
+
+cosine_heatmap(WomensNovels, v_doubt, v_doubt)
+```
+
+When using `x` and `y` values that equal each other like this, it may be nice to simplify things, showing only half of the heatmap by turning off the `redundant` toggle:
+
+```{r}
+cosine_heatmap(WomensNovels,
+               x=v_doubt, 
+               y=v_doubt, 
+               redundant = FALSE)
+```
+
+As noted above, the command works with a vector of values, but it's also possible to be trickier, combining the function with the `closest_to()` command from the `wordVectors` package:
+
+```{r, fig.cap="When using the `closest_to()` command here, don't forget to add `$word` at the end, dropping the numeric values and returning only the words themselves."}
+cosine_heatmap(WomensNovels, 
+               x=closest_to(WomensNovels, "man", 15)$word, 
+               y=closest_to(WomensNovels, "woman", 15)$word)
+```
+ 
+By default, these heatmaps round values to two digits right of the decimal point, but it's possible to change this setting by setting the `round` parameter to another number like `round=3`. It's also possible to hide values altogether when they're not necessary for exploring a model or if a heatmap gets too tight:
+```{r, fig.cap="When the `values` parameter is set to `FALSE`, the function displays a legend by default. In practice, a cosine similarity of -1 is probably unlikely, as (I think) the model relies heavily on negative sampling to get anything less than 0."}
+cosine_heatmap(WomensNovels, 
+               x=closest_to(WomensNovels, "man", 25)$word, 
+               y=closest_to(WomensNovels, "woman", 25)$word, 
+               values=FALSE)
+```
+
+
+### `amplified_heatmap()`
+The second function for visualizing results helps to amplify comparisons within each row and column. This function merely strengthens signals it finds within a subset of words; it doesn't validate these signals, so it's necessary to be careful about attributing too much importance to cosine similarity values that may actually be meager.
+
+```{r}
+amplified_heatmap(WomensNovels, 
+                  x=closest_to(WomensNovels, "man", 25)$word, 
+                  y=closest_to(WomensNovels, "woman", 25)$word)
+```
+
+Many of the same parameters used with `cosine_heatmap()` work for `amplified_heatmap()`, too. But as this second function amplifies the highest and lowest values for each row and column, results become less useful for sets with any words appearing on both the `x` and `y` axes; for these, it's probably a good idea to toggle the `diagonal` parameter to `FALSE`:
+
+```{r, fig.cap="Setting `diagonal=FALSE` hides the obviously strong connections between a word and itself by making these cells gray and leaving space on the spectrum to amplify lower-ranked values. As always, a strong red signifies that two words are more similar to each other, while a strong blue indicates they're much more dissimilar, relative to other words in each row and column."}
+amplified_heatmap(WomensNovels, 
+                  x=c(v_man, v_woman), 
+                  y=c(v_man, v_woman), 
+                  diagonal = FALSE)
+```
+
+## Iterative Exploration
+
+Ideally, the process of visualizing sets of words will lead to iterative development of a research question, as new relationships are suggested in unexpected heat patterns. What, for instance, can be made of the unusually hot cell at the bottom of the the first amplified heatmap above, where the *fat* row meets the *healthy* column? First checking it out with `cosine_heatmap()` is a good idea to verify that the numbers justify going further:
+```{r}
+cosine_heatmap(WomensNovels, 
+               x=closest_to(WomensNovels, "healthy", 10)$word, 
+               y=closest_to(WomensNovels, "fat", 10)$word, 
+               round=3)
+```
+
+These values look high enough to warrant exploration, so a second step might be to widen the scope and discover any other relationships revealed by an amplified heatmap:
+```{r, fig.cap="Here, the legend on the right hand side is turned off by toggling the `legend=FALSE` parameter, making more space for more words."}
+amplified_heatmap(WomensNovels, 
+                  x=closest_to(WomensNovels, "healthy", 30)$word, 
+                  y=closest_to(WomensNovels, "fat", 30)$word, 
+                  legend = FALSE, 
+                  diagonal = FALSE)
+```
+
+At this point, someone working with this corpus might continue exploring the relationship of *fat* to *healthy*, or they might be inspired by other relationships. For instance, is there something interesting in the relationships of *portrait* / *fashion* and *proportioned* / *painted*? In what ways do texts draw upon the language of art to establish expectations of beauty, and do they leave room in the conversation for *health*?
+
+##  
+
+## ...
+
+I've already been using these utility functions to build word embedding models of subsets of my corpus and to begin to explore and compare relationships among the words. I'm very excited by this ongoing work, and I'm having fun doing it, discovering the kinds of connections of ideas and implications that can be found in my corpora, but I wanted to document some methods in progress and to share them. I hope they prove useful to others.
+

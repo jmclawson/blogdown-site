@@ -1,0 +1,17 @@
+/* overwrite highlight js so background of code block is transparent */
+/*code.hljs { background: transparent; }*/
+
+@media (max-width: 760px) {div.figure img {
+	max-width: 100%;
+}
+div.figure marginnote {
+	display: block;
+	float: none;
+	font-style: italic;
+	font-family: sans-serif;
+}
+}
+
+.sidenote code, .marginnote code {
+	font-size: 1.0rem;
+}

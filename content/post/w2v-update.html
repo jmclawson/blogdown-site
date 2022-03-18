@@ -1,0 +1,226 @@
+---
+title: "Updates to Word Vector Utilities"
+author: "James Clawson"
+date: "2020-08-27"
+output: 
+  tufte::tufte_html: default
+  blogdown::html_page: default
+excerpt: "Updates to the code for word vector utility functions add new capabilities, change old behavior, and need an explanation."
+---
+
+
+
+<p>A year of using and fiddling with <a href="https://gist.github.com/jmclawson/21c6a40c78fd66d708bec45d5c0b52e2"><code>w2v_utilities</code></a> has led to more improvements in functionality and display than I expected. While a <a href="https://jmclawson.net/blog/posts/word-vector-utilities">previous post</a> explains the ways to use available functions,<label for="tufte-sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"> These visualizations show images using the older code. Because it’s a way to compare and see the improvements, I’ve left things to stand as they are.</span> this post explains some of the changes to <code>cosine_heatmap()</code> and introduces new visualizations with <code>cosine_bars()</code>.</p>
+<div id="changes-in-heatmap-visualization" class="section level2">
+<h2>Changes in heatmap visualization</h2>
+<p>Now, by default, column titles displayed by <code>cosine_heatmap()</code> will show at the top, and the “first” row will always be the row closest to the column titles. To clean up presentation the zero digit before the decimal point has been omitted, and all values show the same number of digits after the decimal point (rather than dropping a final zero). Additionally, the viridis color scheme has been adopted for its accessibility for different forms of colorblindedness, its printability, and—subjectively speaking—attractiveness.<label for="tufte-sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-2" class="margin-toggle"><span class="sidenote"> As bonus, viridis comes with some <a href="https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html" target="new">nice palette options</a>.</span></p>
+<p>As a change from the previous version, the code to make a similarity matrix is now separated from the code to make a heatmap, so those parameters should come first. Either save the similarity matrix, or pipe it directly into the function for <code>cosine_heatmap()</code>.</p>
+<pre class="r"><code>make_siml_matrix(WomensNovels,
+                 x = c(&quot;sweet&quot;, &quot;bitter&quot;, 
+                       &quot;fresh&quot;, &quot;hot&quot;), 
+                 y = c(&quot;air&quot;, &quot;attitude&quot;,
+                       &quot;bread&quot;, &quot;disposition&quot;,
+                       &quot;face&quot;, &quot;sea&quot;)) %&gt;% 
+  cosine_heatmap()</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+By default, the heatmap shows values overlaid on corresponding colors. Set <code>alpha</code> between 0 and 1 to adjust the intensity of the background.
+</p>
+<img src="/blog/post/w2v-update_files/figure-html/unnamed-chunk-2-1.png" alt="By default, the heatmap shows values overlaid on corresponding colors. Set `alpha` between 0 and 1 to adjust the intensity of the background." width="672"  />
+</div>
+<div class="figure">
+<p class="caption marginnote shownote">
+Setting <code>values</code> to <code>FALSE</code> toggles on the legend; since legibility against text labels isn’t an issue, it also makes colors more vibrant by setting <code>alpha=1</code>.
+</p>
+<img src="/blog/post/w2v-update_files/figure-html/unnamed-chunk-3-1.png" alt="Setting `values` to `FALSE` toggles on the legend; since legibility against text labels isn't an issue, it also makes colors more vibrant by setting `alpha=1`." width="672"  />
+</div>
+<div class="figure">
+<p class="caption marginnote shownote">
+Choose different color palettes using the <code>colorset</code> option. This comparison shows (A) <code>colorsets = 'magma'</code>, (B) <code>colorsets = 'plasma'</code>, (C) <code>colorsets = 'inferno'</code>, and (D) <code>colorsets = 'cividis'</code>.
+</p>
+<img src="/blog/post/w2v-update_files/figure-html/unnamed-chunk-4-1.png" alt="Choose different color palettes using the `colorset` option. This comparison shows (A) `colorsets = 'magma'`, (B) `colorsets = 'plasma'`, (C) `colorsets = 'inferno'`, and (D) `colorsets = 'cividis'`." width="672"  />
+</div>
+<div class="figure">
+<p class="caption marginnote shownote">
+The previous color palette is available by setting <code>colorset='red'</code>.
+</p>
+<img src="/blog/post/w2v-update_files/figure-html/unnamed-chunk-5-1.png" alt="The previous color palette is available by setting `colorset='red'`." width="672"  />
+</div>
+<p>You might notice that the heatmap is minimally styled compared to the previous output, lacking a title and other options. It’s easy to add these other details using standard <code>ggplot2</code> notation and functions like <code>labs()</code>.</p>
+<p>Heatmaps hiding redundant information will flip the placement of column headers so that these are shown near the data:</p>
+<pre class="r"><code>make_siml_matrix(WomensNovels,
+                 x = c(&quot;air&quot;, &quot;attitude&quot;,
+                       &quot;bread&quot;, &quot;disposition&quot;,
+                       &quot;face&quot;, &quot;sea&quot;), 
+                 y = c(&quot;air&quot;, &quot;attitude&quot;,
+                       &quot;bread&quot;, &quot;disposition&quot;,
+                       &quot;face&quot;, &quot;sea&quot;)) %&gt;% 
+  cosine_heatmap(redundant = FALSE)</code></pre>
+<p><img src="/blog/post/w2v-update_files/figure-html/unnamed-chunk-6-1.png" width="672"  /></p>
+</div>
+<div id="changes-in-heatmap-function" class="section level2">
+<h2>Changes in heatmap function</h2>
+<p>In addition to changes in theming and calling the function, a few options have been added, along with new defaults related to them.</p>
+<div id="sort.y-and-sort.x-both-default-to-true" class="section level3">
+<h3><code>sort.y</code> and <code>sort.x</code> (both default to <code>TRUE</code>)</h3>
+<p>It can be easier to read an exploratory heatmap like this when the terms are arranged in some understandable way. And since outliers can throw off averages, it makes the most sense to arrange things by median values. Rows are ordered by their median values with <code>sort.y=TRUE</code>, and order columns with <code>sort.x=TRUE</code>, but these options can be turned off by setting the options to <code>FALSE</code>:</p>
+<pre class="r"><code>make_siml_matrix(WomensNovels,
+                 x = c(&quot;sweet&quot;, &quot;bitter&quot;, 
+                     &quot;fresh&quot;, &quot;hot&quot;), 
+                 y = c(&quot;air&quot;, &quot;attitude&quot;,
+                     &quot;bread&quot;, &quot;disposition&quot;,
+                     &quot;face&quot;, &quot;sea&quot;)) %&gt;% 
+  cosine_heatmap(sort.y = FALSE, 
+                 sort.x = FALSE)</code></pre>
+<p><img src="/blog/post/w2v-update_files/figure-html/unnamed-chunk-7-1.png" width="672"  /></p>
+<p>In many cases, you’ll want to keep one of the axes stable, ordered manually or set by something other than values in the matrix.<label for="tufte-sn-3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-3" class="margin-toggle"><span class="sidenote"> For example, if you’re certain about the terms that can be found in one vector and would like to preserve their order as determined by their nearness to each other, rather than by their nearness to another vector.</span> Because of the underlying order of things in the code, if it makes more sense to think of one vector as stable, make it the columns or x-values, with <code>sort.y</code> toggled to <code>TRUE</code> and <code>sort.x</code> to <code>FALSE</code>.</p>
+</div>
+<div id="limit.y-or-limit.x" class="section level3">
+<h3><code>limit.y</code> or <code>limit.x</code></h3>
+<p>Limit the rows to the top 10 (or some other number) by setting <code>limit.y=10</code>. By expanding the row definition to find more words along a vector (using <code>closest_to()</code> with higher values of <code>n</code>), sorting these items by their median cosine similarity to words in the columns (by setting <code>sort.y=TRUE</code>), and then limiting to a subset of rows (with <code>limit.y</code>), you can easily explore strong relationships you might not otherwise have considered.</p>
+<pre class="r"><code>make_siml_matrix(WomensNovels,
+  x = closest_to(WomensNovels,
+                 ~&quot;soul&quot; + &quot;spirit&quot;,
+                 n = 5)$word, 
+  y = closest_to(WomensNovels,
+                 ~&quot;wind&quot; + &quot;leaves&quot;,
+                 n = 10)$word) %&gt;% 
+  cosine_heatmap()</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Starting from only as many terms as you hope to show in the end can limit discovery of any unexpected interactions between the vectors.
+</p>
+<img src="/blog/post/w2v-update_files/figure-html/unnamed-chunk-8-1.png" alt="Starting from only as many terms as you hope to show in the end can limit discovery of any unexpected interactions between the vectors." width="672"  />
+</div>
+<pre class="r"><code>make_siml_matrix(WomensNovels,
+  x = closest_to(WomensNovels,
+                 ~&quot;soul&quot; + &quot;spirit&quot;,
+                 n = 5)$word, 
+  y = closest_to(WomensNovels,
+                 ~&quot;wind&quot; + &quot;leaves&quot;,
+                 n = 50)$word) %&gt;% 
+  cosine_heatmap(limit.y = 10, legend = TRUE)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+By finding 50 rows, ordering them, and then limiting them to the top 10, you’re able to find words that are closer to the words in the columns.
+</p>
+<img src="/blog/post/w2v-update_files/figure-html/unnamed-chunk-9-1.png" alt="By finding 50 rows, ordering them, and then limiting them to the top 10, you're able to find words that are closer to the words in the columns." width="672"  />
+</div>
+<p>The same mechanism exists for limiting columns using <code>limit.x</code>, but using these two options together will yield a matrix of terms quite far from those you started with. Moreover, as the order of steps for sorting and limiting starts with rows, the final choice of columns may not appear to correlate with the ordering of rows by median.</p>
+<pre class="r"><code>make_siml_matrix(WomensNovels,
+  x = closest_to(WomensNovels,
+                 ~&quot;soul&quot; + &quot;spirit&quot;,
+                 n = 50)$word, 
+  y = closest_to(WomensNovels,
+                 ~&quot;wind&quot; + &quot;leaves&quot;,
+                 n = 50)$word) %&gt;% 
+  cosine_heatmap(limit.y = 10, limit.x = 5,
+                 legend = TRUE)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Using both limits together isn’t very useful. Over optimizing tends to yield a matrix of terms too far from the starting point.
+</p>
+<img src="/blog/post/w2v-update_files/figure-html/unnamed-chunk-10-1.png" alt="Using both limits together isn’t very useful. Over optimizing tends to yield a matrix of terms too far from the starting point." width="672"  />
+</div>
+</div>
+<div id="top.down" class="section level3">
+<h3><code>top.down</code></h3>
+<p>If you would prefer to keep the column titles at the bottom of the heatmap, use <code>top.down=FALSE</code> to revert to this earlier version—while still retaining other visual changes, including the ordering of rows starting with those nearest column headers.</p>
+<pre class="r"><code>make_siml_matrix(WomensNovels,
+  x = closest_to(WomensNovels,
+                 ~&quot;soul&quot; + &quot;spirit&quot;,
+                 n = 5)$word, 
+  y = closest_to(WomensNovels,
+                 ~&quot;wind&quot; + &quot;leaves&quot;,
+                 n = 50)$word) %&gt;% 
+  cosine_heatmap(round = 3,
+                 limit.y = 10, 
+                 top.down = FALSE)</code></pre>
+<p><img src="/blog/post/w2v-update_files/figure-html/unnamed-chunk-11-1.png" width="672"  /></p>
+</div>
+<div id="amplify" class="section level3">
+<h3><code>amplify</code></h3>
+<p>Finally, to bring these options in line with amplified heat maps, I pulled the latter function into <code>cosine_heatmap()</code> as an option, rather than as its own function. This option also maintains the earlier red/blue color palette. To use the option, set <code>amplify=TRUE</code>.</p>
+<pre class="r"><code>make_siml_matrix(WomensNovels,
+  x = closest_to(WomensNovels,
+               ~&quot;soul&quot; + &quot;spirit&quot;,
+               n = 5)$word, 
+  y = closest_to(WomensNovels,
+               ~&quot;wind&quot; + &quot;leaves&quot;,
+               n = 50)$word) %&gt;% 
+  cosine_heatmap(limit.y = 10,
+                 amplify=TRUE)</code></pre>
+<p><img src="/blog/post/w2v-update_files/figure-html/unnamed-chunk-12-1.png" width="672"  /></p>
+<p>If you’d like to add an additional step of re-arranging this amplified heatmap, so that lower rows and columns are nearer each other based on their amplified values, set <code>sort.twice=TRUE</code>.</p>
+<pre class="r"><code>make_siml_matrix(WomensNovels,
+  x = closest_to(WomensNovels,
+                 ~&quot;soul&quot; + &quot;spirit&quot;,
+                 n = 5)$word, 
+  y = closest_to(WomensNovels,
+                 ~&quot;wind&quot; + &quot;leaves&quot;,
+                 n = 50)$word) %&gt;% 
+  cosine_heatmap(limit.y = 10, 
+                 sort.twice = TRUE,
+                 amplify=TRUE)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Setting <code>sort.twice=TRUE</code> might not be a good idea, since it sorts terms based on abstract values, rather than actual cosine similarity. Be wary using it with amplified heatmaps.
+</p>
+<img src="/blog/post/w2v-update_files/figure-html/unnamed-chunk-13-1.png" alt="Setting `sort.twice=TRUE` might not be a good idea, since it sorts terms based on abstract values, rather than actual cosine similarity. Be wary using it with amplified heatmaps." width="672"  />
+</div>
+</div>
+</div>
+<div id="new-visualizations-with-bar-charts" class="section level2">
+<h2>New visualizations with bar charts</h2>
+<p>Heatmaps are useful for showing two-dimensional comparisons, but many explorations of word embeddings are interested in proximity of terms along a vector in one dimension. Bar charts are better suited for these one-dimensional comparisons.</p>
+<div id="showing-similarity-to-one-dimension" class="section level3">
+<h3>Showing similarity to one dimension</h3>
+<p>A new function, <code>cosine_bars()</code> interfaces directly with <code>word2vec</code>’s function <code>closest_to()</code> to turn values into easily readable bar charts:</p>
+<pre class="r"><code>closest_to(WomensNovels, &quot;sky&quot;) %&gt;% 
+  cosine_bars()</code></pre>
+<p><img src="/blog/post/w2v-update_files/figure-html/unnamed-chunk-14-1.png" width="672"  /></p>
+<p>The title of the chart shows the query used, and similarity values over 0.9 display inside the bar to avoid clipping at the right edge:</p>
+<pre class="r"><code>closest_to(WomensNovels, ~&quot;sky&quot; + &quot;cloud&quot;) %&gt;% 
+  cosine_bars() +
+  labs(x=&quot;cosine similarity&quot;)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Add axis labels using standard <code>ggplot2</code> functions.
+</p>
+<img src="/blog/post/w2v-update_files/figure-html/unnamed-chunk-15-1.png" alt="Add axis labels using standard `ggplot2` functions." width="672"  />
+</div>
+</div>
+<div id="comparing-similarities-in-many-dimensions" class="section level3">
+<h3>Comparing similarities in many dimensions</h3>
+<p>It also accepts two-dimensional matrices to display a comparative set of small multiples:</p>
+<pre class="r"><code>make_siml_matrix(WomensNovels,
+      closest_to(WomensNovels,&quot;dog&quot;)$word,
+      closest_to(WomensNovels,&quot;sky&quot;)$word) %&gt;% 
+  cosine_bars()</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+As with heatmaps, these bar charts default to organizing rows and groups by median values, with higher medians charted first. The same <code>sort.x</code> and <code>sort.y</code> options can disable this feature.
+</p>
+<img src="/blog/post/w2v-update_files/figure-html/unnamed-chunk-16-1.png" alt="As with heatmaps, these bar charts default to organizing rows and groups by median values, with higher medians charted first. The same `sort.x` and `sort.y` options can disable this feature." width="672"  />
+</div>
+<p>By default, these charts set a maximum width of 1, so that every visualization output with the same dimensions will be comparable and to force white space for showing values. This option can be toggled off by setting <code>force.width=FALSE</code>, which sets the width to the maximum of the set:</p>
+<pre class="r"><code>make_siml_matrix(WomensNovels,
+      closest_to(WomensNovels,&quot;fish&quot;)$word,
+      closest_to(WomensNovels,&quot;sky&quot;)$word) %&gt;% 
+  cosine_bars(force.width = FALSE)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Setting <code>force.width = FALSE</code> stretches bars to take up the whole width of the space, but it also increases the likelihood that higher values get clipped.
+</p>
+<img src="/blog/post/w2v-update_files/figure-html/unnamed-chunk-17-1.png" alt="Setting `force.width = FALSE` stretches bars to take up the whole width of the space, but it also increases the likelihood that higher values get clipped." width="672"  />
+</div>
+</div>
+</div>
+<div id="section" class="section level2">
+<h2> </h2>
+</div>
+<div id="section-1" class="section level2">
+<h2>…</h2>
+<p>I built and tweaked these functions while exploring some corpora of late-19th and early-20th century British novels, exploring claims made by Virginia Woolf about the shape of modern fiction. My write-up of that work, “<a href="https://wwp.northeastern.edu/blog/word-embedding-model-materialism-spiritualism/">A Word Embedding Model of One’s Own: Modern Fiction from Materialism to Spiritualism</a>,” is available on the blog of Northeastern University’s Women Writers Project.<label for="tufte-sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-4" class="margin-toggle"><span class="sidenote"> Higher-quality visualizations are available here: <a href="https://jmclawson.net/word2vec/blogpost/1-combo_heatmap.pdf">1-combo_heatmap.pdf</a>, <a href="https://jmclawson.net/word2vec/blogpost/2-ranked_adjectives.pdf">2-ranked_adjectives.pdf</a>, <a href="https://jmclawson.net/word2vec/blogpost/3-decacurve_servants.pdf">3-decacurve_servants.pdf</a>, <a href="https://jmclawson.net/word2vec/blogpost/4-decacurve_spouses.pdf">4-decacurve_spouses.pdf</a>, <a href="https://jmclawson.net/word2vec/blogpost/5-decacurve_parents.pdf">5-decacurve_parents.pdf</a>.</span></p>
+<p>The code for the last three visualizations shown there, indicating the curves of <em>spiritualist</em> and <em>materialist</em> dominants as they relate to different character groupings in a series of overlapping corpora, is not included here—mostly because the underlying codebase is messy and complex, and I’m not convinced it can serve the same kind of general purpose as the other functions I’ve shared. But I’ll try to keep public versions of these more useful functions available as I improve on them over time.</p>
+</div>

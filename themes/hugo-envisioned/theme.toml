@@ -1,0 +1,12 @@
+name = "Envisioned"
+license = "MIT"
+licenselink = "https://github.com/dandermotj/hugo-envisioned/blob/master/LICENSE.md"
+description = "A minimalist blog theme using Envisioned-CSS."
+homepage = "http://github.com/dandermotj/hugo-envisioned"
+tags = ["blog", "tufte", "minimal", "envisioned-css", "blogdown", "firacode"]
+features = ["math", "tufte-css", "tufte", "envisioned-css", "firacode", "ligatures "]
+min_version = 0.1
+
+[author]
+  name = "Daniel Jordan"
+  homepage = "https://www.dandermotj.github.io" 

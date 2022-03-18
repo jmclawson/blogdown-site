@@ -1,0 +1,138 @@
+---
+title: "Distance and Dimensionality"
+author: "James Clawson"
+date: "2018-08-03"
+output: html_document
+excerpt: "An introduction to some simple ideas of dimensionality and distance."
+draft: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      cache=TRUE)
+library(stylo)
+library(knitr)
+```
+
+## Background: Placement and Distance
+
+It may seem confusing to start off discussing placement and distance, but much of the stylometric method relies on an abstract understanding of ideas of proximity. This introduction serves as a gentle introduction to these concepts. Please be patient before we get to the good stuff.
+
+### Addressing Multidimensionality
+
+For one year of grad school, this was my mailing address:
+
+> 69/6 Montpelier Park </br>
+> Edinburgh, EH10 4ND </br>
+> United Kingdom
+
+Addresses like these are easy to understand because they are made up of recognizable pockets of information. At the end, the country name "United Kingdom" signifies which of a list of potential countries the address belongs to, "Edinburgh" signifies which of a list of potential cities,`r tufte::margin_note("The post code is another thing entirely. It changes the rules by rushing ahead with specificity out of turn.")` "Montpelier Park" signifies which of a list of potential streets, and so on. At the very top, the street number narrows things down further, and the apartment number "/6" goes further still, signifying the sixth apartment of number 69 on Montpelier Park. Ignoring the post code, an address like this contains five necessary components for any letter or package, but it is easy to imagine some addresses having still more.`r tufte::margin_note('Instead of counting out the apartments in a stairwell to arrive at an ordinal number, for instance, some addresses indicate a floor and a side—e.g., "3FL," indicating two more parts, "third floor" and "left."')`
+
+A mailing address is an easy introduction to multidimensionality. Each part might theoretically be interchangeable with other parts, and with one shift an item of mail might arrive in a different apartment on the same street, in the same apartment number on a different street, or even potentially on the same street name in a different city or country. In this way, an address's shifting parameters work mostly independently of each other, demonstrating how each measures something specific and unique. For this reason, each part of the address represents a dimension, even if some of these dimensions are categories (which city?) and others are measurements (how far down the street?).
+
+### Dimensionality and Distance
+<div style="float:right;">
+```{r pythagorean}
+library(ggplot2)
+ggplot() +
+  geom_segment(aes(x=0, y=0, xend=2.78, yend=3.78), col="mediumpurple", arrow = arrow(length=unit(0.30,"cm"),type="closed"), size=2) +
+  geom_hline(yintercept=4, col="blue", linetype="dashed", size=2) +
+  geom_vline(xintercept = 3, col="red", linetype="dashed", size=2) +
+  xlim(-1, 4) +
+  ylim(-1, 5) +
+  geom_hline(yintercept=0, col="grey", linetype="dashed", size=2) + 
+  geom_vline(xintercept=0, col="grey", linetype="dashed", size=2) +
+  geom_point(mapping = aes(x=3, y=4), size=12, col="skyblue", shape=15) + geom_text(aes(label="B", x=3, y=4), size=12) +
+  geom_point(mapping = aes(x=0, y=0), size=12, col="pink", shape=15) + geom_text(aes(label="A", x=0, y=0), size=12) +
+  theme_bw(base_size = 22) +
+  theme(legend.position = "none") +
+  xlab("longitude") + ylab("latitude")
+```
+</div>
+More efficiently, the world is commonly divided up into two or three dimensions. The index of a street map or atlas, for instance, will rely on a series of letters and numbers to pinpoint the column and row where some point of interest might be found. The entire globe is similarly overlaid with a fine, invisible mesh of latitude and longitude, parceling the planet into ever smaller squares of electronic precision. Because of this system, it is trivial to determine the distance between any two points with known positioning---as in the distance from point A to point B in the image to the right---simply using the Pythagorean theorem.[^pythagorean-basic] In fact, this same equation works as well with two dimensions as it does with three or more.`r tufte::margin_note("It is just as easy to add a third dimension, a fourth, or many others. There is room for all in Pythagoras's equation, which scales easily to any number of dimensions.[^pythagorean-complex]")` This measurement of distance by contrasting measurements of scale is a foundation in much of machine learning. And while the equation is attributed to Pythagoras, the resulting measurement is called the *Euclidean distance*.
+
+<br clear="both">
+
+[^pythagorean-basic]: In the example above, assuming one degree of latitude or longitude represents one unit of distance, the Pythagorean theorem (where, in a right triangle, the length of the hypotenuse squared is equal to the sum of the squared lengths of the legs, or $\mathrm{hypotenuse}^2=\sum\mathrm{legs}^2$, or $d^2=\sum{{\Delta_\mathrm{legs}}^2}$) makes it easy to calculate that a point 3 degrees east and 4 degrees to the north will be 5 units away ($d^2 = 3^2+4^2$; $d = \sqrt{3^2+4^2}$; $d=\sqrt{25}$; $d=5$). In reality, the world is neither flat nor an exact sphere, so lines of latitude and longitude are less systematic than this model would suggest, and there is no such thing as a stable "unit" of distance between any two degrees of latitude or longitude.
+
+[^pythagorean-complex]: If $\Delta_i$ is the distance between two points in any one dimension $i$, the Euclidean distance formula for $n$ dimensions is $\sqrt{\sum\limits_{i=1}^n\Delta_i^2}$ or $\sqrt{(\Delta_x)^2+(\Delta_y)^2+\ldots{}+(\Delta_n)^2}$ .
+
+Given a list of cities in the UK, it is possible to find the coordinates of latitude and longitude that relate to their place in the world:
+
+```{r uk_code, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(ggmap)
+
+cities <- c("Edinburgh", "Cardiff", "London", "Manchester", "Glasgow", "Inverness", "Cambridge", "Oxford", "Belfast", "Dover, UK", "Aberystwyth", "Liverpool", "Land's End, UK")
+
+region <- c("Scotland", "Wales", "England", "England", "Scotland", "Scotland", "England", "England", "Northern Ireland", "England", "Wales", "England", "England")
+
+# uk.cities <- data.frame(city=cities[order(cities)],
+#                         region=region[order(cities)],
+#                         geocode(cities[order(cities)]))
+# 
+## uk.cities$region <- factor(uk.cities$region, levels=c("England", "Northern Ireland", "Scotland", "Wales", "<unknown>"))
+# 
+## uk.cities$city <- gsub(", UK", "", uk.cities$city)
+# 
+## saveRDS(uk.cities, file="uk-cities.Rda")
+
+uk.cities <- readRDS(file="uk-cities.Rda")
+
+## uk.cities$region[uk.cities$city=="Liverpool"] <- "England"
+kable(uk.cities, format="html", table.attr = "class='table table-condensed' style='width:auto;border-spacing:0.5em 0'")
+
+```
+
+Using these coordinates as points on a Cartesian system, it's easy to project the cities onto a map:
+```{r uk_map, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
+# uk <- get_map(location = "United Kingdom", zoom=5, maptype = "watercolor")
+# 
+# uk.map <- ggmap(uk) + 
+#   geom_point(data = uk.cities, aes(x=lon, y=lat, shape=region))
+# 
+# saveRDS(uk.map, file="uk-map.Rda")
+
+uk.map <- readRDS(file="uk-map.Rda")
+
+print(uk.map)
+```
+
+
+And again assuming an imaginary unit of distance as "one degree", the Pythagorean theorem makes it easy to calculate the Euclidean distance between each of these cities:[^sphere-error]
+
+```{r uk_distances, echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE}
+library(stats)
+
+uk.distances <- as.data.frame(as.matrix(dist(uk.cities, diag = TRUE, upper = TRUE)))
+rownames(uk.distances) <- uk.cities$city
+colnames(uk.distances) <- uk.cities$city
+uk.distances <- data.frame(region=uk.cities$region, uk.distances)
+uk.distances[,-1] <- as.numeric(gsub("0","",as.matrix(uk.distances[,-1])))
+kable(uk.distances[,!names(uk.distances)=="region"])
+```
+
+From here, it is easy to list the cities in order of their proximity to Edinburgh:
+
+```{r distance_edin, echo=FALSE}
+uk.distances[is.na(uk.distances)] <- 0
+kable(uk.distances[order(uk.distances$Edinburgh), c("Edinburgh"), drop=FALSE], format="html", table.attr = "class='table table-condensed' style='width:auto;border-spacing:0.5em 0'")
+```
+
+[^sphere-error]: This chart makes clear the way measurements of latitude and longitude are a poor choice for the example of positioning and distance discussed here. There is no clear single unit of distance for the difference of a degree of latitude or longitude. Although the chart puts Belfast fifth in a list of Edinburgh's nearby neighbors, it deserves placement before Liverpool. Because of the way these lines are drawn, a change in longitude carries more weight in our phony calculation of "units" of Euclidean distance than does a change in latitude.
+
+This same application is used in one of the simplest methods of supervised machine called *K-Nearest Neighbors* (*knn*). This method relies on the assumption that there is a relationship between something being measured (for instance, a city's GPS coordinates) and membership in a given category (which country the city belongs to). It works by checking the known categories of nearby data points and taking a vote to draw a conclusion on the unknown category of one specific point. Essentially, if birds of a feather flock together, *knn* considers a bird's flock to guess its feather. This method is simple, but it can be very accurate if there is a good sample of known data points to vote and if the assumption of relationship between measurement and membership is true. Here, we can use the technique to determine Liverpool's most likely region based on its nearest neighbors:
+
+```{r nearby_liverpool, echo=FALSE}
+uk.distances$region[row.names(uk.distances)=="Liverpool"] <- "<unknown>"
+
+kable(uk.distances[order(uk.distances$Liverpool), c("region", "Liverpool"), drop=FALSE], format="html", table.attr = "class='table table-condensed' style='width:auto;border-spacing:0.5em 0'")
+# 
+# paste(uk.distances[order(uk.distances$Liverpool), c("region"), drop=TRUE][-1], collapse=", ")
+```
+
+Commonly, determining the number of neighbors to consider is the biggest difficulty with *knn*. In the example here, the proximity of Manchester, England, suggests that Liverpool may also be in England; in this case, checking with one neighbor will yield a correct categorization of England, as no other region will get a vote. But checking two neighbors means asking for a vote from both Manchester and Aberystwyth, yielding a tie between England and Wales. A third neighbor means adding Cardiff, and the two votes from Wales overpower the single vote from England, so the model will inaccurately guess that Liverpool is in Wales. Liverpool's fourth-nearest neighbor among this list of cities is Oxford, in England, once again resulting in a tie between England and Wales. 
+
+The example with data for cities nearest Liverpool is useful because it exposes a couple truths underlying *knn*'s methodology. First, the method is only as good as its training data, and it is less trustworthy at points near a border between two categories or in positions where data points are sparse. Second, it is probably unwise to choose an even number of neighbors, as they are unable to resolve a tie.
+
+With K-Nearest Neighbors, it can be difficult to walk the line between useful and accurate. Checking with too many neighbors magnifies deficiencies in a minority population and skews results toward the average of the overall population. Imagine, for instance, checking for the nearest three neighbors of any city in Northern Ireland, or checking for the nearest twelve neighbors of any city: the first would place the city in Wales or Scotland, while the second would always result in England. Likewise, checking with too few neighbors can sacrifice accuracy: after all, the nearest neighbor to Land's End, England, is Cardiff, Wales. The best anyone can do is to to have as many known data points as is reasonably possible and to take the vote of a reasonably small number of neighbors, tweaking numbers to fit a data set in order to get more correct results.
+

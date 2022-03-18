@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+<head>
+<title>jmclawson / blog - Selecting a Huge Corpus</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="keywords" content="">
+<meta name="author" content="jmclawson / blog">
+<meta name="generator" content="Hugo 0.48" />
+
+  
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/base-min.css">
+
+
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/grids-responsive-min.css">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="https://jmclawson.net/blog/css/envisioned.css">
+<link rel="stylesheet" href="https://jmclawson.net/blog/css/hugo-envisioned.css">
+<link rel="stylesheet" href="https://jmclawson.net/blog/css/hugo-envisioned-override.css">
+
+  
+  <style>
+  	body.index{
+		padding-top: 6.5vw;
+		background-repeat: no-repeat;
+		background-position: center top;
+		background-size: 90% 10vw;
+  		background-image: url(/images/quartet-splatplot.png);
+		width: 65%;
+		min-width: 400px;
+		max-width: 800px;
+  	}
+	
+	.index #blog_logo {
+		display: none;
+	}
+	
+	@media all and (max-width: 550px) {
+	  body.index div.header {
+ 
+	  }
+	  body.index div.header a.deactive {
+	    text-decoration: none !important;
+	  }
+  }
+	
+	div.topmenu, ul.topmenu {
+	 
+	    background-color: white;
+	}
+	
+	.topmenu a {
+		text-decoration: underline;
+	}
+
+	a, h3 {
+	    color: #333399;
+	}
+
+	div.topmenu{
+	    margin: 0 0 20 0;
+	    padding: 0;
+	    overflow: hidden;
+		text-align: center;
+	}
+	ul.topmenu {
+	    list-style-type: none;
+	    padding: 0;
+	    overflow: hidden;
+		font-family:Futura,Helvetica Neue,Helvetica,Arial;
+		width: 100%;
+		font-size: calc(12px + 1vw);
+		line-height:140%;
+	
+	}
+
+	.topmenu li {
+	 
+	    display: inline;
+	    color: navy;
+	    text-align: center;
+	 
+		padding: 0;
+	}
+
+	.topmenu li a {
+	    padding: 1vw;
+	 
+	}
+
+	.topmenu li a:hover {
+	 
+	}
+
+	.topmenu li:hover {
+	 
+		border-top-style: solid;
+		border-top-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-width: 1px;
+	}
+	
+	body.index div.header h1, body.index h2, body.index h3, body.index h4{
+	font-family:Futura,Helvetica Neue,Helvetica,Arial;}
+	
+	div.header h1 {
+		text-align:center;
+		margin-top:0;
+		 
+		 
+		font-size:calc(12px + 5.5vw);
+		font-weight: normal;
+}
+	
+
+  	#blogpage, #blogpage:hover, #blogpage a, #blogpage a:link {
+   
+  		text-decoration: none;
+  		color: black;
+  		font-weight: bold;
+		pointer-events: none;
+  		text-decoration: none;
+  		border-top-style: none;
+  		border-bottom-style: none;
+		background-repeat: unset !important;
+  	}
+	
+	.topmenu a {
+		background: none !important;
+	}
+
+  </style>
+</head>
+
+
+<body>
+<div id="layout" class="pure-g">
+<article class="pure-u-1">
+<header class="brand, post-brand">
+  <h1>
+    <a href="/blog">
+      <span id = "blog_logo">
+         <img src="/blog/splat.png" alt="Blog Logo" style="height: auto; width:80px">
+      </span>
+      
+    </a>
+  </h1>
+</header>
+<section>
+    <div id="top-of-post">
+        <a href="/"><i class="fa fa-chevron-left" aria-hidden="true";></i></a>
+        <h1 class="content-title">
+        
+        Selecting a Huge Corpus
+        
+        </h1>
+        
+        
+        
+    </div>
+  <span class="content-meta">
+
+    
+       <i class="fa fa-user">&nbsp;</i><span class="author">
+         &nbsp;James Clawson</span> <br>
+    
+
+
+    
+      <i class="fa fa-calendar"></i>
+      &nbsp;May 30, 2019
+    
+
+    
+      &nbsp;<i class="fa fa-clock-o"></i>
+      &nbsp;5 min read
+    
+
+     <br>
+	<script type="text/javascript">
+
+	
+	function toggle_R() {
+	  var x = document.getElementsByClassName('r');
+	  if (x.length == 0) return;
+	  function toggle_vis(o) {
+	    var d = o.style.display;
+	    o.style.display = (d == 'block' || d == '') ? 'none':'block';
+	  }
+
+	  for (i = 0; i < x.length; i++) {
+	    var y = x[i];
+	    if (y.tagName.toLowerCase() === 'pre') toggle_vis(y);
+	  }
+
+	    var elem = document.getElementById("myButton1");
+	    if (elem.value === "Hide Code") elem.value = "Show Code";
+	    else elem.value = "Hide Code";
+	}
+
+	document.write('<input onclick="toggle_R();" type="button" value="Hide Code" id="myButton1"></input>')
+
+	</script>
+  </span>
+
+
+</section>
+
+
+
+<section><div id="setup" class="section level2">
+<h2>Setup</h2>
+<p>As before, start by loading necessary packages.</p>
+<pre class="r"><code>library(rvest)
+library(dplyr)
+library(ggplot2)</code></pre>
+</div>
+<div id="selection-of-categories-and-subcategories" class="section level2">
+<h2>Selection of Categories and Subcategories</h2>
+<p>At this point, we can limit the centuries and national categories to be considered.</p>
+<pre class="r"><code>base_beg &lt;- &quot;https://en.wikipedia.org/wiki/Category:&quot;
+centuries &lt;- 16:20
+base_end &lt;- &quot;th-century_novels&quot;
+nations &lt;- c(&quot;American&quot;, 
+             &quot;Australian&quot;, 
+             &quot;British&quot;, 
+             &quot;Canadian&quot;, 
+             &quot;English&quot;, 
+             &quot;Indian&quot;, 
+             &quot;Irish&quot;, 
+             &quot;New Zealand&quot;)
+
+categories &lt;- data.frame(century=c(),
+                         nation=c(),
+                         url=c(),
+                         stringsAsFactors = FALSE)
+for (century in centuries){
+  cat_url &lt;- paste0(base_beg,century,base_end)
+  page &lt;- read_html(cat_url)
+  cat_list &lt;- html_nodes(page, &quot;div#mw-subcategories &gt; div.mw-content-ltr  ul &gt; li&quot;)
+  for (nation in nations) {
+    if (length(grep(nation, html_text(cat_list))) &gt; 0) {
+      this_url &lt;- 
+        cat_list[[grep(nation, html_text(cat_list))]] %&gt;% 
+        html_nodes(&quot;a&quot;) %&gt;% 
+        html_attr(&quot;href&quot;)
+      this_url &lt;- paste0(&quot;https://en.wikipedia.org&quot;,this_url)
+      categories &lt;&lt;- rbind(categories,
+                          data.frame(century=century,
+                                     nation=nation,
+                                     url=this_url,
+                                     stringsAsFactors = FALSE))
+    }
+  }
+}</code></pre>
+<p>Next, set up the routines and structures for stepping through the subcategories.</p>
+<pre class="r"><code>subcategories &lt;- data.frame(century=c(),
+                            nation=c(),
+                            year=c(),
+                            url=c(),
+                            stringsAsFactors = FALSE)
+
+for (row in 1:nrow(categories)){
+  page &lt;- read_html(categories[row,&quot;url&quot;])
+  sub_list &lt;- html_nodes(page, &quot;div#mw-subcategories&quot;)
+  if (length(sub_list)&gt;0){
+    sub_list &lt;- html_nodes(page, &quot;div.mw-content-ltr ul &gt; li&quot;)}
+  if (length(sub_list)&gt;0){
+    index &lt;- grep(&quot;[0-9]{4}&quot;,html_text(sub_list))
+    if (length(index) &gt; 0) {
+      for (ind in index){
+        the_url &lt;- 
+          sub_list[[ind]] %&gt;% 
+          html_nodes(&quot;a&quot;) %&gt;% 
+          html_attr(&quot;href&quot;)
+        the_url &lt;- paste0(&quot;https://en.wikipedia.org&quot;,the_url)
+        the_year &lt;- gsub(&quot;[a-zA-Z ]&quot;,&quot;&quot;,
+                         sub_list[[ind]] %&gt;% 
+                           html_nodes(&quot;a&quot;) %&gt;% 
+                           html_text()) %&gt;% 
+          as.numeric()
+        subcategories &lt;&lt;- 
+          rbind(subcategories,
+                data.frame(century=categories[row,&quot;century&quot;],
+                           nation=categories[row,&quot;nation&quot;],
+                           year=the_year,
+                           url=the_url,
+                           stringsAsFactors = FALSE))
+      }
+    }
+  }
+}</code></pre>
+<pre><code>## Warning in function_list[[k]](value): NAs introduced by coercion</code></pre>
+</div>
+<div id="downloading-lists-per-year" class="section level2">
+<h2>Downloading lists per year</h2>
+<p>Once these structures are ready, it’s time to check to see if each page exists locally and download it if it doeesn’t. As before, this process is mostly to save Wikipedia from what might become a heavy traffic load if we come back to these pages multiple times to glean the data.</p>
+<pre class="r"><code>if(!dir.exists(&quot;year_lists&quot;)){dir.create(&quot;year_lists&quot;)}
+
+for (row in 1:nrow(subcategories)){
+  id &lt;- paste0(subcategories[row,&quot;nation&quot;],
+               subcategories[row,&quot;year&quot;])
+  this_url &lt;- subcategories[row,&quot;url&quot;]
+  this_file &lt;- paste0(&quot;year_lists/&quot;,id,&quot;.html&quot;)
+  if(!file.exists(this_file)){
+    download.file(this_url, destfile = this_file)
+    
+    # Save the server! Wait before downloading more
+    randomtime &lt;- sample(1:10,1)*sample(c(0.5,1,pi/2),1)
+      cat(&quot;Wait for&quot;,randomtime,&quot;seconds&quot;)
+      Sys.sleep(randomtime)
+  }
+}</code></pre>
+</div>
+<div id="parse-each-list" class="section level2">
+<h2>Parse each list</h2>
+<p>With the pages stored locally, it’s time to organize the data they contain:</p>
+<pre class="r"><code>corpus_wikipedia &lt;- data.frame(titles=c(),
+                               year=c(),
+                               nation=c(),
+                               stringsAsFactors = FALSE)
+
+files &lt;- list.files(path=&quot;year_lists/&quot;)
+
+for (filename in files){
+  id &lt;- gsub(&quot;.html&quot;,&quot;&quot;,filename)
+  this_length &lt;- nchar(id)
+  this_year &lt;- substr(id,this_length-3,this_length)
+  if (!is.na(as.numeric(this_year))) {
+    this_nation &lt;- substr(id,1,this_length-4)
+    these_titles &lt;- read_html(paste0(&quot;year_lists/&quot;,filename)) %&gt;% 
+      html_nodes(&quot;div#mw-pages&quot;) %&gt;% 
+      html_nodes(&quot;div.mw-content-ltr&quot;) %&gt;% 
+      html_nodes(&quot;li&quot;) %&gt;% 
+      html_text()
+    this_data &lt;- data.frame(titles=as.character(these_titles),
+                            year=as.numeric(this_year),
+                            nation=this_nation,
+                            stringsAsFactors = FALSE)
+    corpus_wikipedia &lt;&lt;- rbind(corpus_wikipedia,
+                               this_data)
+  }
+}
+
+corpus_byyear &lt;- corpus_wikipedia %&gt;% 
+  group_by(year) %&gt;% 
+  summarize(count=n())
+
+record_avg &lt;- function(df=corpus_byyear,
+                       window=3){
+  moving_avg &lt;&lt;- data.frame(avg=c(),
+                         year=c(),
+                         stringsAsFactors = FALSE)
+  start &lt;- ceiling(window/2)
+  end &lt;- nrow(df)-ceiling(window/2)
+  for (row in start:end){
+    this_start &lt;- row-ceiling(window/2)
+    this_end &lt;- row+ceiling(window/2)
+    this_avg &lt;- mean(df$count[this_start:this_end])
+    if (&quot;nation&quot; %in% colnames(df)){
+      moving_avg &lt;&lt;- rbind(moving_avg,
+                           data.frame(avg=this_avg,
+                                      year=df$year[row],
+                                      nation=df$nation[row]))
+    } else {
+      moving_avg &lt;&lt;- rbind(moving_avg,
+                           data.frame(avg=this_avg,
+                                      year=df$year[row]))
+    }
+  }
+}
+
+nation_byyear &lt;- corpus_wikipedia %&gt;% 
+  group_by(nation,year) %&gt;% 
+    summarize(count=n())</code></pre>
+<p>It’s always a good idea to take a look at the tables we’ve collected:</p>
+<pre class="r"><code>head(corpus_wikipedia)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">titles</th>
+<th align="right">year</th>
+<th align="left">nation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Clara Howard</td>
+<td align="right">1801</td>
+<td align="left">American</td>
+</tr>
+<tr class="even">
+<td align="left">Equality; or, A History of Lithconia</td>
+<td align="right">1802</td>
+<td align="left">American</td>
+</tr>
+<tr class="odd">
+<td align="left">Memoirs of Carwin the Biloquist</td>
+<td align="right">1803</td>
+<td align="left">American</td>
+</tr>
+<tr class="even">
+<td align="left">Kelroy</td>
+<td align="right">1812</td>
+<td align="left">American</td>
+</tr>
+<tr class="odd">
+<td align="left">Precaution (novel)</td>
+<td align="right">1820</td>
+<td align="left">American</td>
+</tr>
+<tr class="even">
+<td align="left">Owen Chase</td>
+<td align="right">1821</td>
+<td align="left">American</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>head(nation_byyear)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">nation</th>
+<th align="right">year</th>
+<th align="right">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">American</td>
+<td align="right">1801</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">American</td>
+<td align="right">1802</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">American</td>
+<td align="right">1803</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">American</td>
+<td align="right">1812</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">American</td>
+<td align="right">1820</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">American</td>
+<td align="right">1821</td>
+<td align="right">2</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="visualizing" class="section level2">
+<h2>Visualizing</h2>
+<p>Finally, it’s always nice to see a visualization of the <code>r{nrow(corpus_wikipedia)}</code> titles collected:</p>
+<pre class="r"><code>ggplot(corpus_wikipedia) + 
+  geom_bar(mapping=aes(x=year, fill=nation)) + 
+  scale_x_continuous(breaks = c(0:10*20+1800)) + 
+  xlab(NULL) +
+  ylab(&quot;number of novels&quot;) + 
+  ggtitle(&quot;Novels from Anglophonic nations listed on Wikipedia per year&quot;) +
+  theme_bw()</code></pre>
+<p><img src="/blog/post/corpus-huge_files/figure-html/visualizing-1.png" width="672" /></p>
+<p>Because the magnitudes of numbers grow wildly out of proportion among the different nations, it can be nice to drill down into the novels that are not categorized as American or British:</p>
+<pre class="r"><code>ggplot(corpus_wikipedia[!corpus_wikipedia$nation %in% c(&quot;American&quot;,&quot;British&quot;),]) + 
+  geom_bar(mapping=aes(x=year, fill=nation)) + 
+  scale_x_continuous(breaks = c(0:10*20+1800)) + 
+  xlab(NULL) +
+  ylab(&quot;number of novels&quot;) + 
+  ggtitle(&quot;Non-American, Non-British subset of Wikipedia novels&quot;) +
+  theme_bw()</code></pre>
+<p><img src="/blog/post/corpus-huge_files/figure-html/visualizing-nonUS-nonUK-1.png" width="672" /></p>
+<p>Looking at this chart, we notice immediately that some nations are missing. At the beginning of the process, we told our functions that we were interested in the following categories:</p>
+<pre class="r"><code>nations</code></pre>
+<pre><code>## [1] &quot;American&quot;    &quot;Australian&quot;  &quot;British&quot;     &quot;Canadian&quot;    &quot;English&quot;    
+## [6] &quot;Indian&quot;      &quot;Irish&quot;       &quot;New Zealand&quot;</code></pre>
+<p>Our final data is lacking in novels in the Wikipedia categories of English, Irish and New Zealand. These omissions come down to inconsistencies in Wikipedia’s category pages, with the category page for <a href="https://en.wikipedia.org/wiki/Category:New_Zealand_novels">New Zealand novels</a>, for instance, lacking years.</p>
+<p>We also need to be aware of discrepancies in the novels themselves. While the national categories were chosen to include Anglophonic nations, not all of the novels in the data set will be written in English, as the list of titles of Indian novels suggests.</p>
+<pre class="r"><code>head(corpus_wikipedia[corpus_wikipedia$nation==&quot;Indian&quot;,])</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">titles</th>
+<th align="right">year</th>
+<th align="left">nation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>13163</td>
+<td align="left">The English Teacher</td>
+<td align="right">1945</td>
+<td align="left">Indian</td>
+</tr>
+<tr class="even">
+<td>13164</td>
+<td align="left">All About H. Hatterr</td>
+<td align="right">1948</td>
+<td align="left">Indian</td>
+</tr>
+<tr class="odd">
+<td>13165</td>
+<td align="left">Randidangazhi</td>
+<td align="right">1948</td>
+<td align="left">Indian</td>
+</tr>
+<tr class="even">
+<td>13166</td>
+<td align="left">Sivagamiyin Sapatham</td>
+<td align="right">1948</td>
+<td align="left">Indian</td>
+</tr>
+<tr class="odd">
+<td>13167</td>
+<td align="left">Vaishali ki Nagarvadhu</td>
+<td align="right">1948</td>
+<td align="left">Indian</td>
+</tr>
+<tr class="even">
+<td>13168</td>
+<td align="left">Gunahon Ka Devta (novel)</td>
+<td align="right">1949</td>
+<td align="left">Indian</td>
+</tr>
+</tbody>
+</table>
+<p>Selecting for English-language novels will take time and research by an individual.</p>
+<p>Finally, this global corpus allows for a global understanding of some of the trends suggested in the previous corpus, limited to British and American texts.</p>
+<pre class="r"><code>ww1 &lt;- ggplot(corpus_wikipedia[corpus_wikipedia$year %in% 1905:1925,],
+       aes(x=year)) + 
+  geom_rect(aes(xmin=1914,xmax=1918.4,ymin=-Inf,ymax=Inf),alpha=0.03,fill=&quot;pink&quot;) +
+  geom_bar() + 
+  scale_x_continuous(breaks = c(0:9*2+1906)) + 
+  xlab(NULL) +
+  ylab(&quot;number of novels&quot;) + 
+  ggtitle(&quot;Wikipedia&#39;s listing of novels during WW1&quot;) + 
+  theme_bw()
+
+ww1 + 
+  geom_smooth(data=corpus_byyear[corpus_byyear$year %in% 1905:1925,],
+              mapping=aes(y=count,x=year),
+              color=&quot;red&quot;) +
+  geom_label(aes(x=1916.2, y=5),
+             label=&quot;World War I\n7/1914 - 11/1918&quot;,
+             color=&quot;red&quot;)</code></pre>
+<p><img src="/blog/post/corpus-huge_files/figure-html/ww1-1.png" width="672"  /></p>
+<p>The chart looks very similar to the previous chart including only American and British novels. Breaking it down into constituent parts makes it easy to see why:</p>
+<pre class="r"><code>ww1 + 
+  geom_bar(aes(fill=nation)) + 
+  facet_wrap( ~ nation, ncol=2) +
+  scale_x_continuous(breaks = c(0:6*3+1906)) + 
+  theme_bw() + 
+  theme(legend.position = &quot;none&quot;) +
+  ggtitle(&quot;Only American and British texts contribute to WW1&#39;s downward trend&quot;)</code></pre>
+<p><img src="/blog/post/corpus-huge_files/figure-html/ww1-b-1.png" width="672"  /></p>
+<pre class="r"><code>ww2 &lt;- ggplot(corpus_wikipedia[corpus_wikipedia$year %in% 1931:1951,],
+       aes(x=year)) + 
+  geom_rect(aes(xmin=1939,xmax=1945,ymin=-Inf,ymax=Inf),alpha=0.03,fill=&quot;pink&quot;) +
+  geom_bar() + 
+  scale_x_continuous(breaks = c(0:11*2+1931)) + 
+  xlab(NULL) +
+  ylab(&quot;number of novels&quot;) + 
+  ggtitle(&quot;Wikipedia&#39;s listing of novels during WW2&quot;) + 
+  theme_bw()
+
+ww2 + 
+  geom_smooth(data=corpus_byyear[corpus_byyear$year %in% 1931:1951,],
+              mapping=aes(y=count,x=year),
+              color=&quot;red&quot;) +
+  geom_label(aes(x=1942, y=10),
+             label=&quot;World War 2\n9/1939 - 9/1945&quot;,
+             color=&quot;red&quot;)</code></pre>
+<p><img src="/blog/post/corpus-huge_files/figure-html/ww2-1.png" width="672"  /></p>
+<p>The second World War shows a similar pattern to that of the first. Breaking it down by national output is only slightly more revealing:</p>
+<pre class="r"><code>ww2 + 
+  geom_bar(aes(fill=nation)) + 
+  facet_wrap( ~ nation, ncol=2) +
+  scale_x_continuous(breaks = c(0:6*4+1931)) + 
+  theme_bw() + 
+  theme(legend.position = &quot;none&quot;) +
+  ggtitle(&quot;Australian and Candian texts also contribute to WW2&#39;s downward trend&quot;)</code></pre>
+<p><img src="/blog/post/corpus-huge_files/figure-html/ww2-b-1.png" width="672"  /></p>
+</div>
+</section>
+<section>
+  
+  
+    <div class="comments">
+      <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "jmclawson" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </div>
+  
+
+  <footer class="page-footer">
+		<hr>
+		<ul class="page-footer-menu">
+		
+		</ul>
+
+  
+    <p>
+      Powered by <a href="https://gohugo.io">Hugo</a> and the
+      <a href="https://github.com/dandermotj/hugo-envisioned">Envisioned theme</a>.
+    </p>
+  
+
+	<div class="copyright">
+	<p>
+    
+      &copy; 2019
+    .
+    All rights reserved.
+    
+  </p>
+</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
+</section>
+</article>
+</div>
+</body>
+</html>

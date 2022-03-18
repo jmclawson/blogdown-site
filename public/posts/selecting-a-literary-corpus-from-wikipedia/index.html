@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+<head>
+<title>jmclawson / blog - Selecting a Literary Corpus from Wikipedia</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="keywords" content="">
+<meta name="author" content="jmclawson / blog">
+<meta name="generator" content="Hugo 0.74.3" />
+
+  
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/base-min.css">
+
+
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/grids-responsive-min.css">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="https://jmclawson.net/blog/css/envisioned.css">
+<link rel="stylesheet" href="https://jmclawson.net/blog/css/hugo-envisioned.css">
+<link rel="stylesheet" href="https://jmclawson.net/blog/css/hugo-envisioned-override.css">
+
+  
+  <style>
+  	body.index{
+		padding-top: 6.5vw;
+		background-repeat: no-repeat;
+		background-position: center top;
+		background-size: 90% 10vw;
+  		background-image: url(/images/quartet-splatplot.png);
+		width: 65%;
+		min-width: 400px;
+		max-width: 800px;
+  	}
+	
+	.index #blog_logo {
+		display: none;
+	}
+	
+	@media all and (max-width: 550px) {
+	  body.index div.header {
+ 
+	  }
+	  body.index div.header a.deactive {
+	    text-decoration: none !important;
+	  }
+  }
+	
+	div.topmenu, ul.topmenu {
+	 
+	    background-color: white;
+	}
+	
+	.topmenu a {
+		text-decoration: underline;
+	}
+
+	a, h3 {
+	    color: #333399;
+	}
+
+	div.topmenu{
+	    margin: 0 0 20 0;
+	    padding: 0;
+	    overflow: hidden;
+		text-align: center;
+	}
+	ul.topmenu {
+	    list-style-type: none;
+	    padding: 0;
+	    overflow: hidden;
+		font-family:Futura,Helvetica Neue,Helvetica,Arial;
+		width: 100%;
+		font-size: calc(12px + 1vw);
+		line-height:140%;
+	
+	}
+
+	.topmenu li {
+	 
+	    display: inline;
+	    color: navy;
+	    text-align: center;
+	 
+		padding: 0;
+	}
+
+	.topmenu li a {
+	    padding: 1vw;
+	 
+	}
+
+	.topmenu li a:hover {
+	 
+	}
+
+	.topmenu li:hover {
+	 
+		border-top-style: solid;
+		border-top-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-width: 1px;
+	}
+	
+	body.index div.header h1, body.index h2, body.index h3, body.index h4{
+	font-family:Futura,Helvetica Neue,Helvetica,Arial;}
+	
+	div.header h1 {
+		text-align:center;
+		margin-top:0;
+		 
+		 
+		font-size:calc(12px + 5.5vw);
+		font-weight: normal;
+}
+	
+
+  	#blogpage, #blogpage:hover, #blogpage a, #blogpage a:link {
+   
+  		text-decoration: none;
+  		color: black;
+  		font-weight: bold;
+		pointer-events: none;
+  		text-decoration: none;
+  		border-top-style: none;
+  		border-bottom-style: none;
+		background-repeat: unset !important;
+  	}
+	
+	.topmenu a {
+		background: none !important;
+	}
+
+  </style>
+</head>
+
+
+<body>
+<div id="layout" class="pure-g">
+<article class="pure-u-1">
+<header class="brand, post-brand">
+  <h1>
+    <a href="/blog">
+      <span id = "blog_logo">
+         <img src="/blog/splat.png" alt="Blog Logo" style="height: auto; width:80px">
+      </span>
+      
+    </a>
+  </h1>
+</header>
+<section>
+    <div id="top-of-post">
+        <a href="/"><i class="fa fa-chevron-left" aria-hidden="true";></i></a>
+        <h1 class="content-title">
+        
+        Selecting a Literary Corpus from Wikipedia
+        
+        </h1>
+        
+        
+        
+    </div>
+  <span class="content-meta">
+
+    
+       <i class="fa fa-user">&nbsp;</i><span class="author">
+         &nbsp;James Clawson</span> <br>
+    
+
+
+    
+      <i class="fa fa-calendar"></i>
+      &nbsp;Mar 27, 2019
+    
+
+    
+      &nbsp;<i class="fa fa-clock-o"></i>
+      &nbsp;13 min read
+    
+
+     <br>
+	<script type="text/javascript">
+
+	
+	function toggle_R() {
+	  var x = document.getElementsByClassName('r');
+	  if (x.length == 0) return;
+	  function toggle_vis(o) {
+	    var d = o.style.display;
+	    o.style.display = (d == 'block' || d == '') ? 'none':'block';
+	  }
+
+	  for (i = 0; i < x.length; i++) {
+	    var y = x[i];
+	    if (y.tagName.toLowerCase() === 'pre') toggle_vis(y);
+	  }
+
+	    var elem = document.getElementById("myButton1");
+	    if (elem.value === "Hide Code") elem.value = "Show Code";
+	    else elem.value = "Hide Code";
+	}
+
+	document.write('<input onclick="toggle_R();" type="button" value="Hide Code" id="myButton1"></input>')
+
+	</script>
+  </span>
+
+
+</section>
+
+
+
+<section>
+
+
+<p>Selecting a sufficiently sized collection of texts for historical analysis is tough. When I try to list all the novels I can think of to provide context for a project, I’m bound to get it wrong some way: I fail by forgetting something important, or I succeed only in reproducing my own limitations.</p>
+<p>In this post, I explain my rationale and process for using R to select a reasonable, medium-sized sample of titles from Wikipedia for historical comparison; a later post will go farther, showing how to use this selection to get the texts themselves from Project Gutenberg. Even though the process might seem obvious, I’m sharing in part to remind myself of the decisions I took. And with luck, my workflow might prove useful to someone else, too.<label for="tufte-sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"> There’s a lot of code here. If that isn’t your thing, there’s no shame in hiding the code using the button above. Alternatively, <a href="#understanding-the-results">skip ahead to the pictures</a> if you prefer starting with dessert.</span></p>
+<div id="why-wikipedia" class="section level3">
+<h3>Why Wikipedia?</h3>
+<p>If nothing else, Wikipedia is a powerhouse. Rough Googling tells me that the online encyclopedia has 29 million entries in English, and the number of contributors is certainly large enough that I don’t even want to devote the time to estimate it.<label for="tufte-sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-2" class="margin-toggle"><span class="sidenote"> More rough Googling suggests there are 34 million users, but these numbers are probably worldwide; at least some of these users don’t speak English, and a subset of English speakers have probably never used their accounts to contribute.</span> And since it was founded in 2001, it has seldom suffered a reputation for being completely untrustworthy: even though it’s the final say in almost nothing, it’s a perfectly acceptable first source in many topics.</p>
+<p>But when it comes to certain questions, Wikipedia’s authority shines stronger. When selecting things for being well known—say, for identifying a canon of literature—a crowd-sourced resource like Wikipedia is especially convenient. As it is (and with <em>many</em> caveats), canon is shaped when the chaff of obscure works float away in the winds of time and collective ignoring, leaving behind the only works that will have a chance to matter. Because of its size, Wikipedia is big enough that its gusts of collective ignoring blow twice as hard, and we can get a sense of what may become canon before time has a chance to pass.</p>
+<p>Even as Wikipedia is limited as a compendium of objectivity, it is laudable for what it offers as a snapshot of subjectivity. A cultural artifact in its own right, it provides a sampling of the kinds of things that will have mattered. For studying literature younger than a few hundred years, it can be invaluable.</p>
+</div>
+<div id="defining-the-scope" class="section level2">
+<h2>Defining the Scope</h2>
+<p>To get started in using Wikipedia to select a corpus, first load the necessary packages in R. For this project, I use <em>rvest</em> to scrape information from web pages, <em>dplyr</em> to reshuffle information, and <em>ggplot2</em> to make sense of the selection visually. If any of these packages isn’t already installed, be sure to install it using the <strong>install.packages</strong> command in the console.</p>
+<pre class="r"><code>library(rvest)
+library(dplyr)
+library(ggplot2)</code></pre>
+<p>Next, define where the corpus is coming from. The crowd-sourced nature of Wikipedia’s category pages is incredibly useful, as they supply lists of novels considered by others to be important, including some useful metadata. The URLs to any similarly structured Wikipedia pages might be used here.<label for="tufte-sn-3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-3" class="margin-toggle"><span class="sidenote"> I’m starting with the category of <a href="https://en.wikipedia.org/wiki/Category:19th-century_American_novels">19th-century American novels</a>, but I’ll later on add <a href="https://en.wikipedia.org/wiki/Category:19th-century_British_novels">19th-century British novels</a>, <a href="https://en.wikipedia.org/wiki/Category:20th-century_American_novels">20th-century American novels</a>, and <a href="https://en.wikipedia.org/wiki/Category:20th-century_British_novels">20th-century British novels</a>. With variation, similar corpora could be created by referencing other centuries, other nationalities, or even other generic groupings, like <a href="https://en.wikipedia.org/wiki/Category:American_novels_by_genre">American novels by genre</a>.</span> It’s a good idea to download the files locally to reference them without being a nusiance to Wikipedia. Then, once these webpages are local, the computer can read the HTML and interpret it to find the lists of links to the pages for individual years.</p>
+<p>For my interests in this project, I’m curious about selecting out-of-copyright works in English, so I’m looking first at the Wikipedia categories for 19th-century American novels.</p>
+<pre class="r"><code>wp_categories_american &lt;- &quot;https://en.wikipedia.org/wiki/Category:19th-century_American_novels&quot;
+# Avoid hitting Wikipedia&#39;s servers too much. 
+# Download pages only if they haven&#39;t been downloaded
+if(!file.exists(&quot;American-years.html&quot;)){
+  download.file(wp_categories_american, 
+                destfile = &quot;American-years.html&quot;)}
+
+# Parse for individual years
+wp_years_links_amer &lt;- read_html(&quot;American-years.html&quot;) %&gt;% 
+  html_nodes(&quot;a.CategoryTreeLabelCategory&quot;) %&gt;% 
+  html_attr(&quot;href&quot;)</code></pre>
+<p>It turns out that the Wikipedia pages are not as tidy as they could be, so it’s probably necessary to select a subset of the list, limiting results only to those items that are actually links to years. In my case, I just drop off the last few items of the list by defining the final item as number 81.</p>
+<pre class="r"><code>wp_years_links_amer &lt;- wp_years_links_amer[1:81]</code></pre>
+<div id="the-data-so-far" class="section level3">
+<h3>The data so far…</h3>
+<p>At this point, the data in R for my project includes a list of 81 URLs for pages listing every available novel categorized as American and from a particular year between 1801 and 1900. To grab one at random, the sixtieth item in the list is the URL for the <a href="https://en.wikipedia.org/wiki/Category:1880_American_novels">Wikipedia page listing all those novels categorized as 1880 American novels</a>. Following that link will show that this webpage is another list, containing a list of seven novels.</p>
+<p>Seven novels may seem reasonable to keep track of, but those are just the American novels for one year. With 81 years to choose from and potentially more years for other categories, it’s easy to see why scripting this process is the best way to keep everything organized.</p>
+</div>
+</div>
+<div id="getting-titles" class="section level2">
+<h2>Getting Titles</h2>
+<p>After downloading and analyzing the category page for the scope of the corpus, the next step is just a variation of the same step. But instead of downloading the overall national category page to scrape links to the year subcategories, we’re downloading the year subcategory pages to scrape links to novel pages.</p>
+<p>Because 100 years per century is a lot of quick hits to a web server, I added a randomized wait time after downloading each page. Otherwise, I worried Wikipedia might discover that I was just a bot.<label for="tufte-sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-4" class="margin-toggle"><span class="sidenote"> This may have been unnecessary, but discretion is the botter’s part of valor.</span> The “number” in the definition of my function is to allow for downloading small batches, but it probably is overkill to pair it with the wait time.</p>
+<p>After defining this function, I ran it for the group of American novels and watched the files collect in the folder of my operating system:</p>
+<pre class="r"><code>download_wikipedia_pages &lt;- function(pagelist=wp_years_links_amer, number=5, group=&quot;American&quot;){
+  # define a directory
+  thedir &lt;- paste(group,&quot;years/&quot;,sep=&quot;-&quot;)
+  
+  # use the list of links to define years
+  theseyears &lt;- as.numeric(gsub(&quot;[^0-9]&quot;,&quot;&quot;,pagelist))
+  
+  # list the available years that have not been downloaded
+  already.downloaded &lt;- list.files(thedir)
+  already.downloaded &lt;- gsub(&quot;.html&quot;,&quot;&quot;,already.downloaded)
+  
+  # exclude any years already downloaded
+  if(length(already.downloaded)==0){
+    pagelist2 &lt;- pagelist
+  } else {
+    pagelist2 &lt;&lt;- pagelist[-grep(paste(already.downloaded,collapse=&quot;|&quot;),pagelist)]
+  }
+  theseyears &lt;&lt;- as.numeric(gsub(&quot;[^0-9]&quot;,&quot;&quot;,pagelist2))
+  
+  if(length(pagelist2)==0){
+    message(&quot;Everything is already downloaded.&quot;) 
+  } else {
+      if(number&gt;length(pagelist2)){number=length(pagelist2)
+      }
+    # for each year, for as many as &quot;number&quot; years, download the page,
+    # save it, and then wait a random number of seconds before 
+    # downloading the next year in the list.
+    for (page in pagelist2[1:number]) {
+      thisyear &lt;- as.numeric(gsub(&quot;[^0-9]&quot;,&quot;&quot;,page))
+      thisurl &lt;- paste(&quot;https://en.wikipedia.org&quot;,page,sep=&quot;&quot;)
+      if(!dir.exists(thedir)){
+        dir.create(thedir)
+        }
+      download.file(thisurl, 
+                    destfile = paste0(thedir,&quot;/&quot;,thisyear,&quot;.html&quot;))
+      randomtime &lt;- sample(1:15,1)*sample(c(0.5,1,pi/2),1)
+      cat(&quot;Wait for&quot;,randomtime,&quot;seconds&quot;)
+      Sys.sleep(randomtime)
+    }
+    }
+}
+
+# Download the year subcategory pages
+download_wikipedia_pages(pagelist=wp_years_links_amer, number=100, group=&quot;American&quot;)</code></pre>
+<p>With all these pages downloaded locally, another function gets the lists of titles from each of the downloaded pages. I ran this function on the whole American group and checked the first few results. They mostly look ok, but that fifth item may be a problem:</p>
+<pre class="r"><code>get_titles &lt;- function(years=1801:1900,group=&quot;American&quot;){
+  works_df &lt;&lt;- data.frame(titles=c(),year=c(),group=c())
+  available_years &lt;- intersect(years,gsub(&quot;.html&quot;,&quot;&quot;,list.files(path=paste(group,&quot;years&quot;,sep=&quot;-&quot;))))
+  for(year in available_years){
+    titles &lt;- read_html(paste(paste(group,&quot;years/&quot;,sep=&quot;-&quot;),year,&quot;.html&quot;,sep=&quot;&quot;)) %&gt;% 
+      html_nodes(&quot;div#mw-pages&quot;) %&gt;% 
+      html_nodes(&quot;div.mw-content-ltr&quot;) %&gt;% 
+      html_nodes(&quot;li&quot;) %&gt;% 
+      html_text()
+    thisyear_df &lt;- data.frame(titles=as.character(titles),year=as.numeric(year),group=group)
+    works_df &lt;&lt;- rbind(works_df,thisyear_df)
+  }
+}
+
+# Parse titles
+get_titles(group=&quot;American&quot;)
+kable(works_df[1:5,])</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">titles</th>
+<th align="right">year</th>
+<th align="left">group</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Clara Howard</td>
+<td align="right">1801</td>
+<td align="left">American</td>
+</tr>
+<tr class="even">
+<td align="left">Equality; or, A History of Lithconia</td>
+<td align="right">1802</td>
+<td align="left">American</td>
+</tr>
+<tr class="odd">
+<td align="left">Memoirs of Carwin the Biloquist</td>
+<td align="right">1803</td>
+<td align="left">American</td>
+</tr>
+<tr class="even">
+<td align="left">Kelroy</td>
+<td align="right">1812</td>
+<td align="left">American</td>
+</tr>
+<tr class="odd">
+<td align="left">Precaution (novel)</td>
+<td align="right">1820</td>
+<td align="left">American</td>
+</tr>
+</tbody>
+</table>
+<p>Titles with parenthetical notes added to them may pose difficulties if we ever want to use these titles later on to cross-reference against titles from other datasets.<label for="tufte-sn-5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-5" class="margin-toggle"><span class="sidenote"> Foreshadowing!</span> So another function tidies things up easily. Running this latest function and checking the data for cleanliness shows that things are much improved:</p>
+<pre class="r"><code>clean_works_df &lt;- function(){
+  works_df2 &lt;&lt;- data.frame(works_df,possibleauthor=as.character(&quot;&quot;), stringsAsFactors=FALSE)
+  works_df2$titles &lt;&lt;- as.character(works_df2$titles)
+  sub_index &lt;&lt;- grep(&quot; novel)&quot;,works_df$titles)
+  for (index in sub_index){
+    title_parts &lt;- unlist(strsplit(as.character(works_df$titles[index]),&quot; \\(&quot;))
+    works_df2$titles[index] &lt;&lt;- title_parts[1]
+    works_df2$possibleauthor[index] &lt;&lt;- as.character(gsub(&quot; novel\\)&quot;,&quot;&quot;, title_parts[2]))
+  }
+  sub_index &lt;&lt;- grep(&quot;(novel)&quot;,works_df$titles)
+  works_df2$titles[sub_index] &lt;&lt;- gsub(&quot; \\(novel\\)&quot;,&quot;&quot;,works_df2$titles[sub_index])
+  sub_index &lt;&lt;- grep(&quot;(book)&quot;,works_df$titles)
+  works_df2$titles[sub_index] &lt;&lt;- gsub(&quot; \\(book\\)&quot;,&quot;&quot;,works_df2$titles[sub_index])
+  sub_index &lt;&lt;- grep(&quot;(novella)&quot;,works_df$titles)
+  works_df2$titles[sub_index] &lt;&lt;- gsub(&quot; \\(novella\\)&quot;,&quot;&quot;,works_df2$titles[sub_index])
+}
+
+# Tidy the titles
+clean_works_df()
+kable(works_df2[1:5,])</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">titles</th>
+<th align="right">year</th>
+<th align="left">group</th>
+<th align="left">possibleauthor</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Clara Howard</td>
+<td align="right">1801</td>
+<td align="left">American</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Equality; or, A History of Lithconia</td>
+<td align="right">1802</td>
+<td align="left">American</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Memoirs of Carwin the Biloquist</td>
+<td align="right">1803</td>
+<td align="left">American</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Kelroy</td>
+<td align="right">1812</td>
+<td align="left">American</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Precaution</td>
+<td align="right">1820</td>
+<td align="left">American</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<div id="getting-more-titles-british-texts" class="section level3">
+<h3>Getting More Titles: British Texts</h3>
+<p>After saving this data frame of American novels to its own variable, it’s a cinch to go back and rerun everything for a similar British set:</p>
+<pre class="r"><code># Save the American set
+corpus_american19 &lt;- works_df2
+
+# Do everything again for the British set
+# Start with the category URL
+wp_categories_british &lt;- &quot;https://en.wikipedia.org/wiki/Category:19th-century_British_novels&quot;
+
+# Download pages only if they haven&#39;t been downloaded
+if(!file.exists(&quot;British-years.html&quot;)){
+  download.file(wp_categories_british, 
+                destfile = &quot;British-years.html&quot;)}
+
+# Parse for individual years
+wp_years_links_brit &lt;- read_html(&quot;British-years.html&quot;) %&gt;% 
+  html_nodes(&quot;a.CategoryTreeLabelCategory&quot;) %&gt;% 
+  html_attr(&quot;href&quot;)
+
+# Get the relevant subset
+wp_years_links_brit &lt;- wp_years_links_brit[1:97]
+
+# Download the year subcategory pages
+download_wikipedia_pages(pagelist=wp_years_links_brit, number=100, group=&quot;British&quot;)
+
+# Parse titles
+get_titles(group=&quot;British&quot;)
+
+#Tidy the titles
+clean_works_df()
+
+# Save the British set
+corpus_british19 &lt;- works_df2</code></pre>
+</div>
+<div id="getting-more-titles-20th-century-texts" class="section level3">
+<h3>Getting More Titles: 20th-Century Texts</h3>
+<p>Since the copyright watershed is currently ~1923, I wanted to include texts before that date, too. Our functions make this easy to repeat all of the above for years 1901-1930:</p>
+<pre class="r"><code># Start with American works
+wp_categories_american_20 &lt;- &quot;https://en.wikipedia.org/wiki/Category:20th-century_American_novels&quot;
+
+# Download pages that haven&#39;t been downloaded
+if(!file.exists(&quot;American-years-20.html&quot;)){
+  download.file(wp_categories_american_20, 
+                destfile = &quot;American-years-20.html&quot;)
+}
+
+# Parse for individual years
+wp_years_links_amer_20 &lt;- read_html(&quot;American-years-20.html&quot;) %&gt;% 
+  html_nodes(&quot;a.CategoryTreeLabelCategory&quot;) %&gt;% 
+  html_attr(&quot;href&quot;)
+
+# Limit to the first 30 items
+wp_years_links_amer_20 &lt;- wp_years_links_amer_20[1:30]
+
+# Download the year subcategory pages
+download_wikipedia_pages(pagelist=wp_years_links_amer_20, 
+                         number=100,
+                         group=&quot;American-20&quot;)
+
+# Parse titles
+get_titles(years=1901:1930, group=&quot;American-20&quot;)
+
+# Tidy the titles 
+clean_works_df()
+
+# Save the set
+corpus_american20 &lt;- works_df2
+
+##############
+
+# Repeat with British works
+wp_categories_british_20 &lt;- &quot;https://en.wikipedia.org/wiki/Category:20th-century_British_novels&quot;
+
+# Download pages that haven&#39;t been downloaded
+if(!file.exists(&quot;British-years-20.html&quot;)){
+  download.file(wp_categories_british_20, 
+                destfile = &quot;British-years-20.html&quot;)
+}
+
+# Parse for individual years
+wp_years_links_brit_20 &lt;- read_html(&quot;British-years-20.html&quot;) %&gt;% 
+  html_nodes(&quot;a.CategoryTreeLabelCategory&quot;) %&gt;% 
+  html_attr(&quot;href&quot;)
+
+# Limit to the first 30 items
+wp_years_links_brit_20 &lt;- wp_years_links_brit_20[1:30]
+
+# Download the year subcategory pages
+download_wikipedia_pages(pagelist=wp_years_links_brit_20, 
+                         number=100, 
+                         group=&quot;British-20&quot;)
+
+# Parse titles
+get_titles(years=1901:1930, 
+           group=&quot;British-20&quot;)
+
+# Tidy the titles 
+clean_works_df()
+
+# Save the set
+corpus_british20 &lt;- works_df2</code></pre>
+</div>
+<div id="the-data-so-far-1" class="section level3">
+<h3>The data so far…</h3>
+<p>At this point, we have four tables:</p>
+<ol style="list-style-type: decimal">
+<li>19th-century American novels</li>
+<li>19th-century British novels</li>
+<li>early 20th-century American novels</li>
+<li>early 20th-century British novels</li>
+</ol>
+<p>Each table contains rows corresponding to novels, with columns listed for the novel’s title, its year of publication, its grouping, and (for some texts) a guess of the author’s name. Here’s what the first few rows of the table for early 20th-century British novels looks like, for reference:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">titles</th>
+<th align="right">year</th>
+<th align="left">group</th>
+<th align="left">possibleauthor</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Anna Lombard</td>
+<td align="right">1901</td>
+<td align="left">British-20</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Erewhon Revisited</td>
+<td align="right">1901</td>
+<td align="left">British-20</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">The First Men in the Moon</td>
+<td align="right">1901</td>
+<td align="left">British-20</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">The House with the Green Shutters</td>
+<td align="right">1901</td>
+<td align="left">British-20</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">The Inheritors</td>
+<td align="right">1901</td>
+<td align="left">British-20</td>
+<td align="left">Conrad and Ford</td>
+</tr>
+</tbody>
+</table>
+<p>Everything here looks as we might expect it.</p>
+</div>
+</div>
+<div id="understanding-the-results" class="section level2">
+<h2>Understanding the Results</h2>
+<p>I like dipping into the data a few rows at a time like this to see how things look; it’s a good way of paying attention to the structure of information and thinking about what might be done with it. But I also think it’s important to picture the big shape of everything from a distance, too, to know where gaps stand out, to get a sense of the sheer size of things, and maybe even to think about what’s responsible for giving it shape.</p>
+<p>In order to visualize the content of my corpus, I combined the four tables into one and charted the contents as a bar graph over time:</p>
+<pre class="r"><code>corpus_combined &lt;- rbind(corpus_american19,
+                         corpus_british19,
+                         corpus_american20,
+                         corpus_british20)
+
+ggplot(corpus_combined) + 
+  geom_bar(mapping=aes(x=year, fill=group)) + 
+  scale_x_continuous(breaks = c(0:13*10+1800)) + 
+  xlab(NULL) +
+  ylab(&quot;number of novels&quot;) + 
+  ggtitle(&quot;Novels listed on Wikipedia per year&quot;) +
+  theme_bw()</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Over time, these four corpora mostly show robust growth. In a couple key periods, the trend of growth shifts curiously.
+</p>
+<img src="/blog/post/corpus-choose_files/figure-html/Visualizing%20the%20titles-1.png" alt="Over time, these four corpora mostly show robust growth. In a couple key periods, the trend of growth shifts curiously." width="672"  />
+</div>
+<p>Altogether, scraping these categorized titles from Wikipedia resulted in 1,907 novels. These break down into 289 American novels from the 19th century, 578 British novels from the 19th century, 568 American novels from the early 20th century, and 546 British novels from the early 20th century.</p>
+<p>Looking at the big chart, it’s easy to see the American publishing industry gets a slow start through the 19th century before taking off in the 1890s—perhaps as a result of Congress passing the <a href="https://en.wikipedia.org/wiki/International_Copyright_Act_of_1891">International Copyright Act of 1891</a>. A focused view of American works makes this shift more obvious.</p>
+<pre class="r"><code>ggplot(corpus_combined[corpus_combined$group %in% c(&quot;American&quot;,&quot;American-20&quot;),]) + 
+  geom_bar(mapping=aes(x=year)) + 
+  scale_x_continuous(breaks = c(0:13*10+1800)) + 
+  xlab(NULL) +
+  ylab(&quot;number of novels&quot;) + 
+  ggtitle(&quot;American novels categorized on Wikipedia&quot;) + 
+  geom_segment(aes(x=1891, xend=1891, y=0, yend=32), color=&quot;red&quot;) +
+  geom_label(aes(x=1875, y=32), label=&quot;International Copyright Act of 1891&quot;, color=&quot;red&quot;) +
+  theme_bw()</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Extending copyright protections within the US to authors who weren’t American, the International Copyright Act of 1891 marked the beginning of the end of the practice of publishing foreign works without paying royalties. Passage of the act may correspond to an apparent rise in American publishing.
+</p>
+<img src="/blog/post/corpus-choose_files/figure-html/America%201890s-1.png" alt="Extending copyright protections within the US to authors who weren't American, the International Copyright Act of 1891 marked the beginning of the end of the practice of publishing foreign works without paying royalties. Passage of the act may correspond to an apparent rise in American publishing." width="672"  />
+</div>
+<p>The colorful chart also shows a strong dip in the mid 1910s, which looks like it correlates to the first World War. We can zoom into that data to see it closer.</p>
+<pre class="r"><code>corpus_byyear &lt;- corpus_combined %&gt;% 
+  group_by(year) %&gt;% 
+  summarize(count=n())
+
+highlight_wwi &lt;- data.frame(x=1914,xend=1918.4,y=0:30*2)
+
+ggplot(corpus_combined[corpus_combined$year %in% 1905:1925,],
+       aes(x=year)) + 
+  geom_segment(data=highlight_wwi,
+               aes(x=x,xend=xend,y=y,yend=y),
+               color=&quot;pink&quot;) + 
+  geom_bar() + 
+  geom_smooth(data=corpus_byyear[corpus_byyear$year %in% 1905:1925,],
+              mapping=aes(y=count,x=year),
+              color=&quot;red&quot;) +
+  scale_x_continuous(breaks = c(0:9*2+1906)) + 
+  xlab(NULL) +
+  ylab(&quot;number of novels&quot;) + 
+  ggtitle(&quot;Wikipedia&#39;s English-language novels, 1905-1925&quot;) + 
+  geom_label(aes(x=1916.2, y=5),
+             label=&quot;World War I\n7/1914 - 11/1918&quot;,
+             color=&quot;red&quot;) +
+  theme_bw()</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+The trendline declines during the years of World War I.
+</p>
+<img src="/blog/post/corpus-choose_files/figure-html/closeup%201918-1.png" alt="The trendline declines during the years of World War I." width="672"  />
+</div>
+<p>A cursory look at the combined corpus in the first chart was enough to see aberrations in the overall shapes of the numbers, prompting closer considerations. The shift of American publishing in the second chart and the drop in combined British and American publishing in the third chart might incite some research for which I now have an appropriate corpus to consult. A number of inquiries might be worth pursuing:</p>
+<ul>
+<li><em>does the increase in American novels from the 1890s correlate to similar changes in copyright over time and internationally?</em> To study this, I might get new corpora from Wikipedia, or I might change gears back to non-digital research methods.</li>
+<li><em>does this 1918 fall in numbers represent a drop in publishing, a drop in quality of works, or a deficiency in Wikipedia’s representation of published works?</em> To study this, I might look into the history of publishing, I might try to find some other method for measuring the shaping of a contemporary canon,<label for="tufte-sn-6" class="margin-toggle sidenote-number"></label><input type="checkbox" id="tufte-sn-6" class="margin-toggle"><span class="sidenote"> More foreshadowing for a future post!</span> or I might dive into the editing history of these Wikipedia categories.</li>
+<li><em>does the valley during WWI correspond to valleys at other moments of wartime or to peaks during periods of peace? do these peaks and valleys perhaps correlate instead to purely economic numbers? is it possible that the 1891 law or the first world war is unrelated to any shifting?</em> To study this, I’d have to find some other world war to compare it to, or I’d have to look closer at other periods of economic instability.</li>
+</ul>
+<p>But these are questions for another day.</p>
+</div>
+<div id="section" class="section level2">
+<h2> </h2>
+</div>
+<div id="conclusions" class="section level2">
+<h2>Conclusions</h2>
+<p>Wikipedia is far from perfect, but it’s closer than I am in avoiding selection bias. Seeing this chart helps me feel comfortable that I haven’t unwittingly left something out and confident that I’m not amplifying my own limited knowledge of available texts.</p>
+<p>After all this work, it’s a <em>really</em> good idea to save the final table to external files to have a milestone to start back from another time. Saving as both an RDS file and a CSV file makes it easy to reuse the data in R or in any other common application.<label for="tufte-mn-1" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-1" class="margin-toggle"><span class="marginnote">My files are available for download here: <a href="http://jmclawson.net/blog/post/corpus-choose_files/corpus_combined.rds">corpus_combined.rds</a>, <a href="http://jmclawson.net/blog/post/corpus-choose_files/corpus_combined.csv">corpus_combined.csv</a></span></p>
+<pre class="r"><code>saveRDS(corpus_combined,file=&quot;corpus_combined.rds&quot;)
+write.csv(corpus_combined,file=&quot;corpus_combined.csv&quot;, row.names=FALSE)</code></pre>
+</div>
+</section>
+<section>
+  
+  <footer class="page-footer">
+		<hr>
+		<ul class="page-footer-menu">
+		
+		</ul>
+
+  
+    <p>
+      Powered by <a href="https://gohugo.io">Hugo</a> and the
+      <a href="https://github.com/dandermotj/hugo-envisioned">Envisioned theme</a>.
+    </p>
+  
+
+	<div class="copyright">
+	<p>
+    
+      &copy; 2020
+    .
+    All rights reserved.
+    
+  </p>
+</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
+</section>
+</article>
+</div>
+</body>
+</html>

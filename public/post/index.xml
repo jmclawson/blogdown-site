@@ -1,55 +1,69 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on A Hugo website</title>
-    <link>/incubate/post/</link>
-    <description>Recent content in Posts on A Hugo website</description>
+    <title>Posts on jmclawson / blog</title>
+    <link>/blog/post/</link>
+    <description>Recent content in Posts on jmclawson / blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 03 Aug 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 01 Sep 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/incubate/post/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/blog/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Authorship and Milton’s De Doctrina Christiana</title>
-      <link>/incubate/posts/authorship-and-miltons-de-doctrina-christiana/</link>
-      <pubDate>Fri, 03 Aug 2018 00:00:00 +0000</pubDate>
+      <title>Introducing Stylo2gg</title>
+      <link>/blog/posts/introducing-stylo2gg/</link>
+      <pubDate>Tue, 01 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>/incubate/posts/authorship-and-miltons-de-doctrina-christiana/</guid>
-      <description>Background: Placement and Distance It may seem confusing to start off discussing placement and distance, but much of the stylometric method relies on an abstract understanding of ideas of proximity. This introduction serves as a gentle introduction to these concepts. Please be patient before we get to the good stuff.
-Addressing Multidimensionality For one year of grad school, this was my mailing address:
- 69/6 Montpelier Park  Edinburgh, EH10 4ND  United Kingdom</description>
+      <guid>/blog/posts/introducing-stylo2gg/</guid>
+      <description>For the past few years, I’ve been using the R package styloMaciej Eder, Jan Rybicki, and Mike Kestemont, “Stylometry with R: A Package for Computational Text Analysis,” R Journal, vol. 8, no. 1 (2016): 107-121. to study authorship in early modern texts and style in twentieth-century texts.I learned about stylometry and the stylo package from one of its authors, Maciej Eder, by taking a class he taught at DHSI in 2017.</description>
     </item>
     
     <item>
-      <title>Hello Tuftesque</title>
-      <link>/incubate/posts/hello-tuftesque/</link>
-      <pubDate>Sun, 15 Oct 2017 00:00:00 +0000</pubDate>
+      <title>Updates to Word Vector Utilities</title>
+      <link>/blog/posts/updates-to-word-vector-utilities/</link>
+      <pubDate>Thu, 27 Aug 2020 00:00:00 +0000</pubDate>
       
-      <guid>/incubate/posts/hello-tuftesque/</guid>
-      <description>This is an abridged version of the blogpost Introducing The Tuftesque Blogdown Theme on livefreeordichotomize.com.
-Customizing It would be pretty lame if that was it, wouldn’t it? Fear not, you can tinker with it to make it your own.
-Side Notes: We all know why you’re here: the sidenotes. This is rather easy. Just make sure you have the tufte package installed and then, in an inline r chunk, wherever you want to put a side note call the following.</description>
+      <guid>/blog/posts/updates-to-word-vector-utilities/</guid>
+      <description>A year of using and fiddling with w2v_utilities has led to more improvements in functionality and display than I expected. While a previous post explains the ways to use available functions,These visualizations show images using the older code. Because it’s a way to compare and see the improvements, I’ve left things to stand as they are. this post explains some of the changes to cosine_heatmap() and introduces new visualizations with cosine_bars().</description>
     </item>
     
     <item>
-      <title>A Plain Markdown Post</title>
-      <link>/incubate/posts/a-plain-markdown-post/</link>
-      <pubDate>Fri, 30 Dec 2016 21:49:57 -0700</pubDate>
+      <title>Word Vector Utilities</title>
+      <link>/blog/posts/word-vector-utilities/</link>
+      <pubDate>Mon, 12 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>/incubate/posts/a-plain-markdown-post/</guid>
-      <description>This is a post written in plain Markdown (*.md) instead of R Markdown (*.Rmd). The major differences are:
- You cannot run any R code in a plain Markdown document, whereas in an R Markdown document, you can embed R code chunks (```{r}); A plain Markdown post is rendered through Blackfriday, and an R Markdown document is compiled by rmarkdown and Pandoc.  There are many differences in syntax between Blackfriday&amp;rsquo;s Markdown and Pandoc&amp;rsquo;s Markdown.</description>
+      <guid>/blog/posts/word-vector-utilities/</guid>
+      <description>Substantial changes to these functions are explained here: jmclawson.net/blog/posts/updates-to-word-vector-utilities/ This July, I was very fortunate to be a participant at the Word Vectors for the Thoughtful Humanist workshop, organized by the Women Writers Project at Northeastern University and funded by the NEH. Sarah Connell and Julia Flanders, along with Laura Johnson, Ashley Clark, Laura Nelson, Syd Bauman, and others, guided us through introduction, discussion, and practical application of word vector embeddings.</description>
     </item>
     
     <item>
-      <title>Lorem Ipsum</title>
-      <link>/incubate/posts/lorem-ipsum/</link>
-      <pubDate>Thu, 01 Jan 2015 13:09:13 -0600</pubDate>
+      <title>Selecting a Better Corpus</title>
+      <link>/blog/posts/selecting-a-better-corpus/</link>
+      <pubDate>Thu, 30 May 2019 00:00:00 +0000</pubDate>
       
-      <guid>/incubate/posts/lorem-ipsum/</guid>
-      <description>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</description>
+      <guid>/blog/posts/selecting-a-better-corpus/</guid>
+      <description>Not long after posting the previous blog post, “Selecting a Literary Corpus from Wikipedia”, I realized there was better way to go about everything. Rather than hard coding the specific Wikipedia pages from which to draw titles, it’s easier to define general years and categories, and then extract from these results. So, in the spirit of the previous blog post, and with the desire to get something out before the end of May, this is a quick addendum and improvement to the methods and process of last time.</description>
+    </item>
+    
+    <item>
+      <title>Selecting a Literary Corpus from Wikipedia</title>
+      <link>/blog/posts/selecting-a-literary-corpus-from-wikipedia/</link>
+      <pubDate>Wed, 27 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/posts/selecting-a-literary-corpus-from-wikipedia/</guid>
+      <description>Selecting a sufficiently sized collection of texts for historical analysis is tough. When I try to list all the novels I can think of to provide context for a project, I’m bound to get it wrong some way: I fail by forgetting something important, or I succeed only in reproducing my own limitations.
+In this post, I explain my rationale and process for using R to select a reasonable, medium-sized sample of titles from Wikipedia for historical comparison; a later post will go farther, showing how to use this selection to get the texts themselves from Project Gutenberg.</description>
+    </item>
+    
+    <item>
+      <title>Why Blog, Why Today?</title>
+      <link>/blog/posts/why-blog-why-today/</link>
+      <pubDate>Mon, 28 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/posts/why-blog-why-today/</guid>
+      <description>It’s 2019: The pond and the fry-up both feature bigger fish. This is the perfect time not to start a blog, yet here I am, even going so far as to address an empty venue as if there were already an audience. I could be wrong—as a novitiate, I probably am wrong—but it feels necessary to start with a preface, with something to explain why I’m doing this, why I’m doing it now, and what I hope will result.</description>
     </item>
     
   </channel>

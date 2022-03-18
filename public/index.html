@@ -2,23 +2,47 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 
 <head>
-<title>A Hugo website - A Hugo website</title>
+<title>jmclawson / blog - jmclawson / blog</title>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="">
 <meta name="keywords" content="">
-<meta name="author" content="A Hugo website">
-<meta name="generator" content="Hugo 0.48" />
+<meta name="author" content="jmclawson / blog">
+<meta name="generator" content="Hugo 0.74.3" />
 
   
+  
+
+  <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    menuSettings: { zoom: "Double-Click" },
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+</script>
+
+<script type="text/javascript"
+  src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
 
 
 
-<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
 
 
-    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/grids-responsive-min.css">
+
+
+<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/base-min.css">
+
+
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/grids-responsive-min.css">
 
 
 
@@ -30,232 +54,434 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
 
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
 
 
-<link rel="stylesheet" href="http://jmclawson.net/incubate/css/tuftesque.css">
-<style>
-body {
+<link rel="stylesheet" href="https://jmclawson.net/blog/css/envisioned.css">
+<link rel="stylesheet" href="https://jmclawson.net/blog/css/hugo-envisioned.css">
+<link rel="stylesheet" href="https://jmclawson.net/blog/css/hugo-envisioned-override.css">
+
   
-    background-color: #fffff8;
-  
+  <style>
+  	body.index{
+		padding-top: 6.5vw;
+		background-repeat: no-repeat;
+		background-position: center top;
+		background-size: 90% 10vw;
+  		background-image: url(/images/quartet-splatplot.png);
+		width: 65%;
+		min-width: 400px;
+		max-width: 800px;
+  	}
+	
+	.index #blog_logo {
+		display: none;
+	}
+	
+	@media all and (max-width: 550px) {
+	  body.index div.header {
+ 
+	  }
+	  body.index div.header a.deactive {
+	    text-decoration: none !important;
+	  }
+  }
+	
+	div.topmenu, ul.topmenu {
+	 
+	    background-color: white;
+	}
+	
+	.topmenu a {
+		text-decoration: underline;
+	}
+
+	a, h3 {
+	    color: #333399;
+	}
+
+	div.topmenu{
+	    margin: 0 0 20 0;
+	    padding: 0;
+	    overflow: hidden;
+		text-align: center;
+	}
+	ul.topmenu {
+	    list-style-type: none;
+	    padding: 0;
+	    overflow: hidden;
+		font-family:Futura,Helvetica Neue,Helvetica,Arial;
+		width: 100%;
+		font-size: calc(12px + 1vw);
+		line-height:140%;
+	
+	}
+
+	.topmenu li {
+	 
+	    display: inline;
+	    color: navy;
+	    text-align: center;
+	 
+		padding: 0;
+	}
+
+	.topmenu li a {
+	    padding: 1vw;
+	 
+	}
+
+	.topmenu li a:hover {
+	 
+	}
+
+	.topmenu li:hover {
+	 
+		border-top-style: solid;
+		border-top-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-width: 1px;
+	}
+	
+	body.index div.header h1, body.index h2, body.index h3, body.index h4{
+	font-family:Futura,Helvetica Neue,Helvetica,Arial;}
+	
+	div.header h1 {
+		text-align:center;
+		margin-top:0;
+		 
+		 
+		font-size:calc(12px + 5.5vw);
+		font-weight: normal;
 }
-</style>
+	
 
+  	#blogpage, #blogpage:hover, #blogpage a, #blogpage a:link {
+   
+  		text-decoration: none;
+  		color: black;
+  		font-weight: bold;
+		pointer-events: none;
+  		text-decoration: none;
+  		border-top-style: none;
+  		border-bottom-style: none;
+		background-repeat: unset !important;
+  	}
+	
+	.topmenu a {
+		background: none !important;
+	}
 
-
-<script>
-
-</script>
-
-
+  </style>
 </head>
 
-<body>
-<style>
-  body {
-    padding-left: 0 !important;
-  }
-  p {
-    width: 100%;
-  }
-</style>
-<div id="homepage">
-<header class="brand">
-  <h1>
-    <a href="/incubate">
-      <span id = "blog_logo">
-         <img src="/incubate/logo.png" alt="Blog Logo" style="height: 40px; width:40px">
-      </span>
+<body class="index">
+
+	
+	<body class="blog">
+
+	<div class="header">
+		<header class="brand">
+		  <h1>
+		      <span id = "blog_logo">
+		         <img src="/blog/splat.png" alt="Blog Logo" style="height: auto; width:100px">
+		      </span>
+		   
+			
+		
+				
+		<div class="header">
+			<h1>James M. Clawson</h1>
+			<ul class="topmenu">
+				<li id="aboutpage"><a href="/about.php">About</a></li>
+				<li id="teachingpage"><a href="/teach.php">Teaching</a></li>
+				<li id="researchpage"><a href="/research.php">Research</a></li>
+				<li id="projectspage"><a href="/projects.php">Projects</a></li>
+				
+				<li id="blogpage"><a href="/blog/" class="deactive">Blog</a></li>
+			</ul>
+		</div>
+	</div>
+
+	<style>
+	  body {
+	    padding-left: 0 !important;
+	  }
+	  p {
+	    width: 100%;
+	  }
+	</style>
+	<div id="homepage">
+
+
+
+  
+  
+    
+	
+      <section>
+<h1 class="content-title">
+  
+  <a href="/blog/posts/introducing-stylo2gg/">Introducing Stylo2gg</a>
+  
+</h1>
+
+
+
+  <span class="content-meta">
+
+    
+
+
+    
+      <i class="fa fa-calendar"></i>
+      &nbsp;Sep 1, 2020
+    
+
+    
+      &nbsp;<i class="fa fa-clock-o"></i>
+      &nbsp;16 min read
+    
+
+    
+  </span>
+
+
+</section>
+
+      <p>The stylo2gg package makes it easy to present stylo data using ggplot2, offering up additional useful options for annotation and understanding.</p>
+      <p><a href="/blog/posts/introducing-stylo2gg/">Read On &rarr;</a></p>
       
+    
+  
+
+
+  
+
+
+  
+  
+    
+	
         
+    
+  
+
+
+  
+  
+    
+	
+      <section>
+<h1 class="content-title">
+  
+  <a href="/blog/posts/updates-to-word-vector-utilities/">Updates to Word Vector Utilities</a>
+  
+</h1>
+
+
+
+  <span class="content-meta">
+
+    
+
+
+    
+      <i class="fa fa-calendar"></i>
+      &nbsp;Aug 27, 2020
+    
+
+    
+      &nbsp;<i class="fa fa-clock-o"></i>
+      &nbsp;8 min read
+    
+
+    
+  </span>
+
+
+</section>
+
+      <p>Updates to the code for word vector utility functions add new capabilities, change old behavior, and need an explanation.</p>
+      <p><a href="/blog/posts/updates-to-word-vector-utilities/">Read On &rarr;</a></p>
       
-    </a>
-  </h1>
-</header>
-
-
-  <header 
-    class = "main-header" 
-    style='background-image: url("images/banner.png")'
-  >
-
-</header>
+    
+  
 
 
   
+  
     
+	
       <section>
-  <h1 class="content-title">
+<h1 class="content-title">
   
-  <a href="/incubate/posts/authorship-and-miltons-de-doctrina-christiana/">Authorship and Milton’s De Doctrina Christiana</a>
+  <a href="/blog/posts/word-vector-utilities/">Word Vector Utilities</a>
   
-  </h1>
-  
-  
-  
+</h1>
+
+
+
   <span class="content-meta">
+
     
-  
-  
-  
-  <i class="fa fa-user">&nbsp;</i><span class="author">
-    &nbsp;James Clawson (with Hugh Wilson)</span> <br>
+
+
     
-  
-  
-  
-  <i class="fa fa-calendar"></i>
-    &nbsp;Aug 3, 2018
-  
-  
-  
-  &nbsp;<i class="fa fa-clock-o"></i>
-    &nbsp;8 min read
-  
-  
-  
-    </span>
+      <i class="fa fa-calendar"></i>
+      &nbsp;Aug 12, 2019
     
+
     
-    </section>
-      <p>An introduction to some simple ideas of dimensionality and distance.</p>
-      <p><a href="/incubate/posts/authorship-and-miltons-de-doctrina-christiana/">Read On &rarr;</a></p>
-      <hr>
+      &nbsp;<i class="fa fa-clock-o"></i>
+      &nbsp;10 min read
+    
+
+    
+  </span>
+
+
+</section>
+
+      <p>The wordVectors package from Ben Schmidt and templates from the Women Writers Project have been very useful as I begin doing work with word vector embeddings. To simplify some things and to help with exploring results, I wrote some utility functions, which this post explains how to use.</p>
+      <p><a href="/blog/posts/word-vector-utilities/">Read On &rarr;</a></p>
+      
     
   
 
+
+  
   
     
+	
       <section>
-  <h1 class="content-title">
+<h1 class="content-title">
   
-  <a href="/incubate/posts/hello-tuftesque/">Hello Tuftesque</a>
+  <a href="/blog/posts/selecting-a-better-corpus/">Selecting a Better Corpus</a>
   
-  </h1>
-  
-  
-  
+</h1>
+
+
+
   <span class="content-meta">
+
     
-  
-  
-  
-  
-  
-  
-  <i class="fa fa-calendar"></i>
-    &nbsp;Oct 15, 2017
-  
-  
-  
-  &nbsp;<i class="fa fa-clock-o"></i>
-    &nbsp;4 min read
-  
-  
-  
-    </span>
+
+
     
+      <i class="fa fa-calendar"></i>
+      &nbsp;May 30, 2019
     
-    </section>
-      <p>A simple post on how to work with the tuftesque theme and how to customize it to your heart&#39;s desire.</p>
-      <p><a href="/incubate/posts/hello-tuftesque/">Read On &rarr;</a></p>
-      <hr>
+
+    
+      &nbsp;<i class="fa fa-clock-o"></i>
+      &nbsp;9 min read
+    
+
+    
+  </span>
+
+
+</section>
+
+      <p>Building on the previous blog post, this one gets more novels from more countries over more years. Compared to the last corpus, this one is huge, at 13,334 titles. (Yes, sometimes bigger is better.)</p>
+      <p><a href="/blog/posts/selecting-a-better-corpus/">Read On &rarr;</a></p>
+      
     
   
 
+
+  
   
     
+	
       <section>
-  <h1 class="content-title">
+<h1 class="content-title">
   
-  <a href="/incubate/posts/a-plain-markdown-post/">A Plain Markdown Post</a>
+  <a href="/blog/posts/selecting-a-literary-corpus-from-wikipedia/">Selecting a Literary Corpus from Wikipedia</a>
   
-  </h1>
-  
-  
-  
+</h1>
+
+
+
   <span class="content-meta">
+
     
-  
-  
-  
-  
-  
-  
-  <i class="fa fa-calendar"></i>
-    &nbsp;Dec 30, 2016
-  
-  
-  
-  &nbsp;<i class="fa fa-clock-o"></i>
-    &nbsp;2 min read
-  
-  
-  
-    </span>
+
+
     
+      <i class="fa fa-calendar"></i>
+      &nbsp;Mar 27, 2019
     
-    </section>
-      <p></p>
-      <p><a href="/incubate/posts/a-plain-markdown-post/">Read On &rarr;</a></p>
-      <hr>
+
+    
+      &nbsp;<i class="fa fa-clock-o"></i>
+      &nbsp;13 min read
+    
+
+    
+  </span>
+
+
+</section>
+
+      <p>Choosing a sufficiently sized collection of literary texts can be difficult, especially if one wants to avoid selection bias. Luckily, Wikipedia can help.</p>
+      <p><a href="/blog/posts/selecting-a-literary-corpus-from-wikipedia/">Read On &rarr;</a></p>
+      
     
   
 
-  
 
   
+  
     
+	
       <section>
-  <h1 class="content-title">
+<h1 class="content-title">
   
-  <a href="/incubate/posts/lorem-ipsum/">Lorem Ipsum</a>
+  <a href="/blog/posts/why-blog-why-today/">Why Blog, Why Today?</a>
   
-  </h1>
-  
-  
-  
+</h1>
+
+
+
   <span class="content-meta">
+
     
-  
-  
-  
-  
-  
-  
-  <i class="fa fa-calendar"></i>
-    &nbsp;Jan 1, 2015
-  
-  
-  
-  &nbsp;<i class="fa fa-clock-o"></i>
-    &nbsp;1 min read
-  
-  
-  
-    </span>
+
+
     
+      <i class="fa fa-calendar"></i>
+      &nbsp;Jan 28, 2019
     
-    </section>
-      <p></p>
-      <p><a href="/incubate/posts/lorem-ipsum/">Read On &rarr;</a></p>
-      <hr>
+
+    
+      &nbsp;<i class="fa fa-clock-o"></i>
+      &nbsp;4 min read
+    
+
+    
+  </span>
+
+
+</section>
+
+      <p>This is the perfect time not to start a blog, yet here I am. It feels necessary to start with a preface, with something to explain why I’m doing this, why I’m doing it now, and what I hope will result. In the spirit of the web, here’s a listicle of the Top Six Reasons I’ve Begun a Blog. (You won’t believe number three!)</p>
+      <p><a href="/blog/posts/why-blog-why-today/">Read On &rarr;</a></p>
+      
     
   
 
-  
 
   
 
-  
-    
-      <h2><a href="/incubate/post/">See all posts</a></h2>
-    
-  
 
   
+
+
+  
+
+<h2><a href="/blog">See all posts</a></h2>
 
 <footer class="page-footer">
 		<hr>
@@ -264,28 +490,31 @@ body {
 		</ul>
 
   
+    <p>
+      Powered by <a href="https://gohugo.io">Hugo</a> and the
+      <a href="https://github.com/dandermotj/hugo-envisioned">Envisioned theme</a>.
+    </p>
+  
 
 	<div class="copyright">
 	<p>
     
-      &copy;2018
+      &copy; 2020
     .
     All rights reserved.
     
   </p>
 </div>
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-      tex2jax: {
-        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-      }
-    });
-    </script>
-    <script type="text/javascript"
-      src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-    </script>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
+</article>
 </div>
 </body>
 </html>

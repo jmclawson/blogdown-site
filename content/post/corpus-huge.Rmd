@@ -1,0 +1,425 @@
+---
+title: "Selecting a Better Corpus"
+author: "James Clawson"
+date: "2019-05-30"
+output: 
+  tufte::tufte_html: default
+  blogdown::html_page: default
+excerpt: "Building on the previous blog post, this one gets more novels from more countries over more years. Compared to the last corpus, this one is huge, at 13,334 titles. (Yes, sometimes bigger is better.)"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "~/GitHub/blogdown-site/temp/corpus-files")
+library(knitr)
+```
+
+Not long after posting the previous blog post, ["Selecting a Literary Corpus from Wikipedia"](https://jmclawson.net/blog/posts/selecting-a-literary-corpus-from-wikipedia/), I realized there was better way to go about everything. Rather than hard coding the specific Wikipedia pages from which to draw titles, it's easier to define general years and categories, and then extract from these results. So, in the spirit of the previous blog post, and with the desire to get something out before the end of May, this is a quick addendum and improvement to the methods and process of last time. As always, if you're allergic to code, feel free to hide it using the button above; alternatively, feel free to [skip ahead to the pretty pictures and results](#visualizing-the-results) at the end.
+
+While the previous blog post resulted in a table of 1,907 titles, this new method yields 13,334.^[This data is available for exploration here: [jmclawson.net/projects/wiki-corpus.html](https://jmclawson.net/projects/wiki-corpus.html)] In this case, bigger really is better, especially when it comes to understanding an overall picture.
+
+## Getting started
+As before, start by loading necessary packages.
+```{r libraries, message=FALSE, warning=FALSE}
+library(rvest)
+library(dplyr)
+library(ggplot2)
+```
+
+I decided to abstract these functions into a [gist available on Github](https://gist.github.com/jmclawson/79d95f5d10f4e5abd577fc5cf6e8e6ea), so the next step is to load it:
+
+```{r get-functions, message=FALSE}
+devtools::source_gist("https://gist.github.com/jmclawson/79d95f5d10f4e5abd577fc5cf6e8e6ea")
+```
+
+
+With these functions loaded, start by limiting the centuries and national categories to be considered, and then gather the category pages.
+```{r nation-century_categories, cache=TRUE}
+
+centuries <- 16:20
+nations <- c("American", 
+             "Australian", 
+             "British", 
+             "Canadian", 
+             "English", 
+             "Indian", 
+             "Irish", 
+             "New Zealand")
+
+get_cat_pages()
+
+```
+
+Next, step through the subcategories to collect the URLs to each.
+
+```{r nation-year_subcategories, message=FALSE, warning=FALSE, cache=TRUE}
+get_subcat_urls()
+```
+
+## Collecting the data
+Once the structures are ready, it's time to check to see if each page exists locally and download it if it doesn't. As before, this process is mostly to save Wikipedia from what might become a heavy traffic load if we come back to these pages multiple times to glean the data.
+
+This process is contained by the `get_subcat_pages()` function. It'll take some time, as it's designed to wait a randomized length of time to avoid hitting the Wikipedia servers too hard.
+
+```{r pages-per-year, eval=FALSE, message=FALSE, cache=TRUE}
+get_subcat_pages()
+```
+
+With pages stored locally, it's time to collect and organize the data they contain.
+
+```{r parse-each-page, eval=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
+parse_subcat_pages()
+
+```
+
+```{r sneak-corpus, message=FALSE, warning=FALSE, include=FALSE, cache=TRUE}
+corpus_wikipedia <- read.csv(url("http://jmclawson.net/blog/post/corpus-huge_files/corpus_wikipedia.csv"), stringsAsFactors = FALSE)
+
+corpus_byyear <- corpus_wikipedia %>% 
+   group_by(year) %>% 
+   summarize(count=n())
+
+nation_byyear <- corpus_wikipedia %>% 
+   group_by(nation,year) %>% 
+   summarize(count=n())
+
+```
+
+Once the collecting processes are finished, it's wise to take a look at the results of things collected. First up is the top part of the table of all novels.
+
+```{r view-so-far1a, include=TRUE, eval=FALSE}
+head(corpus_wikipedia)
+```
+
+```{r view-so-far1b, echo=FALSE}
+kable(head(corpus_wikipedia))
+```
+
+
+Everything looks good there, so there's no need to modify anything. There were 13,334 titles collected from Wikipedia's national categories. That's a lot!
+
+Next, double check the first few rows of novels per nation per year.
+
+```{r view-so-far2a, include=TRUE, eval=FALSE}
+head(nation_byyear)
+```
+
+```{r view-so-far2b, echo=FALSE, cache=TRUE}
+kable(head(nation_byyear))
+```
+
+The full version of this table shows 618 entries summarizing the number of titles represented by each nation for each year. Again, everything looks good and clean. 
+
+## Visualizing the results
+
+After collecting the full list of data, it's rewarding to see a quantified visualization of the titles collected. In this case, Wikipedia yielded 13,334 titles from these national categories in the range of years in question.
+
+```{r visualizing, cache=TRUE, fig.cap="As expected, these five corpora mostly show robust growth. During the two world wars, especially, the trend of growth shifts noticeably."}
+plot_all <- ggplot(corpus_wikipedia, aes(x=year)) + 
+  geom_bar(aes(fill=nation)) + 
+  scale_x_continuous(breaks = c(0:12*20+1760)) + 
+  xlab(NULL) +
+  ylab("number of novels") + 
+  ggtitle("Novels from Anglophonic nations listed on Wikipedia per year") +
+  theme_bw()
+
+plot_all
+```
+
+Because the magnitudes of numbers grow wildly out of proportion among the different nations, it's helpful to drill down into the novels that are not categorized as American or British:
+
+```{r visualizing-nonUS-nonUK, cache=TRUE, fig.cap="Australian, Canadian, and Indian novels are a smaller percentage of the overall corpus, but they show clear participation in global trends."}
+ggplot(corpus_wikipedia[!corpus_wikipedia$nation %in% c("American","British"),]) + 
+  geom_bar(mapping=aes(x=year, fill=nation)) + 
+  scale_x_continuous(breaks = c(0:12*20+1760)) + 
+  xlab(NULL) +
+  ylab("number of novels") + 
+  ggtitle("Non-American, Non-British subset of Wikipedia novels") +
+  theme_bw()
+```
+
+Looking at this chart, we notice immediately that some nations are missing. At the beginning of the process, we told our functions that we were interested in the following categories:
+
+```{r nations}
+nations
+```
+
+Our final data is lacking in novels in the Wikipedia categories of English, Irish and New Zealand. These omissions come down to inconsistencies in Wikipedia's category pages, with the category page for [New Zealand novels](https://en.wikipedia.org/wiki/Category:New_Zealand_novels), for instance, lacking years.
+
+We also need to be aware of discrepancies in the novels themselves. While the national categories were chosen to include Anglophonic nations, not all of the novels in the data set will be written in English, as the list of titles of Indian novels suggests.^[Figuring out which among these are written in English will take time for research beyond the scope of this blog posting.]
+
+```{r indian-1a, include=TRUE, eval=FALSE}
+head(corpus_wikipedia[corpus_wikipedia$nation=="Indian",])
+```
+
+```{r indian-1b, echo=FALSE, cache=TRUE}
+kable(head(corpus_wikipedia[corpus_wikipedia$nation=="Indian",]))
+```
+
+Finally, this global corpus allows for a global understanding of some of the trends suggested in the previous corpus, limited to British and American texts.
+
+### World War 1
+
+The smaller set of titles allowed for a consideration only of novels categorized as British and American. A global context should better visualize the impact of World War 1.
+
+```{r ww1, message=FALSE, fig.cap="Trendlines continue as before, even with a corpus selected more broadly.", cache=TRUE}
+ww1 <- ggplot(corpus_wikipedia[corpus_wikipedia$year %in% 1905:1925,],
+       aes(x=year)) + 
+  geom_rect(aes(xmin=1914,xmax=1918.4,ymin=-Inf,ymax=Inf),alpha=0.03,fill="pink") +
+  geom_bar() + 
+  scale_x_continuous(breaks = c(0:9*2+1906)) + 
+  xlab(NULL) +
+  ylab("number of novels") + 
+  ggtitle("Wikipedia's listing of novels during WW1") + 
+  theme_bw()
+
+ww1 + 
+  geom_smooth(data=corpus_byyear[corpus_byyear$year %in% 1905:1925,],
+              mapping=aes(y=count,x=year),
+              color="red") +
+  geom_label(aes(x=1916.2, y=5),
+             label="World War I\n7/1914 - 11/1918",
+             color="red")
+```
+
+The chart looks very similar to the previous chart including only American and British novels. Breaking it down into constituent parts makes it easy to see why:
+
+```{r ww1-b, message=FALSE, fig.cap="Not every national literature has enough data in Wikipedia's listings to offer much to an understanding.", cache=TRUE}
+ww1 + 
+  geom_bar(aes(fill=nation)) + 
+  facet_wrap( ~ nation, ncol=2) +
+  scale_x_continuous(breaks = c(0:6*3+1906)) + 
+  theme_bw() + 
+  theme(legend.position = "none") +
+  ggtitle("Only American and British texts contribute to WW1's downward trend")
+```
+
+It turns out that only American and British texts really contribute to the downward trendline of Wikipedia's novels listed during World War 1.
+
+### World War 2
+
+Unlike the previous set of titles, this bigger list includes works published through the second world war, too. The data show a similar decline in the listing of wartime novels:
+
+```{r ww2, message=FALSE, fig.cap="World War 2 seems to have a similar effect on the data. It is unclear whether this shift in data is caused by declining publication rates, by low enduring significance of works published during the war years, or by competing interests of Wikipedia editors.", cache=TRUE}
+ww2 <- ggplot(corpus_wikipedia[corpus_wikipedia$year %in% 1931:1951,],
+       aes(x=year)) + 
+  geom_rect(aes(xmin=1939,xmax=1945,ymin=-Inf,ymax=Inf),alpha=0.03,fill="pink") +
+  geom_bar() + 
+  scale_x_continuous(breaks = c(0:11*2+1931)) + 
+  xlab(NULL) +
+  ylab("number of novels") + 
+  ggtitle("Wikipedia's listing of novels during WW2") + 
+  theme_bw()
+
+ww2 + 
+  geom_smooth(data=corpus_byyear[corpus_byyear$year %in% 1931:1951,],
+              mapping=aes(y=count,x=year),
+              color="red") +
+  geom_label(aes(x=1942, y=10),
+             label="World War 2\n9/1939 - 9/1945",
+             color="red")
+```
+
+Breaking it down by national output is only slightly more revealing than the data of World War 1:
+
+```{r ww2-b, message=FALSE, fig.cap="National data shows slightly more effect during World War 2 than it did during World War 1.", cache=TRUE}
+ww2 + 
+  geom_bar(aes(fill=nation)) + 
+  facet_wrap( ~ nation, ncol=2) +
+  scale_x_continuous(breaks = c(0:6*4+1931)) + 
+  theme_bw() + 
+  theme(legend.position = "none") +
+  ggtitle("Four of the five groups contribute to WW2's downward trend")
+```
+
+Unlike the case in the first world war, the second shows Australian and Canadian texts contributing to the global decline in the numbers of titles listed, albeit in a very minor way when put into the context of American and British works. For understandable reasons, Indian novels aren't categorized on Wikipedia until 1945.
+
+### International patterns
+Having considered the world at war, it may be beneficial to zoom out once again in hopes of making sense of the growth charts for all national literatures. For this comparison, it makes sense to use dissimilar scales among the charts, so that each facet is consistent only within itself; in this way, the trends of national growth---rather than the absolute numbers---can be compared
+
+```{r international-patterns, cache=TRUE}
+plot_all + 
+  facet_wrap( ~ nation, ncol=2, scales="free") +
+  ggtitle("National growth charts (inconsistent scales)") +
+  theme_bw() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 90,
+                                         hjust = 1,
+                                         vjust=0.5)) +
+  ylab(NULL)
+
+  
+```
+
+Of these, the trend for Canadian novels looks most similar to those of American and British novels, growing mostly consistently over time. On the contrary, Indian novels seem poorly represented on Wikipedia, so it probably doesn't make sense to make sense out of this chart. Meanwhile, Australian novels show an interesting trend of positive growth until around 1960, with a change in direction until a nadir around 1980. I'm not sure what was happening in Australia at this time, but it would probably warrant further attention.
+
+### Titular words
+
+At the moment, the data frame includes the titles, nation, and publication years from these 13,334 novels. Without the texts themselves, further options for exploration are limited, but it might be fun to peek at trends in the novel titles. After pulling together all the 42,305(!) words from the titles, it's easy to filter out stop words and find the most common among those that remain:
+
+```{r word-cloud, echo=FALSE, message=FALSE, cache=TRUE}
+title_words <- 
+  corpus_wikipedia$titles %>% 
+  strsplit(" ") %>% 
+  unlist() %>% 
+  tolower()
+
+has_parentheses <- grep("[()]",title_words)
+
+title_words <- gsub("([a-z]*).*",
+                    "\\1",
+                    title_words[-has_parentheses])
+
+# I'm limiting stop words here to articles, prepositions, and coordinating conjunctions
+stop_words <- c("a", "an", "the", 
+                "for", "and", "nor", "but", "or", "yet", "so",
+                "of", "in", "to", "for", "on", "at", "from", "with")
+has_stops <- grep(paste0("\\b",
+                         paste0(stop_words,
+                                collapse="\\b|\\b"),
+                         "\\b"),
+                  title_words)
+
+titles_subset <- title_words[-has_stops] %>%
+  table() %>% 
+  as.data.frame(stringsAsFactors=FALSE)
+
+# The first word is blank, so skip it, too
+titles_subset <- titles_subset[-1,]
+
+# Now create a wordcloud
+library(wordcloud)
+
+wordcloud(words=titles_subset[,1],
+          freq=titles_subset[,2],
+          max.words = 60,
+          colors=brewer.pal(8, "Dark2"))
+
+```
+
+This cloud of the top 60 words popular in 13,334 titles seems to reveal a lot. Surprisingly, "Oz" and "Conan" make appearances. Otherwise, novelists from this period show a preference for extremes of black and white, of light and dark. Many explore mysteries and themes of death and murder, life and war. And many devote themselves to questions of time, family, the world and humanity. (Or, as is more likely the case, does "man" here reflect a literary fixation on the masculine?) 
+
+Finally, comparing the counts of words per title with the publication year shows a greater trend:
+
+```{r title-lengths, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
+
+corpus_wikipedia$count <- corpus_wikipedia$titles %>% 
+  strsplit(" ") %>% 
+  lengths()
+
+titlecount <- corpus_wikipedia %>% 
+  group_by(nation, year) %>% 
+  summarise(average=mean(count),
+            median=median(count),
+            novels=n())
+
+titlecount_byyear <- corpus_wikipedia %>% 
+  group_by(year) %>% 
+  summarise(average=mean(count),
+            median=median(count),
+            novels=n())
+
+ggplot(titlecount,mapping=aes(x=year,y=average)) + 
+  geom_point(aes(color=nation, size=novels), alpha=0.6) + 
+  geom_smooth(data=titlecount_byyear, aes(x=year, y=average), se=FALSE) +
+  theme_bw() +
+  ylab("average words per title") + xlab(NULL)
+
+```
+
+Even without a rigorous analysis, the chart shows that, after a slow rise from 1800 until around 1900, the number of words in titles has been on a slight decline since about 1950, especially among British and American texts, and that it's always been low for Indian novels. At least some of this decline may likely be attributed to the falling out of favor of the double-barrelled *Title: or, Subtitle* format.
+
+**Update:** My hunch about subtitles seems incorrect. On one hand, subtitled novels indeed have longer titles. On that same hand, there really is a decline of the prevalence of subtitles, at least within this limited corpus. But juxtaposing title lengths of subtitled and unsubtitled works emphasizes that the trend toward shorter titles is generally followed by novels in both groups:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Although novels increasingly eschew subtitles, the role of subtitles is marginal to the overall trend of shortening title lengths."}
+corpus_subtitled <- corpus_wikipedia
+corpus_subtitled$subtitled <- corpus_subtitled$nation
+corpus_subtitled[-grep("[:;]",corpus_wikipedia$titles),"subtitled"] <- "No"
+corpus_subtitled[grep("[:;]",corpus_wikipedia$titles),"subtitled"] <- "Yes"
+
+library(cowplot)
+
+sub_percent_peryear <- corpus_subtitled %>% 
+  # mutate(subtitled=ifelse(nation=="Unsubtitled", "No", "Yes")) %>% 
+  group_by(subtitled,year) %>% 
+  summarise(n=n()) %>% 
+  group_by(year) %>% 
+  mutate(percentage=n/sum(n)) %>%
+  .[grep("Yes", .$subtitled),] %>%
+  ggplot(mapping=aes(x=year, 
+                       y=percentage)) + 
+  geom_col() + 
+  geom_text(data=tibble(years=c(1910), per=c(.5), text=c("Subtitled novels as a percentage of the whole corpus per year")), aes(x=years, y=per, label=text), color = "black", size=5) +
+  # geom_text(data=tibble(years=c(1811), per=c(.94), text=c("100% in 1802")), aes(x=years, y=per, label=text), color = "black", size=3) +
+
+  xlab(NULL) +
+  ylab(NULL) +
+  scale_y_continuous(labels = function(x) paste0(x*100, "%"),
+                     breaks = c(0,0.5,1)) +
+  ggtitle(NULL) +
+  theme_bw() +
+  scale_x_continuous(breaks = c(0:11*20+1760),
+                     limits=c(1794,2000),
+                     expand=expand_scale(add=c(0,4))) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        legend.title = element_blank())
+
+library(zoo)
+
+sub_length_peryear <- corpus_subtitled %>% 
+  # mutate(subtitled=ifelse(nation=="Unsubtitled", "No", "Yes")) %>% 
+  group_by(year,subtitled) %>% 
+  summarise(average=mean(count),
+            median=median(count)) %>% 
+  ggplot(mapping=aes(x=year)) + 
+  # geom_line(aes(y=rollmean(median,30,na.pad=TRUE),
+  #               color=subtitled),
+  #           show.legend = FALSE) +
+  geom_smooth(aes(y=median, 
+                color=subtitled), 
+              se=TRUE,
+              show.legend = FALSE) +
+  geom_smooth(data=titlecount_byyear,
+              mapping=aes(x=year,y=average),
+              color="black", se=FALSE) +
+  # geom_point(data=corpus_subtitled,
+  #            aes(y=year,
+  #                x=count,
+  #                color=subtitled), show.legend = FALSE) +
+  geom_text(data=tibble(years=c(1947.5, 1930), 
+                        length=c(7.1, 2.75), 
+                        text=c("Novels with subtitles", 
+                               "Novels without subtitles"), 
+                        subtitled=c("Yes","No")), 
+            aes(x=years, y=length, label=text, color=as.factor(subtitled)), 
+            size=5, 
+            show.legend = FALSE) +
+  geom_text(data=tibble(years=c(1836), 
+                        length=c(4.0), 
+                        text=c("All novels")), 
+            aes(x=years, y=length, label=text), color = "black", size=5) +
+  theme_bw() +
+  xlab(NULL) + ylab("average words per title") +
+  scale_x_continuous(breaks = c(0:12*20+1760),
+                     limits=c(1794,2000),
+                     expand=expand_scale(add=c(0,4)))
+
+plot_grid(sub_percent_peryear, sub_length_peryear, align = "v", nrow = 2, rel_heights = c(1/3, 2/3))
+```
+A larger data set is necessary for testing this kind of a hunch---or even for having it, regardless of how wrong it turns out to be.
+
+
+##  
+
+## Conclusions
+
+Wikipedia still isn't perfect, but it's a great way to collect a good-sized list of titles. And the methods in this blog post do so more robustly than those in the previous post.
+
+As always, save everything to external files at the end to have a milestone to start back from another time..`r tufte::margin_note("My files are available for download here: [corpus_wikipedia.rds](http://jmclawson.net/blog/post/corpus-huge_files/corpus_wikipedia.rds), [corpus_wikipedia.csv](http://jmclawson.net/blog/post/corpus-huge_files/corpus_wikipedia.csv)")`
+```{r Save milestone 1, message=FALSE}
+saveRDS(corpus_wikipedia,file="corpus_wikipedia.rds")
+write.csv(corpus_wikipedia,file="corpus_wikipedia.csv", row.names=FALSE)
+```
+Sometime soon, I hope to write up my method for actually *getting* (some of) these texts, so it'll be good to be able to start directly from a list of titles.
